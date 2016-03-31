@@ -48,6 +48,9 @@
     <ClInclude Include="PreProcess.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="AuxiliaryFunction.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -57,6 +60,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ExtractXML.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AuxiliaryFunction.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="QPDPreProcess.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

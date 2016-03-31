@@ -145,6 +145,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AuxiliaryFunction.h" />
     <ClInclude Include="ExtractXML.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="PreProcess.h" />
@@ -156,7 +157,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AuxiliaryFunction.cpp" />
     <ClCompile Include="ExtractXML.cpp" />
+    <ClCompile Include="QPDPreProcess.cpp" />
     <ClCompile Include="rsProcess.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
