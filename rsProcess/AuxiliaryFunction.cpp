@@ -25,7 +25,7 @@ void WriteENVIHeader(const char* pathHeader, ENVIHeader mImgHeader)
 	//投影和坐标系统
 	if (mImgHeader.bimgGeoProjection)
 	{
-		fprintf(fpHead, "map info = { %s,", mImgHeader.mapInfo.projection);
+		fprintf(fpHead, "map info = { %s,", mImgHeader.mapInfo.projection.c_str());
 		fprintf(fpHead, "%lf,", mImgHeader.mapInfo.adfGeotransform[1]);
 		fprintf(fpHead, "%lf,", mImgHeader.mapInfo.adfGeotransform[5]);
 		fprintf(fpHead, "%lf,", mImgHeader.mapInfo.adfGeotransform[0]);
@@ -33,7 +33,7 @@ void WriteENVIHeader(const char* pathHeader, ENVIHeader mImgHeader)
 		fprintf(fpHead, "%lf,", mImgHeader.mapInfo.adfGeotransform[2]);
 		fprintf(fpHead, "%lf,", mImgHeader.mapInfo.adfGeotransform[4]);
 		fprintf(fpHead, "%d,", mImgHeader.mapInfo.zone);
-		fprintf(fpHead, "%s\n", mImgHeader.mapInfo.directions);
+		fprintf(fpHead, "%s\n", mImgHeader.mapInfo.directions.c_str());
 		fprintf(fpHead, "%s\n", mImgHeader.coordianteSys.c_str());
 	}
 

@@ -25,7 +25,7 @@ public:
 	/*
 		nFixLines为一次读取的帧数，采用较大的读取帧数处理效率比较高,但是要考虑内存的消耗
 	*/
-	virtual long PreProc_GenerateD0Data(char *pRAWData, char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines)=0;
+	virtual long PreProc_GenerateD0Data(const char *pRAWData, const  char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines)=0;
 };
 
 //全谱段数据预处理
@@ -39,5 +39,5 @@ public:
 	long PreProc_LeakLineInterpolate(FILE *fRAW, unsigned short *pRepairBuffer, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize,
 											int nLoc, __int64 nOffset, unsigned short *pfBuffer, unsigned short *plBuffer, unsigned short *pLeakBuffer);
 
-	long PreProc_GenerateD0Data(char *pRAWData, char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines);
+	long PreProc_GenerateD0Data(const char *pRAWData, const  char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines);
 };

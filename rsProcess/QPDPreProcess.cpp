@@ -784,7 +784,7 @@ long QPDPreProcess::PreProc_LeakLineInterpolate(FILE *fRAW, unsigned short *pRep
 	return lError;
 }
 
-long QPDPreProcess::PreProc_GenerateD0Data(char *pRAWData, char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines)
+long QPDPreProcess::PreProc_GenerateD0Data(const char *pRAWData,const char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines)
 {
 	//==========变量定义=============
 	long lError = 0;
@@ -852,6 +852,11 @@ long QPDPreProcess::PreProc_GenerateD0Data(char *pRAWData, char *pData, DINFO mD
 		goto ErrEnd;
 	}
 	memset(pBuffer, 0, nBufFramesize);
+	//进行漏行检测
+	lError = PreProc_LeakLineCheck(pRAWData, mDataHeader, nLeakFrameType, nLeakFrameSize, nLeakFrameCount);
+	if (lError != 0)
+		goto ErrEnd;
+
 	if (nLeakFrameCount == 0)
 	{
 		//无漏行，直接分buffer读取和写入，去除首尾多余部分	
