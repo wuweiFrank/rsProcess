@@ -784,7 +784,7 @@ long QPDPreProcess::PreProc_LeakLineInterpolate(FILE *fRAW, unsigned short *pRep
 	return lError;
 }
 
-long QPDPreProcess::PreProc_GenerateD0Data(const char *pRAWData,const char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines)
+long QPDPreProcess::PreProc_GenerateD0Data(const char *pRAWData,const char *pData, DINFO &mDataHeader, vector<short> &nLeakFrameType, vector<int> &nLeakFrameSize, int &nLeakFrameCount, const int nFixLines)
 {
 	//==========变量定义=============
 	long lError = 0;
@@ -799,7 +799,18 @@ long QPDPreProcess::PreProc_GenerateD0Data(const char *pRAWData,const char *pDat
 	unsigned short *pBuffer = NULL;
 	unsigned short *pRepairBuffer = NULL;
 	unsigned short *pfBuffer = NULL, *plBuffer = NULL, *pLeakBuffer = NULL;
+	ENVIHeader mENVIHeader;
+	char drive[_MAX_DRIVE]; char dir[_MAX_DIR]; char filename[_MAX_FNAME]; char ext[_MAX_EXT];
+	char path[_MAX_PATH];
+	_splitpath_s(pData, drive, dir, filename, ext);
+	_makepath_s(path, drive, dir, filename, "hdr");
+	memset(&mENVIHeader, 0, sizeof(ENVIHeader));
 	//===========处理===============
+	//进行漏行检测
+	lError = PreProc_LeakLineCheck(pRAWData, mDataHeader, nLeakFrameType, nLeakFrameSize, nLeakFrameCount);
+	if (lError != 0)
+		goto ErrEnd;
+
 	//漏行修复
 	nWidths = mDataHeader.nWidths;
 	nLines = mDataHeader.nLines;
@@ -812,12 +823,7 @@ long QPDPreProcess::PreProc_GenerateD0Data(const char *pRAWData,const char *pDat
 	nFramesize = nFrame*sizeof(unsigned short);
 	nBufFramesize = nFrame*sizeof(unsigned short)*nFixLines;
 
-	ENVIHeader mENVIHeader;
-	char drive[_MAX_DRIVE]; char dir[_MAX_DIR]; char filename[_MAX_FNAME]; char ext[_MAX_EXT];
-	char path[_MAX_PATH];
-	_splitpath_s(pData, drive, dir, filename, ext);
-	_makepath_s(path, drive, dir, filename, "hdr");
-	memset(&mENVIHeader, 0, sizeof(ENVIHeader));
+
 
 	err = fopen_s(&fRAW, pRAWData, "rb");
 	if (err)
@@ -852,10 +858,6 @@ long QPDPreProcess::PreProc_GenerateD0Data(const char *pRAWData,const char *pDat
 		goto ErrEnd;
 	}
 	memset(pBuffer, 0, nBufFramesize);
-	//进行漏行检测
-	lError = PreProc_LeakLineCheck(pRAWData, mDataHeader, nLeakFrameType, nLeakFrameSize, nLeakFrameCount);
-	if (lError != 0)
-		goto ErrEnd;
 
 	if (nLeakFrameCount == 0)
 	{
@@ -1019,3 +1021,46 @@ ErrEnd:
 	fclose(fData);
 	return lError;
 }
+
+long QPDPreProcess::PrePRoc_WriteLeakInfo(char *pLeakFile, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount)
+{
+	FILE *fLeak = NULL;
+	errno_t err = 0;
+	int i = 0, nSize = 0;
+	err = fopen_s(&fLeak, pLeakFile, "w");
+	if (err)
+	{
+
+	}
+	nSize = nLeakFrameType.size();
+	fprintf(fLeak, "%d	%d\n", nSize, nLeakFrameCount);
+	for (i = 0; i < nSize; i++)
+	{
+		fprintf(fLeak, "%d	%d\n", nLeakFrameType[i], nLeakFrameSize[i]);
+	}
+	fclose(fLeak);
+	return 0;
+}
+
+long QPDPreProcess::PreProc_ReadLeakFile(char *pLeakFile, vector<short> &nLeakFrameType, vector<int> &nLeakFrameSize, int &nLeakFrameCount)
+{
+	FILE *fLeak = NULL;
+	errno_t err = 0;
+	int i = 0, nSize = 0, nLeakSize = 0, nLeakType = 0;
+	err = fopen_s(&fLeak, pLeakFile, "r");
+	if (err)
+	{
+
+	}
+	fscanf_s(fLeak, "%d	%d\n", &nSize, &nLeakFrameCount);
+	for (i = 0; i < nSize; i++)
+	{
+		fscanf_s(fLeak, "%d	%d", &nLeakType, &nLeakSize);
+		nLeakFrameType.push_back(short(nLeakType));
+		nLeakFrameSize.push_back(nLeakSize);
+	}
+	fclose(fLeak);
+	return 0;
+}
+
+

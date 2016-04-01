@@ -262,7 +262,7 @@ long Level0Process::Level0Proc_Nonuniform(const char* pathBSQ, const char* pathN
 }
 
 //除去两侧辅助数据和无意义波段，得到纯影像数据信息并转换为TIF格式
-long Level0Process::Level0Proc_GetUsefulData(const char* pathBSQ, const char* pathUseful, int width, int leftunuse, int rightunuse, vector<int> usefulBands)
+long Level0Process::Level0Proc_GetUsefulData(const char* pathBSQ, const char* pathUseful, int leftunuse, int rightunuse, vector<int> usefulBands)
 {
 	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
 	GDALAllRegister();
@@ -337,7 +337,7 @@ long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* 
 	int lError = 0;
 	int i = 0;
 	__int64 nOffset = 0;
-	int nWidths = 0, nLines = 0, nBands = 0, nHeadOffset = 0;
+	int nWidths = xsize, nLines = ysize, nBands = bands, nHeadOffset = 0;
 	__int64 nFrameSize = 0;
 	FILE *fD0 = NULL, *fEvent = NULL;
 	errno_t err = 0;
@@ -345,7 +345,7 @@ long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* 
 	unsigned short lGPStime2 = 0, ltempGPStime2 = 0;
 	unsigned short nMicrosecond = 0, ntempMicrosecond = 0;
 	unsigned long ltempGPStime = 0, lGPStime = 0;
-	int nFreamSize = xsize*bands;
+	nFrameSize = xsize*bands;
 
 	//打开0级数据
 	err = fopen_s(&fD0, pathRawBIL, "rb");
@@ -362,18 +362,18 @@ long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* 
 	}
 	nOffset = nEventOffset;
 
-	//_fseeki64(fD0, nOffset, SEEK_SET);
-	//fread_s(&ltempGPStime, sizeof(unsigned long), sizeof(unsigned long), 1, fD0);
-	//fread_s(&ltempGPStime2, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
-	//fread_s(&ntempMicrosecond, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
-	//ltempGPStime = ltempGPStime1 * 65535 + ltempGPStime2;
+	_fseeki64(fD0, nOffset, SEEK_SET);
+	fread_s(&ltempGPStime1, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
+	fread_s(&ltempGPStime2, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
+	fread_s(&ntempMicrosecond, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
+	ltempGPStime = ltempGPStime1 * 65535 + ltempGPStime2;
 	for (i = 0; i < nLines; i++)
 	{
 		_fseeki64(fD0, nOffset, SEEK_SET);
-		fread_s(&ltempGPStime, sizeof(unsigned long), sizeof(unsigned long), 1, fD0);
-		//fread_s(&ltempGPStime2, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
+		fread_s(&ltempGPStime1, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
+		fread_s(&ltempGPStime2, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
 		fread_s(&ntempMicrosecond, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
-		//ltempGPStime = ltempGPStime1 * 65535 + ltempGPStime2;
+		ltempGPStime = ltempGPStime1 * 65535 + ltempGPStime2;
 		if (lGPStime<ltempGPStime)
 		{
 			//判断是否出现GPS周内秒缺失
@@ -406,7 +406,6 @@ ErrEnd:
 	}
 	return lError;
 }
-
 
 
 //对全谱段短波数据Event信息进行修正
@@ -453,3 +452,6 @@ long QPDLevel0Process::Level0Proc_ModifySWIREvent(const char* pathEvent, const c
 	fclose(fEvent2);
 	return 0;
 }
+
+
+

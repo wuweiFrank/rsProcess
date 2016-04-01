@@ -17,7 +17,7 @@ public:
 	/*
 		nLeakFrameType 0为无漏行；1为漏整数帧；2为漏行；3为漏行且漏帧头文件
 	*/
-	virtual long PreProc_LeakLineCheck(const char *pRAWData, FILE *fRAW, DINFO &mDataHeader, vector<short> &nLeakFrameType, vector<int> &nLeakFrameSize, int &nLeakFrameCount) = 0;
+	virtual long PreProc_LeakLineCheck(const char *pRAWData, DINFO &mDataHeader, vector<short> &nLeakFrameType, vector<int> &nLeakFrameSize, int &nLeakFrameCount) = 0;
 
 	virtual long PreProc_LeakLineInterpolate(FILE *fRAW, unsigned short *pRepairBuffer, DINFO mDataHeader, vector<short> nLeakFrameType,vector<int> nLeakFrameSize, 
 															 int nLoc, __int64 nOffset, unsigned short *pfBuffer, unsigned short *plBuffer, unsigned short *pLeakBuffer)=0;
@@ -25,7 +25,7 @@ public:
 	/*
 		nFixLines为一次读取的帧数，采用较大的读取帧数处理效率比较高,但是要考虑内存的消耗
 	*/
-	virtual long PreProc_GenerateD0Data(const char *pRAWData, const  char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines)=0;
+	virtual long PreProc_GenerateD0Data(const char *pRAWData, const  char *pData, DINFO &mDataHeader, vector<short> &nLeakFrameType, vector<int> &nLeakFrameSize, int &nLeakFrameCount, const int nFixLines)=0;
 };
 
 //全谱段数据预处理
@@ -39,5 +39,11 @@ public:
 	long PreProc_LeakLineInterpolate(FILE *fRAW, unsigned short *pRepairBuffer, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize,
 											int nLoc, __int64 nOffset, unsigned short *pfBuffer, unsigned short *plBuffer, unsigned short *pLeakBuffer);
 
-	long PreProc_GenerateD0Data(const char *pRAWData, const  char *pData, DINFO mDataHeader, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount, const int nFixLines);
+	long PreProc_GenerateD0Data(const char *pRAWData, const  char *pData, DINFO &mDataHeader, vector<short> &nLeakFrameType, vector<int> &nLeakFrameSize, int &nLeakFrameCount, const int nFixLines);
+
+	//将漏行信息写入文件中
+	long PrePRoc_WriteLeakInfo(char *pLeakFile, vector<short> nLeakFrameType, vector<int> nLeakFrameSize, int nLeakFrameCount);
+
+	//从文件中读取漏行信息
+	long PreProc_ReadLeakFile(char *pLeakFile, vector<short> &nLeakFrameType, vector<int> &nLeakFrameSize, int &nLeakFrameCount);
 };

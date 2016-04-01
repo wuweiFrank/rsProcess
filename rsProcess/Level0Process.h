@@ -18,20 +18,23 @@ public:
 	virtual long Level0Proc_Nonuniform(const char* pathBSQ, const char* pathNonuniform,const char* pathCalibFile= 0, const char* pathDarkFile=0);
 
 	//获取有用的数据，除去两端无用的数据和波段
-	virtual long Level0Proc_GetUsefulData(const char* pathBSQ, const char* pathUseful, int width, int leftunuse, int rightunuse, vector<int> usefulBands);
+	virtual long Level0Proc_GetUsefulData(const char* pathBSQ, const char* pathUseful, int leftunuse, int rightunuse, vector<int> usefulBands);
 
 	//解算得到Event文件数据
 	virtual long Level0Proc_ExtractEvent(const char* pathRawBIL, const char* pathEvent, const int nEventOffset);
 private:
 	//获取非均匀性校正参数，通过实验室定标文件和暗电流
 	void GetNonuniformParameters(const char* pathCalibFile, const char* pathDarkFile, float* params);
-
 };
 
-class QPDLevel0Process
+class QPDLevel0Process : public Level0Process
 {
 public:
 	//修改短波红外Event信息，由于对于全谱段数据短波Event的百微秒是正确的，整数秒存在异常
 	//因此需要对全谱段短波数据进行处理
 	long Level0Proc_ModifySWIREvent(const char* pathEvent,const char* pathExEvent, float fTime);
 };
+
+
+//全谱段数据0级数据产品生产测试函数
+void QPDLevel0ProcessUnitTestFunc();
