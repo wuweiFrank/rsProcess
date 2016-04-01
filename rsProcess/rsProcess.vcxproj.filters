@@ -57,6 +57,21 @@
     <ClInclude Include="ProductTest.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Level2Process.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GeoPOSProcess.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoordinateTrans.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="matrixOperation.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tsmUTM.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -78,6 +93,21 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ProductTest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GeoPOSProcess.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Level2Process.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="matrixOperation.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tsmUTM.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CoordinateTrans.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

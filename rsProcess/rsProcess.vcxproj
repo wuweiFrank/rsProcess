@@ -146,9 +146,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AuxiliaryFunction.h" />
+    <ClInclude Include="CoordinateTrans.h" />
     <ClInclude Include="ExtractXML.h" />
+    <ClInclude Include="GeoPOSProcess.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Level0Process.h" />
+    <ClInclude Include="Level2Process.h" />
+    <ClInclude Include="matrixOperation.h" />
     <ClInclude Include="PreProcess.h" />
     <ClInclude Include="ProductTest.h" />
     <ClInclude Include="rapidxml\rapidxml.hpp" />
@@ -157,11 +161,16 @@
     <ClInclude Include="rapidxml\rapidxml_utils.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="tsmUTM.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuxiliaryFunction.cpp" />
+    <ClCompile Include="CoordinateTrans.cpp" />
     <ClCompile Include="ExtractXML.cpp" />
+    <ClCompile Include="GeoPOSProcess.cpp" />
     <ClCompile Include="Level0Process.cpp" />
+    <ClCompile Include="Level2Process.cpp" />
+    <ClCompile Include="matrixOperation.cpp" />
     <ClCompile Include="ProductTest.cpp" />
     <ClCompile Include="QPDPreProcess.cpp" />
     <ClCompile Include="rsProcess.cpp" />
@@ -171,6 +180,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="tsmUTM.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

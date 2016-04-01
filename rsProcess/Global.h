@@ -6,8 +6,14 @@ using namespace std;
 //目前所有错误都是1，正确结果都返回0，等整个程序完成再对错误代码进行调整
 
 //日志输出路径
-#define _log_path_ "c:\\process_log\\rsProcess.log";
-
+//常量的定义
+#define _log_path_ "c:\\process_log\\rsProcess.log"
+#define PI 3.14159265358
+#define MAX_NUM  99999999
+#define MIN_NUM -99999999
+#define WGS84LRadius 6378137
+#define WGS84Eccentricity 0.0066943850
+#define EQUAL_LIMIT 0.000001
 //数据头信息
 typedef struct stDataInfo
 {
@@ -64,3 +70,46 @@ typedef struct stImgHeader {
 	bool bimgFWHM;
 	vector<float> imgFWHM;
 }ENVIHeader;
+
+//SBET文件结构
+typedef struct stSbetElement
+{
+	double dGpsTime;
+	double dLatitude;
+	double dLongitude;
+	double dHeight;
+	double dVx;
+	double dVy;
+	double dVz;
+	double dRoll;
+	double dPitch;
+	double dHeading;
+	double dWander;
+	double dAx;
+	double dAy;
+	double dAz;
+	double dArx;
+	double dAry;
+	double dArz;
+}SBETELEMENT;
+
+//点数据结构的定义
+//二维点和三维点数据结构
+struct CPOINT
+{
+	int x;
+	int y;
+};
+struct DPOINT
+{
+	double dX;
+	double dY;
+};
+struct THREEDPOINT
+{
+	double dX;
+	double dY;
+	double dZ;
+};
+
+
