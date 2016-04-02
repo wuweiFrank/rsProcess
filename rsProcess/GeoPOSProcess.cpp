@@ -374,13 +374,13 @@ long GeoPOSProcess::GeoPOSProc_ReadEOFile(const char* pathEO, double &dB, double
 	double dLatitude, dLongitude, dFlightHeight;
 	double pdEOData[15];
 	char szTemp[256];
-	fscanf_s(fp, "%s%d", szTemp, &nImgLines);
-	fscanf_s(fp, "%s%d", szTemp, &nPOSSamples);
-	fscanf_s(fp, "%s%lf", szTemp, &dLatitude);
-	fscanf_s(fp, "%s%lf", szTemp, &dLongitude);
-	fscanf_s(fp, "%s%lf", szTemp, &dFlightHeight);
-	fscanf_s(fp, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", szTemp, szTemp, szTemp, szTemp, szTemp, szTemp
-		, szTemp, szTemp, szTemp, szTemp, szTemp, szTemp, szTemp, szTemp, szTemp);
+	fscanf_s(fp, "%s%d", szTemp,256, &nImgLines);
+	fscanf_s(fp, "%s%d", szTemp, 256, &nPOSSamples);
+	fscanf_s(fp, "%s%lf", szTemp, 256, &dLatitude);
+	fscanf_s(fp, "%s%lf", szTemp, 256, &dLongitude);
+	fscanf_s(fp, "%s%lf", szTemp, 256, &dFlightHeight);
+	fscanf_s(fp, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", szTemp, 256, szTemp, 256,szTemp, 256, szTemp, 256, szTemp, 256, szTemp
+		, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256,szTemp, 256,szTemp, 256,szTemp, 256, szTemp, 256);
 
 	int nEOLines = nImgLines*nPOSSamples;
 	if (m_geo_EO == NULL)
@@ -393,10 +393,10 @@ long GeoPOSProcess::GeoPOSProc_ReadEOFile(const char* pathEO, double &dB, double
 	for (int i = 0; i<nEOLines; i++)
 	{
 
-		fscanf_s(fp, "%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf%lf",
-			pdEOData, pdEOData + 1, pdEOData + 2, pdEOData + 3, pdEOData + 4,
-			pdEOData + 5, pdEOData + 6, pdEOData + 7, pdEOData + 8, pdEOData + 9,
-			pdEOData + 10, pdEOData + 11, pdEOData + 12, pdEOData + 13, pdEOData + 14);
+		fscanf_s(fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+			&pdEOData[0], &pdEOData[1],&pdEOData[2], &pdEOData[3], &pdEOData[4],
+			&pdEOData[5], &pdEOData[6], &pdEOData[7], &pdEOData[8], &pdEOData[9],
+			&pdEOData[10],&pdEOData[11],&pdEOData[12],&pdEOData[13], &pdEOData[14]);
 
 		m_geo_EO[i].m_dX = pdEOData[0];
 		m_geo_EO[i].m_dY = pdEOData[1];
@@ -695,13 +695,13 @@ long QPDGeoPOSProcess::GeoPOSProc_GetEOLines(const char *pEoFile, int &nEOLines)
 {
 	long lError = 0;
 	FILE *fEO = NULL;
-	if(fopen_s(&fEO,pEoFile, "r")!=0);			//打开文件
+	if(fopen_s(&fEO,pEoFile, "r")!=0)		//打开文件
 	{
 		lError = -1;
 		goto ErrEnd;
 	}
 	char s[50];
-	fscanf_s(fEO, "%s%d", s, &nEOLines);
+	fscanf_s(fEO, "%s%d", s,50, &nEOLines);
 ErrEnd:
 	if (fEO)
 	{

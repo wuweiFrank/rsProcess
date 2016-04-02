@@ -136,3 +136,86 @@ void QPDLevel0ProcessUnitTestFunc()
 	m_level0Proc.Level0Proc_Nonuniform(pathBSQUseful5, pathBSQNonuniform5);
 	m_level0Proc.Level0Proc_Nonuniform(pathBSQUseful6, pathBSQNonuniform6);
 }
+
+void QPDLevel2ProcessUnitTestFunc()
+{
+	char* pathSBET = "";
+
+	char* pathBSQNonuniform1 = "E:\\73\\test\\Level0Product\\P0Noneuniform\\P01_0101_20160229_115734783.dat";
+	char* pathBSQNonuniform2 = "E:\\73\\test\\Level0Product\\P0Noneuniform\\P01_0301_20160229_115734783.dat";
+	char* pathBSQNonuniform3 = "E:\\73\\test\\Level0Product\\P0Noneuniform\\P01_0401_20160229_115734783.dat";
+	char* pathBSQNonuniform4 = "E:\\73\\test\\Level0Product\\P0Noneuniform\\P01_0501_20160229_115734783.dat";
+	char* pathBSQNonuniform5 = "E:\\73\\test\\Level0Product\\P0Noneuniform\\P01_0601_20160229_115734783.dat";
+	char* pathBSQNonuniform6 = "E:\\73\\test\\Level0Product\\P0Noneuniform\\P01_0701_20160229_115734783.dat";
+
+	char* pathEventOut1 = "E:\\73\\test\\Catalog\\EVENTModify_0101_20160229_115734783.txt";
+	char* pathEventOut2 = "E:\\73\\test\\Catalog\\EVENTModify_0101_20160229_115734783.txt";
+	char* pathEventOut3 = "E:\\73\\test\\Catalog\\EVENT_0401_20160229_115734783.txt";
+	char* pathEventOut4 = "E:\\73\\test\\Catalog\\EVENT_0501_20160229_115734783.txt";
+	char* pathEventOut5 = "E:\\73\\test\\Catalog\\EVENT_0601_20160229_115734783.txt";
+	char* pathEventOut6 = "E:\\73\\test\\Catalog\\EVENT_0701_20160229_115734783.txt";
+
+	char* pathPOS1 = "E:\\73\\test\\P2\\POS_0101_20160229_115734783.txt";
+	char* pathPOS2 = "E:\\73\\test\\P2\\POS_0101_20160229_115734783.txt";
+	char* pathPOS3 = "E:\\73\\test\\P2\\POS_0401_20160229_115734783.txt";
+	char* pathPOS4 = "E:\\73\\test\\P2\\POS_0501_20160229_115734783.txt";
+	char* pathPOS5 = "E:\\73\\test\\P2\\POS_0601_20160229_115734783.txt";
+	char* pathPOS6 = "E:\\73\\test\\P2\\POS_0701_20160229_115734783.txt";
+
+
+	char* pathEO1 = "E:\\73\\test\\P2\\EO_0101_20160229_115734783.txt";
+	char* pathEO2 = "E:\\73\\test\\P2\\EO_0101_20160229_115734783.txt";
+	char* pathEO3 = "E:\\73\\test\\P2\\EO_0401_20160229_115734783.txt";
+	char* pathEO4 = "E:\\73\\test\\P2\\EO_0501_20160229_115734783.txt";
+	char* pathEO5 = "E:\\73\\test\\P2\\EO_0601_20160229_115734783.txt";
+	char* pathEO6 = "E:\\73\\test\\P2\\EO_0701_20160229_115734783.txt";
+	QPDGeoPOSProcess m_QPDPOSProc;
+
+	//解算POS数据
+	m_QPDPOSProc.GeoPOSProc_ExtractSBET(pathSBET, pathEventOut1, pathPOS1, 19);
+	m_QPDPOSProc.GeoPOSProc_ExtractSBET(pathSBET, pathEventOut2, pathPOS2, 19);
+	m_QPDPOSProc.GeoPOSProc_ExtractSBET(pathSBET, pathEventOut3, pathPOS3, 19);
+	m_QPDPOSProc.GeoPOSProc_ExtractSBET(pathSBET, pathEventOut4, pathPOS4, 19);
+	m_QPDPOSProc.GeoPOSProc_ExtractSBET(pathSBET, pathEventOut5, pathPOS5, 19);
+	m_QPDPOSProc.GeoPOSProc_ExtractSBET(pathSBET, pathEventOut6, pathPOS6, 19);
+
+	//解算EO数据
+	THREEDPOINT setupVec;setupVec.dX= setupVec.dY=setupVec.dZ=0; float setupAngle[] = { 0,0,0 };
+	m_QPDPOSProc.GeoPOSProc_ExtractEO(pathPOS1, 0, pathEO1, setupVec, setupAngle, 1);
+	m_QPDPOSProc.GeoPOSProc_ExtractEO(pathPOS2, 0, pathEO2, setupVec, setupAngle, 1);
+	m_QPDPOSProc.GeoPOSProc_ExtractEO(pathPOS3, 0, pathEO3, setupVec, setupAngle, 1);
+	m_QPDPOSProc.GeoPOSProc_ExtractEO(pathPOS4, 0, pathEO4, setupVec, setupAngle, 1);
+	m_QPDPOSProc.GeoPOSProc_ExtractEO(pathPOS5, 0, pathEO5, setupVec, setupAngle, 1);
+	m_QPDPOSProc.GeoPOSProc_ExtractEO(pathPOS6, 0, pathEO6, setupVec, setupAngle, 1);
+
+	char* pathLevel21 = "E:\\73\\test\\P2\\P2_0101_20160229_115734783.tif";
+	char* pathLevel22 = "E:\\73\\test\\P2\\P2_0101_20160229_115734783.tif";
+	char* pathLevel23 = "E:\\73\\test\\P2\\P2_0401_20160229_115734783.tif";
+	char* pathLevel24 = "E:\\73\\test\\P2\\P2_0501_20160229_115734783.tif";
+	char* pathLevel25 = "E:\\73\\test\\P2\\P2_0601_20160229_115734783.tif";
+	char* pathLevel26 = "E:\\73\\test\\P2\\P2_0701_20160229_115734783.tif";
+	QPDLevel2Process m_QDPLevel2Proc;
+	float fGSDX = 2, fGSDY = 2;
+	double fElevation = 0;
+	int nEoOffset = 0;
+	float fFov = 14, fIFov = 1,fFocalLen = 40;
+	bool bDEM = 0,bIGM = 1;
+	int nInterval = 1;
+	//A级数据产品处理
+	m_QDPLevel2Proc.Level2Proc_Product2A(pathBSQNonuniform1, pathLevel21, pathEO1, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, false, NULL,true);
+	m_QDPLevel2Proc.Level2Proc_Product2A(pathBSQNonuniform2, pathLevel22, pathEO2, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, false, NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2A(pathBSQNonuniform3, pathLevel23, pathEO3, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, false, NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2A(pathBSQNonuniform4, pathLevel24, pathEO4, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, false, NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2A(pathBSQNonuniform5, pathLevel25, pathEO5, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, false, NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2A(pathBSQNonuniform6, pathLevel26, pathEO6, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, false, NULL, true);
+
+	//B级数据产品处理
+	char* pathDEM = "";
+	m_QDPLevel2Proc.Level2Proc_Product2B(pathBSQNonuniform1, pathLevel21, pathEO1, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, pathDEM,false,  NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2B(pathBSQNonuniform2, pathLevel22, pathEO2, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, pathDEM, false, NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2B(pathBSQNonuniform3, pathLevel23, pathEO3, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, pathDEM, false, NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2B(pathBSQNonuniform4, pathLevel24, pathEO4, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, pathDEM, false, NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2B(pathBSQNonuniform5, pathLevel25, pathEO5, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, pathDEM, false, NULL, true);
+	m_QDPLevel2Proc.Level2Proc_Product2B(pathBSQNonuniform6, pathLevel26, pathEO6, fGSDX, fGSDY, fElevation, nEoOffset, fFov, fIFov, fFocalLen, pathDEM, false, NULL, true);
+
+}
