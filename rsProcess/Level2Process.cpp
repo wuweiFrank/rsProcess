@@ -60,9 +60,9 @@ long Level2Process::Level2Proc_CalculateIGMFile(int nLines, int nImgWidth, int n
 
 			//是指向左还是指向右为正方向
 			if(!bInverse)
-				fx = nImgWidth / 2 - j;
+				fx = float(nImgWidth / 2 - j);
 			else
-				fx = j - nImgWidth / 2;
+				fx = float(j - nImgWidth / 2);
 
 			dAngle = fx*dPixelIFov;
 			//像空间坐标
@@ -195,7 +195,12 @@ long Level2Process::Level2Proc_CalculateIGMFileDEM(int nLines, int nImgWidth, in
 			int nZone;
 			long lOffset = i*nImgWidth + j;
 
-			fx = j - nImgWidth / 2;
+			//是指向左还是指向右为正方向
+			if (!bInverse)
+				fx = float(nImgWidth / 2 - j);
+			else
+				fx = float(j - nImgWidth / 2);
+
 			dAngle = fx*dPixelIFov;
 			//像空间坐标
 			dPhotoPt[0] = fFocalLen*tan(dAngle);
@@ -269,7 +274,11 @@ long Level2Process::Level2Proc_CalculateIGMFileDEM(int nLines, int nImgWidth, in
 				int nZone;
 				long lOffset = i*nImgWidth + j;
 
-				fx = j - nImgWidth / 2;
+				//是指向左还是指向右为正方向
+				if (!bInverse)
+					fx = float(nImgWidth / 2 - j);
+				else
+					fx = float(j - nImgWidth / 2);
 				dAngle = fx*dPixelIFov;
 				//像空间坐标
 				dPhotoPt[0] = fFocalLen*tan(dAngle);
@@ -525,7 +534,7 @@ long Level2Process::Level2Proc_ReadDEMFile(const char *pDEMFile, int &nSamples, 
 	{
 		pDEMPt = new double[nImgSize];
 	}
-	catch (bad_alloc&e)
+	catch (bad_alloc)
 	{
 		lError = -1;
 		goto ErrEnd;
@@ -544,7 +553,7 @@ long Level2Process::Level2Proc_ReadDEMFile(const char *pDEMFile, int &nSamples, 
 		{
 			pDEM = new short[nImgSize];
 		}
-		catch (bad_alloc&e)
+		catch (bad_alloc)
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -565,7 +574,7 @@ long Level2Process::Level2Proc_ReadDEMFile(const char *pDEMFile, int &nSamples, 
 		{
 			pDEM = new int[nImgSize];
 		}
-		catch (bad_alloc&e)
+		catch (bad_alloc)
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -586,7 +595,7 @@ long Level2Process::Level2Proc_ReadDEMFile(const char *pDEMFile, int &nSamples, 
 		{
 			pDEM = new float[nImgSize];
 		}
-		catch (bad_alloc&e)
+		catch (bad_alloc)
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -703,7 +712,7 @@ long QPDLevel2Process::Level2Proc_Product2A(const char *pFile, const char *pCFil
 	{
 		pGoundPt = new THREEDPOINT[nImgSize];
 	}
-	catch (bad_alloc & e)
+	catch (bad_alloc)
 	{
 		lError = -1;
 		goto ErrEnd;
@@ -734,7 +743,7 @@ long QPDLevel2Process::Level2Proc_Product2A(const char *pFile, const char *pCFil
 		{
 			pnImgBuffer = new unsigned short[nImgSize];
 		}
-		catch (bad_alloc & e)
+		catch (bad_alloc )
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -743,7 +752,7 @@ long QPDLevel2Process::Level2Proc_Product2A(const char *pFile, const char *pCFil
 		{
 			pnRegBuffer = new unsigned short[nReImgSize];
 		}
-		catch (bad_alloc & e)
+		catch (bad_alloc)
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -785,7 +794,7 @@ long QPDLevel2Process::Level2Proc_Product2A(const char *pFile, const char *pCFil
 		{
 			pfImgBuffer = new float[nImgSize];
 		}
-		catch (bad_alloc & e)
+		catch (bad_alloc)
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -794,7 +803,7 @@ long QPDLevel2Process::Level2Proc_Product2A(const char *pFile, const char *pCFil
 		{
 			pfRegBuffer = new float[nReImgSize];
 		}
-		catch (bad_alloc & e)
+		catch (bad_alloc)
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -961,7 +970,7 @@ long QPDLevel2Process::Level2Proc_Product2B(const char *pFile, const char *pCFil
 	{
 		pGoundPt = new THREEDPOINT[nImgSize];
 	}
-	catch (bad_alloc & e)
+	catch (bad_alloc)
 	{
 		lError = -1;
 		goto ErrEnd;
@@ -990,7 +999,7 @@ long QPDLevel2Process::Level2Proc_Product2B(const char *pFile, const char *pCFil
 		{
 			pnImgBuffer = new unsigned short[nImgSize];
 		}
-		catch (bad_alloc & e)
+		catch (bad_alloc )
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -999,7 +1008,7 @@ long QPDLevel2Process::Level2Proc_Product2B(const char *pFile, const char *pCFil
 		{
 			pnRegBuffer = new unsigned short[nReImgSize];
 		}
-		catch (bad_alloc & e)
+		catch (bad_alloc )
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -1040,7 +1049,7 @@ long QPDLevel2Process::Level2Proc_Product2B(const char *pFile, const char *pCFil
 		{
 			pfImgBuffer = new float[nImgSize];
 		}
-		catch (bad_alloc & e)
+		catch (bad_alloc )
 		{
 			lError = -1;
 			goto ErrEnd;
@@ -1049,7 +1058,7 @@ long QPDLevel2Process::Level2Proc_Product2B(const char *pFile, const char *pCFil
 		{
 			pfRegBuffer = new float[nReImgSize];
 		}
-		catch (bad_alloc & e)
+		catch (bad_alloc )
 		{
 			lError = -1;
 			goto ErrEnd;

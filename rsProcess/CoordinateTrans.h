@@ -1,7 +1,7 @@
 #pragma once
 /*  Created on : 2016 - 04 - 01
 * Author : wuwei
-*		description：影像数据产品生产辅助类
+*		description：影像数据产品生产坐标转换类
 */
 #include "stdafx.h"
 #include "CoordinateTrans.h"
@@ -36,8 +36,6 @@ public:
 	long XYZToBLH(THREEDPOINT XYZPnt, double &dB, double &dL, double &dH);
 
 	//virtual long CoordinateImgToGeoMap(int nImgHeight, int nImgWidth, THREEDPOINT *pGoundPt, EO *pdEOData, float fFov, float fFocalLen);
-
 	//virtual long CoordinateGeoMapToUTM(double dB, double dL, double dH, THREEDPOINT *pGoundPnt, int nImgHeight, int nImgWidth, DPOINT &minPnt, DPOINT &maxPnt);
-
 	//virtual long CoordinateSrcToCorrectMap(THREEDPOINT *pGoundPnts, DPOINT* pfMapPositions, float fGSD, DPOINT minPnt, DPOINT maxPnt, int nImgHeight, int nImgWidth);
 };

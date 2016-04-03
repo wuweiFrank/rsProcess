@@ -374,13 +374,13 @@ long GeoPOSProcess::GeoPOSProc_ReadEOFile(const char* pathEO, double &dB, double
 	double dLatitude, dLongitude, dFlightHeight;
 	double pdEOData[15];
 	char szTemp[256];
-	fscanf_s(fp, "%s%d", szTemp, &nImgLines);
-	fscanf_s(fp, "%s%d", szTemp, &nPOSSamples);
-	fscanf_s(fp, "%s%lf", szTemp, &dLatitude);
-	fscanf_s(fp, "%s%lf", szTemp, &dLongitude);
-	fscanf_s(fp, "%s%lf", szTemp, &dFlightHeight);
-	fscanf_s(fp, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", szTemp, szTemp, szTemp, szTemp, szTemp, szTemp
-		, szTemp, szTemp, szTemp, szTemp, szTemp, szTemp, szTemp, szTemp, szTemp);
+	fscanf_s(fp, "%s%d", szTemp,256, &nImgLines);
+	fscanf_s(fp, "%s%d", szTemp, 256, &nPOSSamples);
+	fscanf_s(fp, "%s%lf", szTemp, 256, &dLatitude);
+	fscanf_s(fp, "%s%lf", szTemp, 256, &dLongitude);
+	fscanf_s(fp, "%s%lf", szTemp, 256, &dFlightHeight);
+	fscanf_s(fp, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp
+		, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256, szTemp, 256);
 
 	int nEOLines = nImgLines*nPOSSamples;
 	if (m_geo_EO == NULL)
@@ -605,9 +605,7 @@ long QPDGeoPOSProcess::GeoPOSProc_ReadPartPOS(const char *pPOSFile, long nLines,
 	long   lError = 0;
 	int    i;
 	FILE   *fpin = NULL;
-	char   cA[111], cB[111];
 	double fReadData[20];
-	double fTemp[6];
 	char   cTempchar[2048];
 	int realLines = 0;
 	if (m_geo_POS != NULL)
@@ -695,13 +693,13 @@ long QPDGeoPOSProcess::GeoPOSProc_GetEOLines(const char *pEoFile, int &nEOLines)
 {
 	long lError = 0;
 	FILE *fEO = NULL;
-	if(fopen_s(&fEO,pEoFile, "r")!=0);			//打开文件
+	if(fopen_s(&fEO,pEoFile, "r")!=0)			//打开文件
 	{
 		lError = -1;
 		goto ErrEnd;
 	}
 	char s[50];
-	fscanf_s(fEO, "%s%d", s, &nEOLines);
+	fscanf_s(fEO, "%s%d", s,50, &nEOLines);
 ErrEnd:
 	if (fEO)
 	{
