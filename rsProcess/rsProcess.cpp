@@ -3,11 +3,12 @@
 
 #include "stdafx.h"
 #include"ProductTest.h"
+#include"Level1Process.h"
 int main()
 {
 	//QPDPreProcessUnitTestFunc();
 	//QPDLevel0ProcessUnitTestFunc();
-	QPDLevel2ProcessUnitTestFunc();
-    return 0;
+	//QPDLevel1Process m_levelProcess;
+	return 0;
 }
 

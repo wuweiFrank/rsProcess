@@ -16,6 +16,9 @@
     <Filter Include="头文件\rapidxml">
       <UniqueIdentifier>{2371a53a-d3fb-443b-845f-e54c361ff1a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\AreialProduct">
+      <UniqueIdentifier>{cc42ca22-1dc7-4972-8cd6-88b3d4574348}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -39,25 +42,10 @@
     <ClInclude Include="rapidxml\rapidxml_utils.hpp">
       <Filter>头文件\rapidxml</Filter>
     </ClInclude>
-    <ClInclude Include="ExtractXML.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Global.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="PreProcess.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="AuxiliaryFunction.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Level0Process.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ProductTest.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Level2Process.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="GeoPOSProcess.h">
@@ -72,6 +60,24 @@
     <ClInclude Include="tsmUTM.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ExtractXML.h">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClInclude>
+    <ClInclude Include="Level0Process.h">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClInclude>
+    <ClInclude Include="Level1Process.h">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClInclude>
+    <ClInclude Include="Level2Process.h">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClInclude>
+    <ClInclude Include="PreProcess.h">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClInclude>
+    <ClInclude Include="ProductTest.h">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -80,25 +86,10 @@
     <ClCompile Include="rsProcess.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ExtractXML.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="AuxiliaryFunction.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="QPDPreProcess.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Level0Process.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ProductTest.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="GeoPOSProcess.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Level2Process.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="matrixOperation.cpp">
@@ -109,6 +100,27 @@
     </ClCompile>
     <ClCompile Include="CoordinateTrans.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtractXML.cpp">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="Level0Process.cpp">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="Level2Process.cpp">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="ProductTest.cpp">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="QPDLevel1Process.cpp">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="QPDPreProcess.cpp">
+      <Filter>头文件\AreialProduct</Filter>
+    </ClCompile>
+    <ClCompile Include="THRLevel1Process.cpp">
+      <Filter>头文件\AreialProduct</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

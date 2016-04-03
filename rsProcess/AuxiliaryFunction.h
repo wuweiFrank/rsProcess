@@ -28,3 +28,7 @@ void GetAveDev(unsigned short *pBuffer, int nSamples, int nLines, int nBand, flo
 //对float类型的数据和unsigned short类型的数据进行处理
 void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned short *pRegBuffer);
 void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, float *pRegBuffer);
+
+//获取两幅影像匹配直方图
+//以img2为标准
+void GetImgHistroMatch(double* img1, double *img2, int xsize1, int ysize1, int xsize2, int ysize2, int minPix, int maxPix, int* histroMap);

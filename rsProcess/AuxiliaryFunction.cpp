@@ -104,10 +104,10 @@ void GetAveDev(unsigned char *pBuffer, int nSamples, int nLines, int nBand, floa
 	{
 		return ;
 	}
-	fAverage = dSum / nCount;
+	fAverage = (float)dSum / nCount;
 	dMul /= nCount;
 	dMul -= fAverage*fAverage;
-	fDeviate = sqrt(dMul);
+	fDeviate = (float)sqrt(dMul);
 	return ;
 }
 void GetAveDev(unsigned short *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate)
@@ -136,7 +136,7 @@ void GetAveDev(unsigned short *pBuffer, int nSamples, int nLines, int nBand, flo
 	fAverage = dSum / nCount;
 	dMul /= nCount;
 	dMul -= fAverage*fAverage;
-	fDeviate = sqrt(dMul);
+	fDeviate = (float)sqrt(dMul);
 	return;
 }
 
@@ -154,7 +154,7 @@ void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THRE
 	{
 		fDGrey = new float[nReSamples*nReLines];
 	}
-	catch (bad_alloc & e)
+	catch (bad_alloc)
 	{
 		exit(-1);
 	}
@@ -162,7 +162,7 @@ void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THRE
 	{
 		fDItem = new float[nReSamples*nReLines];
 	}
-	catch (bad_alloc & e)
+	catch (bad_alloc )
 	{
 		exit(-1);
 	}
@@ -194,10 +194,10 @@ void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THRE
 			fDY = presentPnt.dY - nY;
 			fDN = pImgBuffer[lPixOffset];		//获取当前点的原始DN值
 
-			fTempGrey[0] = (1 - fDX)*(1 - fDY)*fDN;
-			fTempGrey[1] = fDX*(1 - fDY)*fDN;
-			fTempGrey[2] = (1 - fDX)*fDY*fDN;
-			fTempGrey[3] = fDX*fDY*fDN;
+			fTempGrey[0] = (float)(1 - fDX)*(1 - fDY)*fDN;
+			fTempGrey[1] = (float)fDX*(1 - fDY)*fDN;
+			fTempGrey[2] = (float)(1 - fDX)*fDY*fDN;
+			fTempGrey[3] = (float)fDX*fDY*fDN;
 
 			if (nC >= 0 && nC<nReSamples && nY >= 0 && nY<nReLines)
 			{
@@ -207,13 +207,13 @@ void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THRE
 				fDItem[lOffset] += (1 - fDX)*(1 - fDY);						//左上点
 				if (nC < nReSamples - 1)	//未处于右边界
 				{
-					fDGrey[lOffset + 1] += fTempGrey[1];
-					fDItem[lOffset + 1] += fDX*(1 - fDY);					//右上点
+					fDGrey[lOffset + 1] += (float)fTempGrey[1];
+					fDItem[lOffset + 1] += (float)fDX*(1 - fDY);					//右上点
 				}
 				if (nY < nReLines - 1)	//未处于下边界
 				{
-					fDGrey[lOffset + nReSamples] += fTempGrey[2];
-					fDItem[lOffset + nReSamples] += (1 - fDX)*fDY;		//左下点
+					fDGrey[lOffset + nReSamples] += (float)fTempGrey[2];
+					fDItem[lOffset + nReSamples] += (float)(1 - fDX)*fDY;		//左下点
 				}
 				if (nC<nReSamples - 1 && nY<nReLines - 1)
 				{
@@ -288,7 +288,6 @@ void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THRE
 			}
 		}
 	}
-ErrEnd:
 	if (fDGrey)
 	{
 		delete[]fDGrey;
@@ -313,7 +312,7 @@ void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *
 	{
 		fDGrey = new float[nReSamples*nReLines];
 	}
-	catch (bad_alloc & e)
+	catch (bad_alloc )
 	{
 		exit(-1);
 	}
@@ -321,7 +320,7 @@ void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *
 	{
 		fDItem = new float[nReSamples*nReLines];
 	}
-	catch (bad_alloc & e)
+	catch (bad_alloc )
 	{
 		exit(-1);
 	}
@@ -353,10 +352,10 @@ void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *
 			fDY = presentPnt.dY - nY;
 			fDN = pImgBuffer[lPixOffset];		//获取当前点的原始DN值
 
-			fTempGrey[0] = (1 - fDX)*(1 - fDY)*fDN;
-			fTempGrey[1] = fDX*(1 - fDY)*fDN;
-			fTempGrey[2] = (1 - fDX)*fDY*fDN;
-			fTempGrey[3] = fDX*fDY*fDN;
+			fTempGrey[0] = (float)(1 - fDX)*(1 - fDY)*fDN;
+			fTempGrey[1] = (float)fDX*(1 - fDY)*fDN;
+			fTempGrey[2] = (float)(1 - fDX)*fDY*fDN;
+			fTempGrey[3] = (float)fDX*fDY*fDN;
 
 			if (nC >= 0 && nC<nReSamples && nY >= 0 && nY<nReLines)
 			{
@@ -376,8 +375,8 @@ void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *
 				}
 				if (nC<nReSamples - 1 && nY<nReLines - 1)
 				{
-					fDGrey[lOffset + nReSamples + 1] += fTempGrey[3];
-					fDItem[lOffset + nReSamples + 1] += fDX*fDY;			//右下点
+					fDGrey[lOffset + nReSamples + 1] += (float)fTempGrey[3];
+					fDItem[lOffset + nReSamples + 1] += (float)fDX*fDY;			//右下点
 				}
 			}
 		}
@@ -447,7 +446,6 @@ void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *
 			}
 		}
 	}
-ErrEnd:
 	if (fDGrey)
 	{
 		delete[]fDGrey;
@@ -458,4 +456,83 @@ ErrEnd:
 		delete[]fDItem;
 		fDGrey = NULL;
 	}
+}
+
+//获取直方图匹配后的直方图
+//影像2的直方图为基准
+void GetImgHistroMatch(double* img1, double *img2, int xsize1, int ysize1, int xsize2, int ysize2, int minPix, int maxPix, int* histroMap)
+{
+	int *ihistro1 = NULL;
+	double* fhistro1 = NULL;
+	int *ihistro2 = NULL;
+	double* fhistro2 = NULL;
+	try
+	{
+		ihistro1 = new int[maxPix-minPix];
+		fhistro1 = new double[maxPix - minPix];
+		ihistro2 = new int[maxPix - minPix];
+		fhistro2 = new double[maxPix - minPix];
+
+		memset(ihistro1, 0, sizeof(int)*(maxPix - minPix));
+		memset(ihistro2, 0, sizeof(int)*(maxPix - minPix));
+		memset(fhistro1, 0, sizeof(double)*(maxPix - minPix));
+		memset(fhistro2, 0, sizeof(double)*(maxPix - minPix));
+	}
+	catch (bad_alloc)
+	{
+		printf("allocate memory error\n");
+		exit(-1);
+	}
+
+	for (int i = 0; i<xsize1*ysize1; ++i)
+		ihistro1[int(img1[i])-minPix]++;
+	for (int i = 0; i<xsize2*ysize2; ++i)
+		ihistro2[int(img2[i]) - minPix]++;
+	for (int i = minPix; i<maxPix; ++i)
+	{
+		fhistro1[i] = double(ihistro1[i]) / xsize1 / ysize1;
+		fhistro2[i] = double(ihistro2[i]) / xsize2 / ysize2;
+	}
+	//累积直方图
+	for (int i = 1; i<maxPix; ++i)
+	{
+		fhistro1[i] = fhistro1[i - 1] + fhistro1[i];
+		fhistro2[i] = fhistro2[i - 1] + fhistro2[i];
+	}
+
+
+
+	//直方图匹配
+	double m_diffA, m_diffB;  int k = 0;
+	for (int i = 0; i < maxPix - minPix; i++)
+	{
+		m_diffB = 1;
+		for (int j = k; j < maxPix - minPix; j++)
+		{
+			m_diffA = abs(fhistro1[i] - fhistro2[j]);
+			if (m_diffA - m_diffB < 1.0E-5)
+			{
+				m_diffB = m_diffA;
+				k = j;
+			}
+			else
+			{
+				k = j - 1;
+				break;
+			}
+		}
+		if (k == maxPix - minPix - 1)
+		{
+			for (int l = i; l < maxPix - minPix; l++)
+				histroMap[l] = k;
+			break;
+		}
+		histroMap[i] = k;
+	}
+
+	//清理内存
+	delete[]ihistro1;
+	delete[]ihistro2;
+	delete[]fhistro1;
+	delete[]fhistro2;
 }
