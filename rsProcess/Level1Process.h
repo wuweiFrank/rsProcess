@@ -50,7 +50,9 @@ public:
 	//对于QPD数据采用分段线性校正 最后一个系数为分段数
 	long LevelProc_GetParameterInfo(const char* pathImgRad, int& nSamples, int &nBands, int &nLevels);
 
-	//================================================================================================================================================
+	//重载的大气校正函数，由于没有参数，只好空着了
+	long Level1Proc_AtmosphereCorrect(const char* pathImgRad, const char* pathRef, const char* pathAtmosphere) { return 0; }
+	//=================================================================================================================================================
 	//下面是QPD数据处理特有的函数
 	//三个视场的视场拼接
 	/*****************************************************************************
@@ -135,6 +137,7 @@ private:
 	long Level1Proc_ViewJointFillData(unsigned short* imgViewData, int xsize, int ysize, float stposx, float stposy, unsigned short* jointData, int xmosaic, int ymosaic);
 };
 
+
 //热红外数据的辐射校正
 //热红外数据辐射校正主要特点为包含一个光谱校正模块
 class THRLevel1Process : public Level1Process
@@ -153,6 +156,8 @@ public:
 
 	//对于QPD数据采用分段线性校正 最后一个系数为分段数
 	long LevelProc_GetParameterInfo(const char* pathImgRad, int& nSamples, int &nBands, int &nLevels) { return 0; }
+
+	long Level1Proc_AtmosphereCorrect(const char* pathImgRad, const char* pathRef, const char* pathAtmosphere) { return 0; }
 	//===============================================================================================================================
 	/*
 	功能：对热红外高光谱数据进行光谱定标

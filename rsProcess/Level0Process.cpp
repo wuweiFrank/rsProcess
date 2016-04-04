@@ -132,6 +132,7 @@ long Level0Process::Level0Proc_RawToBSQ(const char* pathRawBIL, const char* path
 	return 0;
 }
 
+
 //获取非均匀性校正参数
 void Level0Process::GetNonuniformParameters(const char* pathCalibFile, const char* pathDarkFile, float* params)
 {
@@ -261,6 +262,7 @@ long Level0Process::Level0Proc_Nonuniform(const char* pathBSQ, const char* pathN
 	return 0;
 }
 
+
 //除去两侧辅助数据和无意义波段，得到纯影像数据信息并转换为TIF格式
 long Level0Process::Level0Proc_GetUsefulData(const char* pathBSQ, const char* pathUseful, int leftunuse, int rightunuse, vector<int> usefulBands)
 {
@@ -323,6 +325,7 @@ long Level0Process::Level0Proc_GetUsefulData(const char* pathBSQ, const char* pa
 	return 0;
 }
 
+
 //从原始数据中解算得到EVENT数据文件，这个函数是以全谱段数据为例，对于不同传感器有不同的数据格式需要重载此函数
 long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* pathEvent,const int nEventOffset)
 {
@@ -345,7 +348,7 @@ long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* 
 	unsigned short lGPStime2 = 0, ltempGPStime2 = 0;
 	unsigned short nMicrosecond = 0, ntempMicrosecond = 0;
 	unsigned long ltempGPStime = 0, lGPStime = 0;
-	nFrameSize = xsize*bands;
+	nFrameSize = xsize*bands*sizeof(unsigned short);
 
 	//打开0级数据
 	err = fopen_s(&fD0, pathRawBIL, "rb");
@@ -365,8 +368,8 @@ long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* 
 	_fseeki64(fD0, nOffset, SEEK_SET);
 	fread_s(&ltempGPStime1, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
 	fread_s(&ltempGPStime2, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
-	fread_s(&ntempMicrosecond, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
-	ltempGPStime = ltempGPStime1 * 65535 + ltempGPStime2;
+	fread_s(&nMicrosecond, sizeof(unsigned short), sizeof(unsigned short), 1, fD0);
+	lGPStime = ltempGPStime1 * 65535 + ltempGPStime2;
 	for (i = 0; i < nLines; i++)
 	{
 		_fseeki64(fD0, nOffset, SEEK_SET);
@@ -388,11 +391,11 @@ long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* 
 		}
 		else
 		{
-			ltempGPStime = lGPStime;
-			ntempMicrosecond = nMicrosecond;
+			lGPStime = ltempGPStime;
+			nMicrosecond = ntempMicrosecond;
 		}
 		nOffset += nFrameSize;
-		fprintf_s(fEvent, "%d	%lf\n", i + 1, lGPStime + (double)nMicrosecond / 10000.0);
+		fprintf_s(fEvent, "%d	%lf\n", i + 1, lGPStime + (double)ntempMicrosecond / 10000.0);
 	}
 
 ErrEnd:

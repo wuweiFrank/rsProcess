@@ -92,7 +92,7 @@ ErrEnd:
 	return lError;
 }
 
-//相对辐射校正
+//相对辐射校正 相对辐射校正是不是就是非均匀性校正
 long QPDLevel1Process::Level1Proc_RadiationRelative(const char* pathImg, const char* pathImgRad, const char* pathRelRegFile)
 {
 	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
@@ -107,10 +107,12 @@ long QPDLevel1Process::Level1Proc_RadiationRelative(const char* pathImg, const c
 	int ysize = GDALGetRasterYSize(m_dataset);
 	int bands = GDALGetRasterCount(m_dataset);
 
-	char **papszOptions = NULL;
-	papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "BAND");
-	GDALDatasetH m_datasetdst = GDALCreate(GDALGetDriverByName("GTiff"), pathImgRad, xsize, ysize, bands, GDT_UInt16, papszOptions);
-
+	//char **papszOptions = NULL;
+	//papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "BAND");
+	//GDALDatasetH m_datasetdst = GDALCreate(GDALGetDriverByName("GTiff"), pathImgRad, xsize, ysize, bands, GDT_UInt16, papszOptions);
+	FILE* fDst = NULL;
+	if (fopen_s(&fDst, pathImgRad, "wb") != 0)
+		exit(-1);
 	int nSamples, nBands,nLevels;
 	LevelProc_GetParameterInfo(pathRelRegFile, nSamples, nBands, nLevels);
 
@@ -130,7 +132,7 @@ long QPDLevel1Process::Level1Proc_RadiationRelative(const char* pathImg, const c
 		exit(-1);
 	}
 
-	if (LevelProc_RelativeParameters(pathImgRad, parametersA, parametersB, parametersAux) != 0)
+	if (LevelProc_RelativeParameters(pathRelRegFile, parametersA, parametersB, parametersAux) != 0)
 		exit(-1);//读取校正参数异常
 	
 	//根据nLevel进行校正
@@ -139,6 +141,7 @@ long QPDLevel1Process::Level1Proc_RadiationRelative(const char* pathImg, const c
 	{
 		for (int i = 0; i < bands; ++i)
 		{
+			printf("process bands:%d\n", i + 1);
 			GDALRasterIO(GDALGetRasterBand(m_dataset, i + 1), GF_Read, 0, 0, xsize, ysize, imgBuffeSrc, xsize, ysize, GDT_UInt16, 0, 0);
 			for (int j = 0; j < xsize; ++j)
 			{
@@ -246,7 +249,9 @@ long QPDLevel1Process::Level1Proc_RadiationRelative(const char* pathImg, const c
 				}
 			}
 			//数据输出
-			GDALRasterIO(GDALGetRasterBand(m_datasetdst, i + 1), GF_Read, 0, 0, xsize, ysize, imgBuffeDst, xsize, ysize, GDT_UInt16, 0, 0);
+			fwrite(imgBuffeDst, 2, xsize*ysize, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_datasetdst, i + 1), GF_Read, 0, 0, xsize, ysize, imgBuffeDst, xsize, ysize, GDT_UInt16, 0, 0);
 		}
 	}
 	//分段线性校正
@@ -255,6 +260,7 @@ long QPDLevel1Process::Level1Proc_RadiationRelative(const char* pathImg, const c
 		float *fLevelValue = new float[nLevels];
 		for (int i = 0; i < bands; i++)
 		{
+			printf("process bands:%d\n", i + 1);
 			//获取波段
 			GDALRasterIO(GDALGetRasterBand(m_dataset, i + 1), GF_Read, 0, 0, xsize, ysize, imgBuffeSrc, xsize, ysize, GDT_UInt16, 0, 0);
 			for (int j = 0; j < nLevels; j++)
@@ -285,7 +291,6 @@ long QPDLevel1Process::Level1Proc_RadiationRelative(const char* pathImg, const c
 					}
 				}
 			}
-			delete[]fLevelValue; fLevelValue = NULL;
 
 			//如果需要进行坏线校正的话
 			for (int j = 0; j < nSamples; ++j)
@@ -383,11 +388,29 @@ long QPDLevel1Process::Level1Proc_RadiationRelative(const char* pathImg, const c
 				}
 			}
 			//数据输出
-			GDALRasterIO(GDALGetRasterBand(m_datasetdst, i + 1), GF_Read, 0, 0, xsize, ysize, imgBuffeDst, xsize, ysize, GDT_UInt16, 0, 0);
+			fwrite(imgBuffeDst, 2, xsize*ysize, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_datasetdst, i + 1), GF_Read, 0, 0, xsize, ysize, imgBuffeDst, xsize, ysize, GDT_UInt16, 0, 0);
 		}
+		delete[]fLevelValue; fLevelValue = NULL;
+
 	}
 	GDALClose(m_dataset);
-	GDALClose(m_datasetdst);
+	fclose(fDst);
+	//GDALClose(m_datasetdst);
+	//写头文件
+	char drive[_MAX_DRIVE]; char dir[_MAX_DIR]; char filename[_MAX_FNAME]; char ext[_MAX_EXT];
+	char path[_MAX_PATH];
+	_splitpath_s(pathImgRad, drive, dir, filename, ext);
+	_makepath_s(path, drive, dir, filename, "hdr");
+	ENVIHeader mENVIHeader;
+	memset(&mENVIHeader, 0, sizeof(ENVIHeader));
+	mENVIHeader.datatype = 12;
+	mENVIHeader.imgWidth = xsize;
+	mENVIHeader.imgHeight = ysize;
+	mENVIHeader.imgBands = bands;
+	mENVIHeader.interleave = "BSQ";
+	WriteENVIHeader(path, mENVIHeader);
 
 	delete[]imgBuffeSrc; imgBuffeSrc = NULL;
 	delete[]imgBuffeDst; imgBuffeDst = NULL;
@@ -1445,11 +1468,26 @@ long QPDLevel1Process::Level1Proc_ColorMatch(unsigned short* imgBuffer1, unsigne
 		exit(-1);
 	}
 	GetImgHistroMatch(overlap12, overlap21, over_x, ytemp - abs(err_y), over_x, ytemp - abs(err_y), minPixel, maxPixel, mapPixel);
-
-	//考虑用OMP加速
 #pragma omp parallel for
 	for (size_t i = 0; i < xsize1*ysize1; i++)
 		imgBuffer1[i] = mapPixel[imgBuffer1[i]];
+
+	////是不是考虑再做一次校正
+	//double a12[2];
+	//double mean1 = 0, mean2 = 0, sum1 = 0, sum2 = 0;
+	//for (size_t i = 0; i < over_x*(ytemp - abs(err_y)); i++)
+	//{
+	//	mean1 += double(overlap12[i]) / double(over_x*(ytemp - abs(err_y)));
+	//	mean2 += double(overlap21[i]) / double(over_x*(ytemp - abs(err_y)));
+	//}
+	//for (int i = 0; i<over_x*(ytemp - abs(err_y)); ++i)
+	//	sum1 += overlap12[i] * overlap21[i] / mean1 / mean2 - 1;
+	//for (int i = 0; i<over_x*(ytemp - abs(err_y)); ++i)
+	//	sum2 += overlap12[i] * overlap12[i] / mean1 / mean1 - 1;
+	//a12[0] = mean2 / mean1*sum1 / sum2;
+	//a12[1] = mean2 - a12[0] * mean1;
+	//for (int i = 0; i<xsize1*ysize1; ++i)
+	//	imgBuffer1[i] = unsigned short(a12[0] * double(imgBuffer1[i]) + a12[1]);
 
 
 	delete[]overlap12;
