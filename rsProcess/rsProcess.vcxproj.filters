@@ -13,20 +13,8 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="AreialProduct">
-      <UniqueIdentifier>{cc42ca22-1dc7-4972-8cd6-88b3d4574348}</UniqueIdentifier>
-    </Filter>
     <Filter Include="rapidxml">
       <UniqueIdentifier>{2371a53a-d3fb-443b-845f-e54c361ff1a9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="HyperSpectral">
-      <UniqueIdentifier>{60e684b1-de32-46c2-a166-966f519a3634}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="FrequencyFunc">
-      <UniqueIdentifier>{2e25eaca-47d3-46c7-b536-ac8fca63735b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="rsImgProcess">
-      <UniqueIdentifier>{7660631f-0dab-459d-ab3f-1885ca50ed39}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -75,44 +63,8 @@
     <ClInclude Include="ThreadPool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="AerialProduct\ExtractXML.h">
-      <Filter>AreialProduct</Filter>
-    </ClInclude>
-    <ClInclude Include="AerialProduct\Level0Process.h">
-      <Filter>AreialProduct</Filter>
-    </ClInclude>
-    <ClInclude Include="AerialProduct\Level1Process.h">
-      <Filter>AreialProduct</Filter>
-    </ClInclude>
-    <ClInclude Include="AerialProduct\Level2Process.h">
-      <Filter>AreialProduct</Filter>
-    </ClInclude>
-    <ClInclude Include="AerialProduct\PreProcess.h">
-      <Filter>AreialProduct</Filter>
-    </ClInclude>
-    <ClInclude Include="AerialProduct\ProductTest.h">
-      <Filter>AreialProduct</Filter>
-    </ClInclude>
     <ClInclude Include="GDALTools.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="HyperSpectral\HyperSpectural.h">
-      <Filter>HyperSpectral</Filter>
-    </ClInclude>
-    <ClInclude Include="HyperSpectral\fusionfunc.h">
-      <Filter>HyperSpectral</Filter>
-    </ClInclude>
-    <ClInclude Include="FrequencyFunc\waveletTrans.h">
-      <Filter>FrequencyFunc</Filter>
-    </ClInclude>
-    <ClInclude Include="rsImgProcess\ImageBlock.h">
-      <Filter>rsImgProcess</Filter>
-    </ClInclude>
-    <ClInclude Include="rsImgProcess\spFliter.h">
-      <Filter>rsImgProcess</Filter>
-    </ClInclude>
-    <ClInclude Include="rsImgProcess\SampleFunc.h">
-      <Filter>rsImgProcess</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -139,54 +91,6 @@
     </ClCompile>
     <ClCompile Include="ThreadPool.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="AerialProduct\ExtractXML.cpp">
-      <Filter>AreialProduct</Filter>
-    </ClCompile>
-    <ClCompile Include="AerialProduct\Level0Process.cpp">
-      <Filter>AreialProduct</Filter>
-    </ClCompile>
-    <ClCompile Include="AerialProduct\Level2Process.cpp">
-      <Filter>AreialProduct</Filter>
-    </ClCompile>
-    <ClCompile Include="AerialProduct\ProductTest.cpp">
-      <Filter>AreialProduct</Filter>
-    </ClCompile>
-    <ClCompile Include="AerialProduct\QPDLevel1Process.cpp">
-      <Filter>AreialProduct</Filter>
-    </ClCompile>
-    <ClCompile Include="AerialProduct\QPDPreProcess.cpp">
-      <Filter>AreialProduct</Filter>
-    </ClCompile>
-    <ClCompile Include="AerialProduct\THRLevel1Process.cpp">
-      <Filter>AreialProduct</Filter>
-    </ClCompile>
-    <ClCompile Include="HyperSpectral\HyperSpectural.cpp">
-      <Filter>HyperSpectral</Filter>
-    </ClCompile>
-    <ClCompile Include="HyperSpectral\simulatedata.cpp">
-      <Filter>HyperSpectral</Filter>
-    </ClCompile>
-    <ClCompile Include="HyperSpectral\sparse_represent.cpp">
-      <Filter>HyperSpectral</Filter>
-    </ClCompile>
-    <ClCompile Include="HyperSpectral\umixing.cpp">
-      <Filter>HyperSpectral</Filter>
-    </ClCompile>
-    <ClCompile Include="HyperSpectral\wavelet_fusion.cpp">
-      <Filter>HyperSpectral</Filter>
-    </ClCompile>
-    <ClCompile Include="FrequencyFunc\waveletTrans.cpp">
-      <Filter>FrequencyFunc</Filter>
-    </ClCompile>
-    <ClCompile Include="rsImgProcess\ImageBlock.cpp">
-      <Filter>rsImgProcess</Filter>
-    </ClCompile>
-    <ClCompile Include="rsImgProcess\SampleFunc.cpp">
-      <Filter>rsImgProcess</Filter>
-    </ClCompile>
-    <ClCompile Include="rsImgProcess\spFliter.cpp">
-      <Filter>rsImgProcess</Filter>
     </ClCompile>
     <ClCompile Include="GDALTools.cpp">
       <Filter>源文件</Filter>
