@@ -1,4 +1,3 @@
-#include"stdafx.h"
 #include"Level1Process.h"
 #include<io.h>
 #include<fstream>

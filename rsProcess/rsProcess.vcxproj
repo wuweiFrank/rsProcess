@@ -96,8 +96,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
@@ -145,36 +145,56 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AerialProduct\ExtractXML.h" />
+    <ClInclude Include="AerialProduct\Level0Process.h" />
+    <ClInclude Include="AerialProduct\Level1Process.h" />
+    <ClInclude Include="AerialProduct\Level2Process.h" />
+    <ClInclude Include="AerialProduct\PreProcess.h" />
+    <ClInclude Include="AerialProduct\ProductTest.h" />
     <ClInclude Include="AuxiliaryFunction.h" />
     <ClInclude Include="CoordinateTrans.h" />
-    <ClInclude Include="ExtractXML.h" />
+    <ClInclude Include="FrequencyFunc\waveletTrans.h" />
+    <ClInclude Include="GDALTools.h" />
     <ClInclude Include="GeoPOSProcess.h" />
     <ClInclude Include="Global.h" />
-    <ClInclude Include="Level0Process.h" />
-    <ClInclude Include="Level1Process.h" />
-    <ClInclude Include="Level2Process.h" />
+    <ClInclude Include="HyperSpectral\fusionfunc.h" />
+    <ClInclude Include="HyperSpectral\HyperSpectural.h" />
     <ClInclude Include="matrixOperation.h" />
-    <ClInclude Include="PreProcess.h" />
-    <ClInclude Include="ProductTest.h" />
     <ClInclude Include="rapidxml\rapidxml.hpp" />
     <ClInclude Include="rapidxml\rapidxml_iterators.hpp" />
     <ClInclude Include="rapidxml\rapidxml_print.hpp" />
     <ClInclude Include="rapidxml\rapidxml_utils.hpp" />
+    <ClInclude Include="rsImgProcess\ImageBlock.h" />
+    <ClInclude Include="rsImgProcess\SampleFunc.h" />
+    <ClInclude Include="rsImgProcess\spFliter.h" />
+    <ClInclude Include="RunObject.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="tsmUTM.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AerialProduct\ExtractXML.cpp" />
+    <ClCompile Include="AerialProduct\Level0Process.cpp" />
+    <ClCompile Include="AerialProduct\Level2Process.cpp" />
+    <ClCompile Include="AerialProduct\ProductTest.cpp" />
+    <ClCompile Include="AerialProduct\QPDLevel1Process.cpp" />
+    <ClCompile Include="AerialProduct\QPDPreProcess.cpp" />
+    <ClCompile Include="AerialProduct\THRLevel1Process.cpp" />
     <ClCompile Include="AuxiliaryFunction.cpp" />
     <ClCompile Include="CoordinateTrans.cpp" />
-    <ClCompile Include="ExtractXML.cpp" />
+    <ClCompile Include="FrequencyFunc\waveletTrans.cpp" />
+    <ClCompile Include="GDALTools.cpp" />
     <ClCompile Include="GeoPOSProcess.cpp" />
-    <ClCompile Include="Level0Process.cpp" />
-    <ClCompile Include="Level2Process.cpp" />
+    <ClCompile Include="HyperSpectral\HyperSpectural.cpp" />
+    <ClCompile Include="HyperSpectral\simulatedata.cpp" />
+    <ClCompile Include="HyperSpectral\sparse_represent.cpp" />
+    <ClCompile Include="HyperSpectral\umixing.cpp" />
+    <ClCompile Include="HyperSpectral\wavelet_fusion.cpp" />
     <ClCompile Include="matrixOperation.cpp" />
-    <ClCompile Include="ProductTest.cpp" />
-    <ClCompile Include="QPDLevel1Process.cpp" />
-    <ClCompile Include="QPDPreProcess.cpp" />
+    <ClCompile Include="rsImgProcess\ImageBlock.cpp" />
+    <ClCompile Include="rsImgProcess\SampleFunc.cpp" />
+    <ClCompile Include="rsImgProcess\spFliter.cpp" />
     <ClCompile Include="rsProcess.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -182,7 +202,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="THRLevel1Process.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="tsmUTM.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

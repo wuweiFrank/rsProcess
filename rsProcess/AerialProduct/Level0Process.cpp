@@ -1,10 +1,10 @@
-#include"stdafx.h"
+#include"..\stdafx.h"
 
 #include"Level0Process.h"
-#include"Global.h"
-#include"AuxiliaryFunction.h"
+#include"..\Global.h"
+#include"..\AuxiliaryFunction.h"
 
-#include"gdal\include\gdal_priv.h"
+#include"..\gdal\include\gdal_priv.h"
 #include<Windows.h>
 #pragma comment(lib,"gdal_i.lib")
 

@@ -1,7 +1,6 @@
-#include"stdafx.h"
 #include"PreProcess.h"
-#include"AuxiliaryFunction.h"
-#include"Global.h"
+#include"..\AuxiliaryFunction.h"
+#include"..\Global.h"
 
 long QPDPreProcess::PreProc_GetHeadInfo(FILE *fRAW, DINFO &mDataHeader, vector<short> &nLeakFrameType, vector<int> &nLeakFrameSize, int &nLeakFrameCount)
 {

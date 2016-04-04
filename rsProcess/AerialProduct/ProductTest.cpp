@@ -1,4 +1,3 @@
-#include"stdafx.h"
 #include"ProductTest.h"
 
 //全谱段数据预处理单元测试

@@ -1,7 +1,7 @@
 #pragma once
 
-#include"gdal\include\gdal_priv.h"
-#include"Global.h"
+#include"..\gdal\include\gdal_priv.h"
+#include"..\Global.h"
 
 #pragma comment(lib,"gdal_i.lib")
 

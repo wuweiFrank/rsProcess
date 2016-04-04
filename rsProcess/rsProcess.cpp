@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include"ProductTest.h"
+#include"AerialProduct\ProductTest.h"
 int main()
 {
 	//QPDPreProcessUnitTestFunc();

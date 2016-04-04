@@ -1,6 +1,6 @@
 #pragma once
-#include"Global.h"
-#include"GeoPOSProcess.h"
+#include"..\Global.h"
+#include"..\GeoPOSProcess.h"
 //二级数据产品生产基类,基类为虚机类；
 //所有派生类必须重载数据产品生产函数
 class Level2Process

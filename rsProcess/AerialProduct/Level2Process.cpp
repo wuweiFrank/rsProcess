@@ -1,12 +1,11 @@
-#include"stdafx.h"
 
 #include"Level2Process.h"
-#include"AuxiliaryFunction.h"
-#include"GeoPOSProcess.h"
-#include"CoordinateTrans.h"
+#include"..\AuxiliaryFunction.h"
+#include"..\GeoPOSProcess.h"
+#include"..\CoordinateTrans.h"
 
-#include"gdal\include\gdal_priv.h"
-#include"gdal\include\ogr_spatialref.h"
+#include"..\gdal\include\gdal_priv.h"
+#include"..\gdal\include\ogr_spatialref.h"
 #pragma comment(lib,"gdal_i.lib")
 
 //½âËãIGMÎÄ¼þ
