@@ -105,7 +105,6 @@ private:
 	int xsize,int ysize,					视场拼接后影像尺寸
 	int* xmosaicedge,int *ymosaicedge,int edgePixels	拼接边位置和拼接边像元数目
 	*/
-	long Level1Proc_ViewJointFeather(float* imagedata, int xsize, int ysize, vector<CPOINT>& edge_position);
 	long Level1Proc_ViewJointFeather(unsigned short* imagedata, int xsize, int ysize, vector<CPOINT>& edge_position);
 
 
@@ -118,14 +117,10 @@ private:
 	GDALDatasetH m_datasetLeft,GDALDatasetH m_datasetCenter,GDALDatasetH m_datasetRight,左，中，右影像数据集
 	float* datamosaic,GDALDatasetH m_datasetOut,int xmosaic,int ymosaic	输出数据，输出数据集，x大小，y大小
 	*/
-	long Level1Proc_ViewJointFillData(float* imgViewData, int xsize1, int ysize1, int xsize2, int ysize2, int xsize3, int ysize3, float over_left_center_x, float over_right_center_x, float err_left_center_y, float err_right_center_y,
-		GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetCenter, GDALDatasetH m_datasetRight, float* datamosaic, GDALDatasetH &m_datasetOut, int xmosaic, int ymosaic, vector<CPOINT>& edge_position);
 	long Level1Proc_ViewJointFillData(unsigned short* imgViewData, int xsize1, int ysize1, int xsize2, int ysize2, int xsize3, int ysize3, float over_left_center_x, float over_right_center_x, float err_left_center_y, float err_right_center_y,
-		GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetCenter, GDALDatasetH m_datasetRight, unsigned short* datamosaic, GDALDatasetH &m_datasetOut, int xmosaic, int ymosaic, vector<CPOINT>& edge_position);
-	long Level1Proc_ViewJointFillData(float* imgViewData, int xsize1, int ysize1, int xsize2, int ysize2, float over_x, float err_y, GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetRight,
-		float* datamosaic, GDALDatasetH &m_datasetOut, int xmosaic, int ymosaic, vector<CPOINT>& edge_position);
+		GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetCenter, GDALDatasetH m_datasetRight, unsigned short* datamosaic, FILE* fDst, int xmosaic, int ymosaic, vector<CPOINT>& edge_position);
 	long Level1Proc_ViewJointFillData(unsigned short* imgViewData, int xsize1, int ysize1, int xsize2, int ysize2, float over_x, float err_y, GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetRight,
-		unsigned short* datamosaic, GDALDatasetH &m_datasetOut, int xmosaic, int ymosaic, vector<CPOINT>& edge_position);
+		unsigned short* datamosaic, FILE* fDst, int xmosaic, int ymosaic, vector<CPOINT>& edge_position);
 	/*
 	功能：根据最终影像范围和每景影像结果像数据域中填数据
 	参数：float* imgViewData		某个视场数据
@@ -133,7 +128,6 @@ private:
 	int stposx,int stposy		视场数据起始位置
 	float* jointData			视场拼接后数据
 	*/
-	long Level1Proc_ViewJointFillData(float* imgViewData, int xsize, int ysize, float stposx, float stposy, float* jointData, int xmosaic, int ymosaic);
 	long Level1Proc_ViewJointFillData(unsigned short* imgViewData, int xsize, int ysize, float stposx, float stposy, unsigned short* jointData, int xmosaic, int ymosaic);
 };
 

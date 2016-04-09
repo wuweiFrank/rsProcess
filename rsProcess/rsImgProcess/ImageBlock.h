@@ -1,6 +1,6 @@
 #pragma once
 #pragma comment(lib,"gdal_i.lib")
-#include "..\gdal/include/gdal_priv.h"
+#include "..\gdal\include\gdal_priv.h"
 
 //分块大小为512*512
 //设置分块大小为2的倍数主要目的在于通过移位运算加快分块速度
@@ -46,7 +46,6 @@ int  GetImageYBlockNum(GDALDatasetH dataset);	//获取影像y轴方向分块数目
 	buffer				：缓冲区的大小（不能超过影像块的大小）
 */
 long  GetImageBlock(GDALDatasetH dataset,BlockLabel* blocks,int blockXNum,int blockYNum,int buffer);
-
 
 /*
 	读写分块影像数据

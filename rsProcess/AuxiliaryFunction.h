@@ -19,6 +19,7 @@ void WriteENVIHeader(const char* pathHeader, ENVIHeader mImgHeader);
 */
 void GetAveDev(unsigned char *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate);
 void GetAveDev(unsigned short *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate);
+void GetAveDev(float *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate);
 
 //对数据进行采样
 /*
@@ -26,8 +27,12 @@ void GetAveDev(unsigned short *pBuffer, int nSamples, int nLines, int nBand, flo
 	通过采样方法得到没有数据位置像素值
 */
 //对float类型的数据和unsigned short类型的数据进行处理
+void GetImgSample(unsigned char *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned char *pRegBuffer);
 void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned short *pRegBuffer);
 void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, float *pRegBuffer);
+
+void GetImgSample(float *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLines, int nReImgWidth, int nReLines, float *pRegBuffer);//pPositions为校正前影像为止对应校正后影像的影像位置
+
 
 //获取两幅影像匹配直方图
 //以img2为标准

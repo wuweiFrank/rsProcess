@@ -612,7 +612,7 @@ long QPDGeoPOSProcess::GeoPOSProc_ReadPartPOS(const char *pPOSFile, long nLines,
 		delete[]m_geo_POS;
 	m_geo_POS = NULL;
 	m_geo_POS = new POS[nLines];
-	if ((fopen_s(&fpin,pPOSFile, "r")) == NULL)
+	if ((fopen_s(&fpin,pPOSFile, "r")) !=0 )
 	{
 		lError = -1;  //打开POS文件失败
 		goto ErrEnd;
@@ -653,12 +653,12 @@ long QPDGeoPOSProcess::GeoPOSProc_ReadPartPOS(const char *pPOSFile, long nLines,
 			goto ErrEnd;
 		}
 
-		if (fReadData[6] < -180.0 || fReadData[6] > 180.0)
+		if (fReadData[2]*180/PI < -180.0 || fReadData[2] * 180 / PI > 180.0)
 		{
 			lError = 40316;//经度有问题，不是-180到180度之间
 			goto ErrEnd;
 		}
-		if (fReadData[5] <= -90.0 || fReadData[5] >= 90.0)
+		if (fReadData[1] * 180 / PI <= -90.0 || fReadData[1] * 180 / PI >= 90.0)
 		{
 			lError = 40317;//纬度有问题，不是-90到90度之间
 			goto ErrEnd;
@@ -685,7 +685,7 @@ ErrEnd:
 		fclose(fpin);
 		fpin = NULL;
 	}
-	return lError;
+	return 0;
 }
 
 //获取EO元素的行数

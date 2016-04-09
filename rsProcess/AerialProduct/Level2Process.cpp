@@ -766,7 +766,7 @@ long QPDLevel2Process::Level2Proc_Product2A(const char *pFile, const char *pCFil
 			lError = -1;
 			goto ErrEnd;
 		}
-		//创建BSQ格式文件
+		//创建BSQ格式文件//在这里只处理一个波段作为测试文档
 		char **papszOptions = NULL;
 		papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "BAND");
 		pRegDS = pRegDriver->Create(pCFile, nReSamples, nReLines, 1, GDT_UInt16, papszOptions);
@@ -874,11 +874,11 @@ ErrEnd:
 		delete[]pfRegBuffer;
 		pfRegBuffer = NULL;
 	}
-	if (!pCorDS)
+	if (pCorDS!=NULL)
 	{
 		GDALClose(pCorDS);
 	}
-	if (!pRegDS)
+	if (pRegDS != NULL)
 	{
 		GDALClose(pRegDS);
 	}

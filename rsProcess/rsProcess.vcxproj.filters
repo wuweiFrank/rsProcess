@@ -114,6 +114,12 @@
     <ClInclude Include="GDALTools.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="OPENCVTools.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UAV\UAVGeoCorrection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -189,6 +195,12 @@
       <Filter>rsImgPorcess</Filter>
     </ClCompile>
     <ClCompile Include="GDALTools.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OPENCVTools.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UAV\UAVGeoCorrection.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

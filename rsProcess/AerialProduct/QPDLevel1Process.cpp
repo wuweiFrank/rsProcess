@@ -488,6 +488,10 @@ long QPDLevel1Process::Level1Proc_ViewJointThree(const char* pathview1, const ch
 	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
 	GDALAllRegister();
 	long lError = 0;
+	FILE* fDst = NULL;
+	if (fopen_s(&fDst, pathJointView, "wb") != 0)
+		exit(-1);
+
 	GDALDatasetH m_dataset_view_left, m_dataset_view_center, m_dataset_view_right;
 	m_dataset_view_left = GDALOpen(pathview1, GA_ReadOnly);
 	m_dataset_view_center = GDALOpen(pathview2, GA_ReadOnly);
@@ -519,10 +523,11 @@ long QPDLevel1Process::Level1Proc_ViewJointThree(const char* pathview1, const ch
 
 
 	//创建输出影像
-	GDALDatasetH m_dataset_out;
-	char **papszOptions = NULL;
-	papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "BAND");
-	m_dataset_out = GDALCreate(GDALGetDriverByName("GTiff"), pathJointView, mosaic_x_size, mosaic_y_size, bands, m_datatype, papszOptions);
+	//GDALDatasetH m_dataset_out;
+	//char **papszOptions = NULL;
+	//papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "BAND");
+	//m_dataset_out = GDALCreate(GDALGetDriverByName("GTiff"), pathJointView, mosaic_x_size, mosaic_y_size, bands, m_datatype, papszOptions);
+
 	unsigned short* mosaic_data_us = NULL;
 	try
 	{
@@ -543,9 +548,9 @@ long QPDLevel1Process::Level1Proc_ViewJointThree(const char* pathview1, const ch
 		unsigned short* imgdata = new unsigned short[xsize1*ysize1 + xsize2*ysize2 + xsize3*ysize3];
 		memset(imgdata, 0, sizeof(unsigned short)*(xsize1*ysize1 + xsize2*ysize2 + xsize3*ysize3));
 		lError = Level1Proc_ViewJointFillData(imgdata, xsize1, ysize1, xsize2, ysize2, xsize3, ysize3, over_left_center_x, over_right_center_x, err_left_center_y, err_right_center_y,
-			m_dataset_view_left, m_dataset_view_center, m_dataset_view_right, mosaic_data_us, m_dataset_out, mosaic_x_size, mosaic_y_size, edge_points);
+			m_dataset_view_left, m_dataset_view_center, m_dataset_view_right, mosaic_data_us, fDst, mosaic_x_size, mosaic_y_size, edge_points);
 		if (lError != 0)
-			goto Err_End;
+			exit(-1);
 		delete[]imgdata;
 	}
 	else 
@@ -553,24 +558,40 @@ long QPDLevel1Process::Level1Proc_ViewJointThree(const char* pathview1, const ch
 		//数据类型不对，不是QPD数据，此函数只针对QPD数据处理
 	}
 
+	//写头文件
+	char drive[_MAX_DRIVE]; char dir[_MAX_DIR]; char filename[_MAX_FNAME]; char ext[_MAX_EXT];
+	char path[_MAX_PATH];
+	_splitpath_s(pathJointView, drive, dir, filename, ext);
+	_makepath_s(path, drive, dir, filename, "hdr");
+	ENVIHeader mENVIHeader;
+	memset(&mENVIHeader, 0, sizeof(ENVIHeader));
+	mENVIHeader.datatype = 12;
+	mENVIHeader.imgWidth = mosaic_x_size;
+	mENVIHeader.imgHeight = mosaic_y_size;
+	mENVIHeader.imgBands = bands;
+	mENVIHeader.interleave = "BSQ";
+	WriteENVIHeader(path, mENVIHeader);
+
 Err_End:
-	if (mosaic_data_us)
+	if (fDst != NULL)
+		fclose(fDst);
+	if (mosaic_data_us!=NULL)
 		delete[]mosaic_data_us;
-	if (m_dataset_out)
-		GDALClose(m_dataset_out);
-	if (m_dataset_view_left)
+	if (m_dataset_view_left != NULL)
 		GDALClose(m_dataset_view_left);
-	if (m_dataset_view_center)
+	if (m_dataset_view_center != NULL)
 		GDALClose(m_dataset_view_center);
-	if (m_dataset_view_right)
+	if (m_dataset_view_right != NULL)
 		GDALClose(m_dataset_view_right);
+
+
 
 	//指针为空
 	mosaic_data_us = NULL;
 	m_dataset_view_left = NULL;
 	m_dataset_view_center = NULL;
 	m_dataset_view_right = NULL;
-	m_dataset_out = NULL;
+	fDst = NULL;
 
 	return lError;
 }
@@ -608,10 +629,13 @@ long QPDLevel1Process::Level1Proc_ViewJointTwo(const char* pathview1, const char
 		exit(-1);//数据类型不对
 
 	//创建输出影像
-	GDALDatasetH m_dataset_out;
-	char **papszOptions = NULL;
-	papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "BAND");
-	m_dataset_out = GDALCreate(GDALGetDriverByName("GTiff"), pathJointView, mosaic_x_size, mosaic_y_size, bands, m_datatype, papszOptions);
+	//GDALDatasetH m_dataset_out;
+	//char **papszOptions = NULL;
+	//papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "BAND");
+	//m_dataset_out = GDALCreate(GDALGetDriverByName("GTiff"), pathJointView, mosaic_x_size, mosaic_y_size, bands, m_datatype, papszOptions);
+	FILE* fDst = NULL;
+	if (fopen_s(&fDst, pathJointView, "wb") != 0)
+		exit(-1);
 
 	unsigned short* mosaic_data_us = NULL;
 	try
@@ -629,21 +653,34 @@ long QPDLevel1Process::Level1Proc_ViewJointTwo(const char* pathview1, const char
 	if (m_datatype == GDT_UInt16)
 	{
 		unsigned short* imgdata = new unsigned short[xsize1*ysize1 + xsize2*ysize2];
-		lError = Level1Proc_ViewJointFillData(imgdata, xsize1, ysize1, xsize2, ysize2, over_x, err_y, m_dataset_view_left, m_dataset_view_right, mosaic_data_us, m_dataset_out, mosaic_x_size, mosaic_y_size, edge_points);
+		lError = Level1Proc_ViewJointFillData(imgdata, xsize1, ysize1, xsize2, ysize2, over_x, err_y, m_dataset_view_left, m_dataset_view_right, mosaic_data_us, fDst, mosaic_x_size, mosaic_y_size, edge_points);
 		if (lError != 0)
-			goto Err_End;
+			exit(-1);
 		delete[]imgdata;
 	}
 	else
 	{
 		//数据类型不对
 	}
+	//写头文件
+	char drive[_MAX_DRIVE]; char dir[_MAX_DIR]; char filename[_MAX_FNAME]; char ext[_MAX_EXT];
+	char path[_MAX_PATH];
+	_splitpath_s(pathJointView, drive, dir, filename, ext);
+	_makepath_s(path, drive, dir, filename, "hdr");
+	ENVIHeader mENVIHeader;
+	memset(&mENVIHeader, 0, sizeof(ENVIHeader));
+	mENVIHeader.datatype = 12;
+	mENVIHeader.imgWidth = mosaic_x_size;
+	mENVIHeader.imgHeight = mosaic_y_size;
+	mENVIHeader.imgBands = bands;
+	mENVIHeader.interleave = "BSQ";
+	WriteENVIHeader(path, mENVIHeader);
 
 Err_End:
 	if (mosaic_data_us)
 		delete[]mosaic_data_us;
-	if (m_dataset_out)
-		GDALClose(m_dataset_out);
+	if (fDst != NULL)
+		fclose(fDst);
 	if (m_dataset_view_left)
 		GDALClose(m_dataset_view_left);
 	if (m_dataset_view_right)
@@ -653,7 +690,7 @@ Err_End:
 	mosaic_data_us = NULL;
 	m_dataset_view_left = NULL;
 	m_dataset_view_right = NULL;
-	m_dataset_out = NULL;
+	fDst = NULL;
 
 	return lError;
 }
@@ -815,39 +852,6 @@ long QPDLevel1Process::Level1Proc_ViewJointEdge(int xsize1, int ysize1, int xsiz
 	return 0;
 }
 //视场边界的羽化处理
-long QPDLevel1Process::Level1Proc_ViewJointFeather(float* imagedata, int xsize, int ysize, vector<CPOINT>& edge_position)
-{
-	int edge_pixel = edge_position.size();
-	float *feather_data = new float[edge_pixel];
-
-	//对边缘进行均值滤波
-	int featherSize = 7;
-	for (int i = 0; i<edge_pixel; ++i)
-	{
-		int total = 0;
-		float temp_data = 0;
-		int x_start = max((-int(featherSize / 2) + edge_position[i].x), 0);
-		int x_end = min((int(featherSize / 2) + edge_position[i].x), xsize);
-
-		int y_start = max((-int(featherSize / 2) + edge_position[i].y), 0);
-		int y_end = min((int(featherSize / 2) + edge_position[i].y), ysize);
-		for (int j = x_start; j<x_end; ++j)
-		{
-			for (int k = y_start; k<y_end; ++k)
-			{
-				++total;
-				temp_data += imagedata[k*xsize + j];
-			}
-		}
-		feather_data[i] = (temp_data) / total;
-	}
-
-	for (int i = 0; i<edge_pixel; ++i)
-		imagedata[edge_position[i].y*xsize + edge_position[i].x] = feather_data[i];
-	delete[]feather_data;
-
-	return 0;
-}
 long QPDLevel1Process::Level1Proc_ViewJointFeather(unsigned short* imagedata, int xsize, int ysize, vector<CPOINT>& edge_position)
 {
 	int edge_pixel = edge_position.size();
@@ -882,150 +886,9 @@ long QPDLevel1Process::Level1Proc_ViewJointFeather(unsigned short* imagedata, in
 	return 0;
 }
 //向拼接视场中填写数据
-long QPDLevel1Process::Level1Proc_ViewJointFillData(float* imgViewData, int xsize1, int ysize1, int xsize2, int ysize2, int xsize3, int ysize3, float over_left_center_x, float over_right_center_x,
-	float err_left_center_y, float err_right_center_y, GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetCenter, GDALDatasetH m_datasetRight,
-	float* datamosaic, GDALDatasetH &m_datasetOut, int xmosaic, int ymosaic, vector<CPOINT>& edge_position)
-{
-	//做判断 填数据
-	/*
-	______  ______                           ______                      _______
-	|   _|__|_   |          _______          |   _|___              _____|_    |
-	|   ||  ||   |       ___|_   _|_____     |   ||  _|_____    ____|_   ||    |
-	|   ||  ||   |       |  ||   ||    |     |   ||  ||    |    |   ||   ||    |
-	|___||  |____|       |  ||   ||    |     |___||  ||    |    |   ||   |_____|
-	|____|       |       |___|   |     |     |___||  ||    |    |____|
-	|___|   |____|               |_____|         |____|
-	*/
-	if (datamosaic == NULL)
-		return -1;
-	memset(datamosaic, 0, sizeof(unsigned short)*xmosaic*ymosaic);
-	int bands = GDALGetRasterCount(m_datasetLeft);
-	long lError = 0;
-
-
-	if (err_left_center_y>0 && err_right_center_y>0)
-	{
-		//左视场高
-		if (err_left_center_y>err_right_center_y)
-		{
-			for (int i = 0; i<bands; ++i)
-			{
-				GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_Float32, 0, 0);
-				GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_Float32, 0, 0);
-				GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_Float32, 0, 0);
-
-
-				lError = Level1Proc_ViewJointFillData(imgViewData, xsize1, ysize1, 0, 0, datamosaic, xmosaic, ymosaic);
-				lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1, xsize2, ysize2, xsize1 - over_left_center_x, err_left_center_y, datamosaic, xmosaic, ymosaic);
-				lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, xsize1 + xsize2 - over_left_center_x - over_right_center_x, err_left_center_y - err_right_center_y, datamosaic, xmosaic, ymosaic);
-
-				if (lError != 0)
-					return lError;
-				Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-				GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_Float32, 0, 0);
-			}
-		}
-		//右视场高
-		if (err_left_center_y<err_right_center_y)
-		{
-			for (int i = 0; i<bands; ++i)
-			{
-				GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_Float32, 0, 0);
-				GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_Float32, 0, 0);
-				GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_Float32, 0, 0);
-
-				lError = Level1Proc_ViewJointFillData(imgViewData, xsize1, ysize1, 0, err_right_center_y - err_left_center_y, datamosaic, xmosaic, ymosaic);
-				lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1, xsize2, ysize2, xsize1 - over_left_center_x, err_right_center_y, datamosaic, xmosaic, ymosaic);
-				lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize2, ysize2, xsize1 + xsize2 - over_left_center_x - over_right_center_x, 0, datamosaic, xmosaic, ymosaic);
-				if (lError != 0)
-					return lError;
-				Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-				GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_Float32, 0, 0);
-			}
-		}
-	}
-	if (err_left_center_y<0 && err_right_center_y<0)
-	{
-		//左右视场都低
-		for (int i = 0; i<bands; ++i)
-		{
-			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_Float32, 0, 0);
-
-			lError = Level1Proc_ViewJointFillData(imgViewData, xsize1, ysize1, 0, abs(err_right_center_y), datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1, xsize2, ysize2, 0, xsize1 - over_left_center_x, datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, xsize1 + xsize2 - over_left_center_x - over_right_center_x, abs(err_right_center_y), datamosaic, xmosaic, ymosaic);
-
-			if (lError != 0)
-				return lError;
-
-			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_Float32, 0, 0);
-		}
-	}
-	if (err_left_center_y>0 && err_right_center_y<0)
-	{
-		//左视场高右视场低
-		for (int i = 0; i<bands; ++i)
-		{
-			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_Float32, 0, 0);
-
-			lError = Level1Proc_ViewJointFillData(imgViewData, xsize1, ysize1, 0, 0, datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1, xsize2, ysize2, xsize1 - over_left_center_x, err_left_center_y, datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1 + xsize2 + ysize2, xsize3, ysize3, xsize1 + xsize2 - over_left_center_x - over_right_center_x, err_left_center_y + abs(err_right_center_y), datamosaic, xmosaic, ymosaic);
-
-			if (lError != 0)
-				return lError;
-			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_Float32, 0, 0);
-		}
-	}
-	if (err_left_center_y<0 && err_right_center_y>0)
-	{
-		//左视场低右视场高
-		for (int i = 0; i<bands; ++i)
-		{
-			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_Float32, 0, 0);
-
-			lError = Level1Proc_ViewJointFillData(imgViewData, xsize1, ysize1, 0, abs(err_left_center_y) + abs(err_right_center_y), datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1, xsize2, ysize2, xsize1 - over_left_center_x, err_right_center_y, datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, xsize1 + xsize2 - over_left_center_x - over_right_center_x, 0, datamosaic, xmosaic, ymosaic);
-
-			if (lError != 0)
-				return lError;
-			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_Float32, 0, 0);
-		}
-	}
-	if (err_left_center_y == 0 && err_right_center_y == 0)
-	{
-		for (int i = 0; i<bands; ++i)
-		{
-			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_Float32, 0, 0);
-
-			lError = Level1Proc_ViewJointFillData(imgViewData, xsize1, ysize1, 0, 0, datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1, xsize2, ysize2, xsize1 - over_left_center_x, 0, datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1*xsize2*ysize2, xsize3, ysize3, xsize1*xsize2 - over_left_center_x - over_right_center_x, 0, datamosaic, xmosaic, ymosaic);
-			if (lError != 0)
-				return lError;
-			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
-		}
-	}
-	GDALClose(m_datasetOut);
-	m_datasetOut = NULL;
-	return 0;
-}
 long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData, int xsize1, int ysize1, int xsize2, int ysize2, int xsize3, int ysize3, float over_left_center_x, float over_right_center_x,
 	float err_left_center_y, float err_right_center_y, GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetCenter, GDALDatasetH m_datasetRight,
-	unsigned short* datamosaic, GDALDatasetH &m_datasetOut, int xmosaic, int ymosaic, vector<CPOINT>& edge_position)
+	unsigned short* datamosaic, FILE* fDst, int xmosaic, int ymosaic, vector<CPOINT>& edge_position)
 {
 	//做判断 填数据
 	/*
@@ -1049,6 +912,7 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 		{
 			for (int i = 0; i<bands; ++i)
 			{
+				printf("joint band: %d\n", i + 1);
 				GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_UInt16, 0, 0);
 				GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_UInt16, 0, 0);
 				GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_UInt16, 0, 0);
@@ -1061,7 +925,9 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 				if (lError != 0)
 					return lError;
 				Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-				GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
+				fwrite(datamosaic, 2, xmosaic*ymosaic, fDst);
+				fflush(fDst);
+				//GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
 
 			}
 		}
@@ -1070,6 +936,7 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 		{
 			for (int i = 0; i<bands; ++i)
 			{
+				printf("joint band: %d\n", i + 1);
 				GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_UInt16, 0, 0);
 				GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_UInt16, 0, 0);
 				GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_UInt16, 0, 0);
@@ -1081,7 +948,9 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 				if (lError != 0)
 					return lError;
 				Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-				GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
+				fwrite(datamosaic, 2, xmosaic*ymosaic, fDst);
+				fflush(fDst);
+				//GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
 			}
 		}
 	}
@@ -1090,6 +959,7 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 		//左右视场都低
 		for (int i = 0; i<bands; ++i)
 		{
+			printf("joint band: %d\n", i + 1);
 			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_UInt16, 0, 0);
 			GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_UInt16, 0, 0);
 			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_UInt16, 0, 0);
@@ -1103,7 +973,9 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 				return lError;
 
 			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
+			fwrite(datamosaic, 2, xmosaic*ymosaic, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
 		}
 	}
 	if (err_left_center_y>0 && err_right_center_y<0)
@@ -1111,6 +983,7 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 		//左视场高右视场低
 		for (int i = 0; i<bands; ++i)
 		{
+			printf("joint band: %d\n", i + 1);
 			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_UInt16, 0, 0);
 			GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_UInt16, 0, 0);
 			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_UInt16, 0, 0);
@@ -1123,7 +996,9 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 			if (lError != 0)
 				return lError;
 			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
+			fwrite(datamosaic, 2, xmosaic*ymosaic, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
 		}
 	}
 	if (err_left_center_y<0 && err_right_center_y>0)
@@ -1131,6 +1006,7 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 		//左视场低右视场高
 		for (int i = 0; i<bands; ++i)
 		{
+			printf("joint band: %d\n", i + 1);
 			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_UInt16, 0, 0);
 			GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_UInt16, 0, 0);
 			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_UInt16, 0, 0);
@@ -1143,13 +1019,16 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 			if (lError != 0)
 				return lError;
 			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
+			fwrite(datamosaic, 2, xmosaic*ymosaic, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
 		}
 	}
 	if (err_left_center_y == 0 && err_right_center_y == 0)
 	{
 		for (int i = 0; i<bands; ++i)
 		{
+			printf("joint band: %d\n", i + 1);
 			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_UInt16, 0, 0);
 			GDALRasterIO(GDALGetRasterBand(m_datasetCenter, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_UInt16, 0, 0);
 			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize3, ysize3, imgViewData + xsize1*ysize1 + xsize2*ysize2, xsize3, ysize3, GDT_UInt16, 0, 0);
@@ -1161,61 +1040,17 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 			if (lError != 0)
 				return lError;
 			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
+			fwrite(datamosaic, 2, xmosaic*ymosaic, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
 		}
 	}
-	GDALClose(m_datasetOut);
-	m_datasetOut = NULL;
+	//GDALClose(m_datasetOut);
+	//m_datasetOut = NULL;
 	return 0;
-}
-long QPDLevel1Process::Level1Proc_ViewJointFillData(float* imgViewData, int xsize1, int ysize1, int xsize2, int ysize2, float over_x, float err_y, GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetRight,
-	float* datamosaic, GDALDatasetH &m_datasetOut, int xmosaic, int ymosaic, vector<CPOINT>& edge_position)
-{
-	if (datamosaic == NULL)
-		return -1;
-	int bands = GDALGetRasterCount(m_datasetLeft);
-	long lError = 0;
-	//左视场高
-	if (err_y>0)
-	{
-		for (int i = 0; i<bands; ++i)
-		{
-			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_Float32, 0, 0);
-			//Level1Proc_ColorMatch(imgViewData,imgViewData+xsize1*ysize1,xsize1,ysize1,xsize2,ysize2,over_x,err_y);
-
-			lError = Level1Proc_ViewJointFillData(imgViewData, xsize1, ysize1, 0, 0, datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1, xsize2, ysize2, xsize1 - over_x, err_y, datamosaic, xmosaic, ymosaic);
-
-			if (lError != 0)
-				return lError;
-			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_Float32, 0, 0);
-
-		}
-	}
-	else
-	{
-		for (int i = 0; i<bands; ++i)
-		{
-			GDALRasterIO(GDALGetRasterBand(m_datasetLeft, i + 1), GF_Read, 0, 0, xsize1, ysize1, imgViewData, xsize1, ysize1, GDT_Float32, 0, 0);
-			GDALRasterIO(GDALGetRasterBand(m_datasetRight, i + 1), GF_Read, 0, 0, xsize2, ysize2, imgViewData + xsize1*ysize1, xsize2, ysize2, GDT_Float32, 0, 0);
-			//Level1Proc_ColorMatch(imgViewData,imgViewData+xsize1*ysize1,xsize1,ysize1,xsize2,ysize2,over_x,err_y);
-
-			lError = Level1Proc_ViewJointFillData(imgViewData, xsize1, ysize1, 0, abs(err_y), datamosaic, xmosaic, ymosaic);
-			lError = Level1Proc_ViewJointFillData(imgViewData + xsize1*ysize1, xsize2, ysize2, xsize1 - over_x, 0, datamosaic, xmosaic, ymosaic);
-
-			if (lError != 0)
-				return lError;
-			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_Float32, 0, 0);
-
-		}
-	}
-	return lError;
 }
 long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData, int xsize1, int ysize1, int xsize2, int ysize2, float over_x, float err_y, GDALDatasetH m_datasetLeft, GDALDatasetH m_datasetRight,
-	unsigned short* datamosaic, GDALDatasetH &m_datasetOut, int xmosaic, int ymosaic, vector<CPOINT>& edge_position)
+	unsigned short* datamosaic, FILE* fDst, int xmosaic, int ymosaic, vector<CPOINT>& edge_position)
 {
 	if (datamosaic == NULL)
 		return -1;
@@ -1236,7 +1071,9 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 			if (lError != 0)
 				return lError;
 			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
+			fwrite(datamosaic, 2, xmosaic*ymosaic, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
 
 		}
 	}
@@ -1254,37 +1091,13 @@ long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData,
 			if (lError != 0)
 				return lError;
 			Level1Proc_ViewJointFeather(datamosaic, xmosaic, ymosaic, edge_position);
-			GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
+			fwrite(datamosaic, 2, xmosaic*ymosaic, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_datasetOut, i + 1), GF_Write, 0, 0, xmosaic, ymosaic, datamosaic, xmosaic, ymosaic, GDT_UInt16, 0, 0);
 
 		}
 	}
 	return lError;
-}
-long QPDLevel1Process::Level1Proc_ViewJointFillData(float* imgViewData, int xsize, int ysize, float stposx, float stposy, float* jointData, int xmosaic, int ymosaic)
-{
-	//第一个像素对准，第二个像素以后插值
-	int int_start_posx = int(stposx);
-	int int_start_posy = int(stposy);
-	float err_y = stposy - (float)int_start_posy;
-
-	if (err_y<float(1) / float(20))
-	{
-		for (int i = 0; i<xsize; ++i)
-			for (int j = 0; j<ysize; ++j)
-				jointData[(j + int_start_posy)*xmosaic + i + int_start_posx] = imgViewData[j*xsize + i];
-	}
-	else
-	{
-		//取整的第一行
-		for (int i = 0; i<xsize; ++i)
-			jointData[(int_start_posy)*xmosaic + i + int_start_posx] = imgViewData[i];
-		for (int i = 0; i<xsize; ++i)
-		{
-			for (int j = 1; j<ysize; ++j)
-				jointData[(int_start_posy + j)*xmosaic + i + int_start_posx] = float((1.0f - err_y)*float(imgViewData[(j - 1)*xsize + i]) + err_y*float(imgViewData[j*xsize + i]));
-		}
-	}
-	return 0;
 }
 long QPDLevel1Process::Level1Proc_ViewJointFillData(unsigned short* imgViewData, int xsize, int ysize, float stposx, float stposy, unsigned short* jointData, int xmosaic, int ymosaic)
 {

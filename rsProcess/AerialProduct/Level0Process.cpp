@@ -132,7 +132,6 @@ long Level0Process::Level0Proc_RawToBSQ(const char* pathRawBIL, const char* path
 	return 0;
 }
 
-
 //获取非均匀性校正参数
 void Level0Process::GetNonuniformParameters(const char* pathCalibFile, const char* pathDarkFile, float* params)
 {
@@ -196,7 +195,7 @@ long Level0Process::Level0Proc_Nonuniform(const char* pathBSQ, const char* pathN
 	unsigned short* imgSrc = new unsigned short[xsize*ysize];
 	float* imgDst = new float[xsize*ysize];
 
-	GDALDatasetH m_datasetDark = GDALOpen(pathDarkFile, GA_ReadOnly);
+	GDALDatasetH m_datasetDark = GDALOpen(pathNonuniform, GA_ReadOnly);
 	int darkxsize = GDALGetRasterXSize(m_datasetDark);
 	int darkysize = GDALGetRasterYSize(m_datasetDark);
 	int bandsdark = GDALGetRasterCount(m_datasetDark);
@@ -205,9 +204,9 @@ long Level0Process::Level0Proc_Nonuniform(const char* pathBSQ, const char* pathN
 	printf("\r获取校正参数");
 	float *param = new float[xsize*bands];
 	memset(param, 0, sizeof(float)*xsize*bands);
-	if (pathCalibFile != NULL)
+	if (pathCalibFile != NULL && pathDarkFile != NULL)
 		GetNonuniformParameters(pathCalibFile, pathDarkFile, param);
-	else
+	else if(pathDarkFile!= NULL)
 	{
 		//暗电流比影像DN值还大  表示搞不清楚对于全谱段数据暗电流似乎有问题
 		unsigned short* dataDark=new unsigned short[darkxsize*darkysize];
@@ -262,7 +261,6 @@ long Level0Process::Level0Proc_Nonuniform(const char* pathBSQ, const char* pathN
 	return 0;
 }
 
-
 //除去两侧辅助数据和无意义波段，得到纯影像数据信息并转换为TIF格式
 long Level0Process::Level0Proc_GetUsefulData(const char* pathBSQ, const char* pathUseful, int leftunuse, int rightunuse, vector<int> usefulBands)
 {
@@ -291,25 +289,36 @@ long Level0Process::Level0Proc_GetUsefulData(const char* pathBSQ, const char* pa
 	}
 	int totalBands = 0;
 	for (size_t i = 0; i < usefulBands.size(); ++i)
-		if (usefulBands[i]>0 && usefulBands[i] <= bands)
+	{
+		if (usefulBands[i] > 0 && usefulBands[i] <= bands)
+		{
 			totalBands++;
+		}
+	}
 	//输入参数异常
 	if (totalBands == 0)
 		exit(-1);
 
-	char** 	papszOptions = NULL;
-	papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "bsq");//BSQ格式存储
-	GDALDatasetH m_datasetdst = GDALCreate(GDALGetDriverByName("GTiff"), pathUseful, xsize - leftunuse - rightunuse, ysize, totalBands,GDT_UInt16, papszOptions);
+	//char** 	papszOptions = NULL;
+	//papszOptions = CSLSetNameValue(papszOptions, "INTERLEAVE", "BAND");//BSQ格式存储
+	//GDALDatasetH m_datasetdst = GDALCreate(GDALGetDriverByName("GTiff"), pathUseful, xsize - leftunuse - rightunuse, ysize, totalBands,GDT_UInt16, papszOptions);
+	FILE* fDst = NULL;
+	if (fopen_s(&fDst, pathUseful, "wb") != 0)
+		exit(-1);
+
 	totalBands = 0;
 	for (size_t i = 0; i < usefulBands.size(); i++)
 	{
+		printf("process band %d\n", i + 1);
 		if (usefulBands[i] > 0 && usefulBands[i] <= bands)
 		{
 			totalBands++;
 			GDALRasterIO(GDALGetRasterBand(m_dataset, usefulBands[i]), GF_Read, 0, 0, xsize, ysize, imgBuffer, xsize, ysize, GDT_UInt16, 0, 0);
 			for (size_t j = 0; j < ysize; j++)
 				memcpy(imgBufferDst + j*(xsize - leftunuse - rightunuse), imgBuffer + j*xsize + leftunuse, sizeof(unsigned short)*(xsize - leftunuse - rightunuse));
-			GDALRasterIO(GDALGetRasterBand(m_dataset,totalBands), GF_Read, 0, 0, xsize - leftunuse - rightunuse, ysize, imgBuffer, xsize - leftunuse - rightunuse, ysize, GDT_UInt16, 0, 0);
+			fwrite(imgBufferDst, 2, (xsize - leftunuse - rightunuse)*ysize, fDst);
+			fflush(fDst);
+			//GDALRasterIO(GDALGetRasterBand(m_dataset,totalBands), GF_Read, 0, 0, xsize - leftunuse - rightunuse, ysize, imgBuffer, xsize - leftunuse - rightunuse, ysize, GDT_UInt16, 0, 0);
 		}
 	}
 	
@@ -321,10 +330,26 @@ long Level0Process::Level0Proc_GetUsefulData(const char* pathBSQ, const char* pa
 	imgBuffer = NULL;
 	imgBufferDst = NULL;
 	GDALClose(m_dataset);
-	GDALClose(m_datasetdst);
+	fclose(fDst);
+
+	//写头文件
+	//写头文件
+	char drive[_MAX_DRIVE]; char dir[_MAX_DIR]; char filename[_MAX_FNAME]; char ext[_MAX_EXT];
+	char path[_MAX_PATH];
+	_splitpath_s(pathUseful, drive, dir, filename, ext);
+	_makepath_s(path, drive, dir, filename, "hdr");
+	ENVIHeader mENVIHeader;
+	memset(&mENVIHeader, 0, sizeof(ENVIHeader));
+	mENVIHeader.datatype = 12;
+	mENVIHeader.imgWidth = (xsize - leftunuse - rightunuse);
+	mENVIHeader.imgHeight = ysize;
+	mENVIHeader.imgBands = totalBands;
+	mENVIHeader.interleave = "BSQ";
+	WriteENVIHeader(path, mENVIHeader);
+
+	//GDALClose(m_datasetdst);
 	return 0;
 }
-
 
 //从原始数据中解算得到EVENT数据文件，这个函数是以全谱段数据为例，对于不同传感器有不同的数据格式需要重载此函数
 long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* pathEvent,const int nEventOffset)
@@ -395,7 +420,7 @@ long Level0Process::Level0Proc_ExtractEvent(const char* pathRawBIL, const char* 
 			nMicrosecond = ntempMicrosecond;
 		}
 		nOffset += nFrameSize;
-		fprintf_s(fEvent, "%d	%lf\n", i + 1, lGPStime + (double)ntempMicrosecond / 10000.0);
+		fprintf_s(fEvent, "%d %lf\n", i + 1, lGPStime + (double)ntempMicrosecond / 10000.0);
 	}
 
 ErrEnd:
@@ -419,25 +444,25 @@ long QPDLevel0Process::Level0Proc_ModifySWIREvent(const char* pathEvent, const c
 	errno_t err = 0;
 
 	//打开SBET文件、EVENT文件、POS文件
-	err = fopen_s(&fEvent1, pathEvent, "r");		//二进制
+	err = fopen_s(&fEvent1, pathEvent, "r+");		
 	if (err)
 	{
 		IError = 1;
 	}
-	err = fopen_s(&fEvent2, pathExEvent, "w");		//二进制
+	err = fopen_s(&fEvent2, pathExEvent, "w+");		//二进制
 	if (err)
 	{
 		IError = 1;
 	}
 	int ss = 0;
-	double t = 0, t1 = 0, t2 = 0, t3 = 0;
+	double t = 0, t1 = 0, t2 = 0, t3 = 0, t4 = fTime;
 	t2 = fTime;
 	int i = 1;
 
 	//NND 这个函数看了半天才看懂，+1秒
 	do
 	{
-		fscanf_s(fEvent1, "%d	%lf", &ss, &t);
+		fscanf_s(fEvent1, "%d %lf", &ss, &t);
 		t1 = t - int(t);
 		if (t1<t3)
 		{
@@ -448,7 +473,7 @@ long QPDLevel0Process::Level0Proc_ModifySWIREvent(const char* pathEvent, const c
 
 		}
 		t3 = t1;
-		fprintf(fEvent2, "%d	%lf\n", i, t2 + t1);
+		fprintf(fEvent2, "%d %lf\n", i, t2 + t1);
 		i++;
 	} while (!feof(fEvent1));
 	fclose(fEvent1);
@@ -456,5 +481,175 @@ long QPDLevel0Process::Level0Proc_ModifySWIREvent(const char* pathEvent, const c
 	return 0;
 }
 
+//对数据进行非均匀性校正
+long QPDLevel0Process::Level0Proc_RawToBSQ(const char* pathRawBIL, const char* pathBSQ, bool inverse)
+{
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
+	GDALAllRegister();
+	GDALDatasetH m_dataset = GDALOpen(pathRawBIL, GA_ReadOnly);
+	int srcxsize = GDALGetRasterXSize(m_dataset);
+	int srcysize = GDALGetRasterYSize(m_dataset);
+	int srcbands = GDALGetRasterCount(m_dataset);
+	GDALClose(m_dataset);
+
+	int dstxsize = srcxsize;
+	int dstysize = srcysize;
+	int dstbands = srcbands;
+
+	//开始  
+	//获得文件句柄  
+	HANDLE hFile = CreateFile(
+		pathRawBIL,   //文件名  
+		GENERIC_READ | GENERIC_WRITE, //对文件进行读写操作  
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		OPEN_EXISTING,  //打开已存在文件  
+		FILE_ATTRIBUTE_NORMAL,
+		0);
+	SYSTEM_INFO SysInfo;
+	GetSystemInfo(&SysInfo);
+	DWORD dwGran = SysInfo.dwAllocationGranularity;
+	//返回值size_high,size_low分别表示文件大小的高32位/低32位  
+	DWORD size_high;
+	__int64 qwFileSize = GetFileSize(hFile, &size_high);
+	qwFileSize |= (((__int64)size_high) << 32);
+	HANDLE hFileMap = CreateFileMapping(hFile, NULL, PAGE_READWRITE, 0, 0, NULL);
+	CloseHandle(hFile);
+
+
+	//65536*1000/513/648/2=98 //也就是说读了197行 那么偏转为
+	DWORD FrameSize = srcbands*srcxsize * 2;
+	DWORD RealGetLines = 50;				//一次读取50帧的设计
+	DWORD TotalLines = 0;				//总读取的帧数
+	DWORD BlockSize = 10000 * dwGran;
+
+	DWORD RealBlockSize = FrameSize*RealGetLines;
+	DWORD LeftBytesPre = 0;
+	DWORD LeftBytes = 0;						//剩余的字节数
+
+												//unsigned char *imgData	=new unsigned char[RealBlockSize];
+	unsigned char *leftFirst = new unsigned char[FrameSize];
+	unsigned char *leftFrame = new unsigned char[FrameSize];
+	unsigned char *imgDst = new unsigned char[srcysize*srcxsize * 2];
+	unsigned char *imgDstCut = new unsigned char[dstysize*dstxsize * 2];
+	errno_t err;
+	FILE* fBSQ = NULL;
+	err = fopen_s(&fBSQ, pathBSQ, "wb");
+	if (err != 0)
+		exit(-1);	//错误代码和日志
+	if (!inverse)
+	{
+		for (int i = 0; i<srcbands; ++i)
+		{
+			printf("\rprocess band :%d", i + 1);
+			DWORD blockSize = BlockSize;
+			__int64 tmpFileSize = qwFileSize;
+			__int64 qwOffset = 0;
+			TotalLines = 0;
+			while (tmpFileSize>0)
+			{
+				if (tmpFileSize<blockSize)
+					blockSize = (DWORD)tmpFileSize;
+				LPBYTE lpbMapAddress = (LPBYTE)MapViewOfFile(hFileMap, FILE_MAP_ALL_ACCESS, (DWORD)(qwOffset >> 32), (DWORD)(qwOffset & 0xFFFFFFFF), blockSize);
+				//实际读取的行数
+				RealGetLines = (LeftBytesPre + blockSize) / FrameSize;
+				LeftBytes = (LeftBytesPre + blockSize) - RealGetLines*FrameSize;
+
+				//第一帧影像
+				//上一帧的后一段数据加上本帧的前一段数据
+				for (int j = 0; j<(int)LeftBytesPre; ++j)
+					leftFirst[j] = leftFrame[j];
+				for (int j = LeftBytesPre; j<(int)FrameSize; ++j)
+					leftFirst[j] = *(lpbMapAddress + j - LeftBytesPre);
+				//剩下的影像数据
+				for (int j = 0; j<(int)LeftBytes; ++j)
+					leftFrame[j] = *(lpbMapAddress + RealGetLines*FrameSize - LeftBytesPre + j);
+
+				//复制数据给目标影像
+				memcpy(imgDst + TotalLines*srcxsize * 2, leftFirst + i*srcxsize * 2, srcxsize * 2);
+				for (int j = 1; j<(int)RealGetLines; ++j)
+					memcpy(imgDst + (j + TotalLines)*srcxsize * 2, lpbMapAddress + FrameSize - LeftBytesPre + i*srcxsize * 2 + (j - 1)*FrameSize, srcxsize * 2);
+
+				UnmapViewOfFile(lpbMapAddress);
+				tmpFileSize -= blockSize;
+				qwOffset += blockSize;
+				TotalLines += RealGetLines;
+				LeftBytesPre = LeftBytes;
+			}
+			for (int j = 0; j<srcysize; ++j)
+				memcpy(imgDstCut + j*dstxsize * 2, imgDst + j*srcxsize * 2, dstxsize * 2);
+			fwrite(imgDstCut, 2, dstxsize*dstysize, fBSQ);
+		}
+	}
+	else
+	{
+		for (int i = srcbands-1; i>=0; --i)
+		{
+			printf("\rprocess band :%d", i + 1);
+			DWORD blockSize = BlockSize;
+			__int64 tmpFileSize = qwFileSize;
+			__int64 qwOffset = 0;
+			TotalLines = 0;
+			while (tmpFileSize>0)
+			{
+				if (tmpFileSize<blockSize)
+					blockSize = (DWORD)tmpFileSize;
+				LPBYTE lpbMapAddress = (LPBYTE)MapViewOfFile(hFileMap, FILE_MAP_ALL_ACCESS, (DWORD)(qwOffset >> 32), (DWORD)(qwOffset & 0xFFFFFFFF), blockSize);
+				//实际读取的行数
+				RealGetLines = (LeftBytesPre + blockSize) / FrameSize;
+				LeftBytes = (LeftBytesPre + blockSize) - RealGetLines*FrameSize;
+
+				//第一帧影像
+				//上一帧的后一段数据加上本帧的前一段数据
+				for (int j = 0; j<(int)LeftBytesPre; ++j)
+					leftFirst[j] = leftFrame[j];
+				for (int j = LeftBytesPre; j<(int)FrameSize; ++j)
+					leftFirst[j] = *(lpbMapAddress + j - LeftBytesPre);
+				//剩下的影像数据
+				for (int j = 0; j<(int)LeftBytes; ++j)
+					leftFrame[j] = *(lpbMapAddress + RealGetLines*FrameSize - LeftBytesPre + j);
+
+				//复制数据给目标影像
+				memcpy(imgDst + TotalLines*srcxsize * 2, leftFirst + i*srcxsize * 2, srcxsize * 2);
+				for (int j = 1; j<(int)RealGetLines; ++j)
+					memcpy(imgDst + (j + TotalLines)*srcxsize * 2, lpbMapAddress + FrameSize - LeftBytesPre + i*srcxsize * 2 + (j - 1)*FrameSize, srcxsize * 2);
+
+				UnmapViewOfFile(lpbMapAddress);
+				tmpFileSize -= blockSize;
+				qwOffset += blockSize;
+				TotalLines += RealGetLines;
+				LeftBytesPre = LeftBytes;
+			}
+			for (int j = 0; j<srcysize; ++j)
+				memcpy(imgDstCut + j*dstxsize * 2, imgDst + j*srcxsize * 2, dstxsize * 2);
+			fwrite(imgDstCut, 2, dstxsize*dstysize, fBSQ);
+		}
+	}
+
+	CloseHandle(hFileMap);
+	fclose(fBSQ);
+
+	//写头文件
+	char drive[_MAX_DRIVE]; char dir[_MAX_DIR]; char filename[_MAX_FNAME]; char ext[_MAX_EXT];
+	char path[_MAX_PATH];
+	_splitpath_s(pathBSQ, drive, dir, filename, ext);
+	_makepath_s(path, drive, dir, filename, "hdr");
+	ENVIHeader mENVIHeader;
+	memset(&mENVIHeader, 0, sizeof(ENVIHeader));
+	mENVIHeader.datatype = 12;
+	mENVIHeader.imgWidth = dstxsize;
+	mENVIHeader.imgHeight = dstysize;
+	mENVIHeader.imgBands = dstbands;
+	mENVIHeader.interleave = "BSQ";
+	WriteENVIHeader(path, mENVIHeader);
+
+	delete[]imgDstCut;
+	delete[]imgDst;
+	delete[]leftFirst;
+	delete[]leftFrame;
+
+	printf("\n");
+	return 0;
+}
 
 

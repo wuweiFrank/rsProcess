@@ -73,13 +73,6 @@ public:
 	long cubic_sample(char* pathIn,int xsampleszie,int ysamplesize,char* pathOut);
 	long gauss_down_sample(char* pathIn,int xsampleszie,int ysamplesize,char* pathOut);
 	
-
-	//根据影像路径和重采样位置进行重采样
-	/**/
-	long nearest_sample(char* pathIn,int xsamplesize,int ysamplesize,float* xsample,float* ysample,char* pathOut);
-	long biliner_sample(char* pathIn,int xsamplesize,int ysamplesize,float* xsample,float* ysample,char* pathOut);
-	long cubic_sample(char* pathIn,int xsamplesize,int ysamplesize,float* xsample,float* ysample,char* pathOut);
-
 	//对影像数据进行重采样
 	/*
 		参数：int in_xsize			输入影像x的大小

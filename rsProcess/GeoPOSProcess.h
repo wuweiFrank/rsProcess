@@ -76,7 +76,7 @@ public:
 	*/
 	virtual long GeoPOSProc_ReadEOFile(const char* pathEO, double &dB, double &dL, double &dH);
 
-private:
+//private:
 	//根据POS数据计算航带所在象限
 	//EMMatrix 为地心坐标系到成图坐标系的转换
 	long GeoPOSProc_EOQuadrant(int nLines, double EMMatrix[], THREEDPOINT &XYZPoint);

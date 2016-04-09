@@ -4030,544 +4030,399 @@ long GeoGCPProcess::GeoProc_GCPWarpGeoLoc(const char * pszSrcFile, const char * 
 	printf("\rfinishing GeoLoc correct by GCPs\n");
 	return 0;
 }
-//#define ABS_FLOAT_0 0.0001 
-//double GetTriangleSquar(double* pnt1, double* pnt2, double* pnt3)
-//{
-//	double tmp1, tmp2, tmp3, tmp4;
-//	tmp1 = pnt2[0] - pnt1[0];
-//	tmp2 = pnt2[1] - pnt1[1];
-//	tmp3 = pnt3[0] - pnt2[0];
-//	tmp4 = pnt3[1] - pnt2[1];
-//	return fabs((tmp1 * tmp4 - tmp2 * tmp3)) / 2.0f;
-//}
-//bool  IsInTriangle(double* pnt1, double* pnt2, double* pnt3, double* pnt4)
-//{
-//	double SABC, SADB, SBDC, SADC;
-//	SABC = GetTriangleSquar(pnt1, pnt2, pnt3);
-//	SADB = GetTriangleSquar(pnt1, pnt4, pnt2);
-//	SBDC = GetTriangleSquar(pnt2, pnt4, pnt3);
-//	SADC = GetTriangleSquar(pnt1, pnt4, pnt3);
-//
-//	double SumSuqar = SADB + SBDC + SADC;
-//
-//	if ((-ABS_FLOAT_0 < (SABC - SumSuqar)) && ((SABC - SumSuqar) < ABS_FLOAT_0))
-//	{
-//		return true;
-//	}
-//	else
-//	{
-//		return false;
-//	}
-//}
-//void  GetTransInvTran(Point2f *pnt1, Point2f* pnt2, int gcps, double *adfGeoTransform, double *adfGeoInvTransform)
-//{
-//	//解算仿射变换系数
-//	Mat geotrans, invgeotrans;
-//	geotrans = getAffineTransform(pnt1, pnt2);
-//	invgeotrans = getAffineTransform(pnt2, pnt1);
-//
-//	adfGeoTransform[0] = geotrans.at<double>(0, 0);
-//	adfGeoTransform[1] = geotrans.at<double>(0, 1);
-//	adfGeoTransform[2] = geotrans.at<double>(0, 2);
-//	adfGeoTransform[3] = geotrans.at<double>(1, 0);
-//	adfGeoTransform[4] = geotrans.at<double>(1, 1);
-//	adfGeoTransform[5] = geotrans.at<double>(1, 2);
-//
-//	adfGeoInvTransform[0] = invgeotrans.at<double>(0, 0);
-//	adfGeoInvTransform[1] = invgeotrans.at<double>(0, 1);
-//	adfGeoInvTransform[2] = invgeotrans.at<double>(0, 2);
-//	adfGeoInvTransform[3] = invgeotrans.at<double>(1, 0);
-//	adfGeoInvTransform[4] = invgeotrans.at<double>(1, 1);
-//	adfGeoInvTransform[5] = invgeotrans.at<double>(1, 2);
-//}
-//long  GDALTool_TriangleDelaunay(double* points, int pointNumber, const char* pathDst)
-//{
-//	if (points == NULL || pathDst == NULL)
-//		return Error_Empty_Data;
-//
-//	double *padfX = new double[pointNumber];
-//	double *padfY = new double[pointNumber];
-//	for (int i = 0; i<pointNumber; i++)
-//	{
-//		padfX[i] = points[2 * i + 0];
-//		padfY[i] = points[2 * i + 1];
-//	}
-//
-//	//构建三角网
-//	if (GDALHasTriangulation() != TRUE)
-//		return -1;
-//	GDALTriangulation *pdfTriangle = GDALTriangulationCreateDelaunay(pointNumber, padfX, padfY);
-//	GDALTriangulationComputeBarycentricCoefficients(pdfTriangle, padfX, padfY);
-//	//保存到文件中将三角网
-//	ofstream ofs(pathDst, ios_base::out);
-//	if (!ofs.is_open())
-//		return -1;
-//
-//	ofs << "POINTS\n";
-//	ofs << "point numbers of Tin:\n" << pointNumber << endl;
-//	for (int i = 0; i<pointNumber; i++)
-//		ofs << i + 1 << setw(15) << padfX[i] << setw(15) << padfY[i] << endl;
-//	ofs << "TRIANGLES\n";
-//	ofs << "triangle number:\n" << pdfTriangle->nFacets << endl;
-//	for (int i = 0; i<pdfTriangle->nFacets; i++)
-//		ofs << pdfTriangle->pasFacets[i].anVertexIdx[0] << setw(5) << pdfTriangle->pasFacets[i].anVertexIdx[1] << setw(5) << pdfTriangle->pasFacets[i].anVertexIdx[2] << setw(5) <<
-//		pdfTriangle->pasFacets[i].anNeighborIdx[0] << setw(5) << pdfTriangle->pasFacets[i].anNeighborIdx[1] << setw(5) << pdfTriangle->pasFacets[i].anNeighborIdx[2] << setw(15) <<
-//		pdfTriangle->pasFacetCoefficients[i].dfCstX << setw(15) << pdfTriangle->pasFacetCoefficients[i].dfCstY << setw(15) <<
-//		pdfTriangle->pasFacetCoefficients[i].dfMul1X << setw(15) << pdfTriangle->pasFacetCoefficients[i].dfMul1Y << setw(15) <<
-//		pdfTriangle->pasFacetCoefficients[i].dfMul2X << setw(15) << pdfTriangle->pasFacetCoefficients[i].dfMul2Y << endl;
-//	ofs << "END TIN";
-//	ofs.close();
-//
-//	GDALTriangulationFree(pdfTriangle);
-//	delete[]padfX;
-//	delete[]padfY;
-//	return 0;
-//}
-//GDALTriangulation* GDALTool_LoadTriangle(const char* pathTri, double* pdfTriVex, int &number)
-//{
-//	GDALTriangulation* m_triangle = NULL;
-//	GDALTriFacet *m_facets = NULL;
-//	GDALTriBarycentricCoefficients* m_barycentricCoefficients = NULL;
-//
-//	int triNumber, nfaces;
-//	char cnstTmpchar[2048];
-//	ifstream ifs(pathTri, ios_base::in);
-//	ifs.getline(cnstTmpchar, 2048);
-//	ifs.getline(cnstTmpchar, 2048);
-//	ifs.getline(cnstTmpchar, 2048);
-//	triNumber = atoi(cnstTmpchar);
-//	number = triNumber;
-//
-//	for (int i = 0; i<triNumber; i++)
-//	{
-//		ifs.getline(cnstTmpchar, 2048);
-//		int indexnum;
-//		sscanf(cnstTmpchar, "%d%lf%lf", &indexnum, &pdfTriVex[2 * i + 0], &pdfTriVex[2 * i + 1]);
-//	}
-//
-//	ifs.getline(cnstTmpchar, 2048);
-//	ifs.getline(cnstTmpchar, 2048);
-//	ifs.getline(cnstTmpchar, 2048);
-//	nfaces = atoi(cnstTmpchar);
-//
-//	m_triangle = (GDALTriangulation*)CPLCalloc(1, sizeof(GDALTriangulation));
-//	m_facets = (GDALTriFacet*)VSIMalloc2(nfaces, sizeof(GDALTriFacet));
-//	m_barycentricCoefficients = (GDALTriBarycentricCoefficients*)VSIMalloc2(nfaces, sizeof(GDALTriBarycentricCoefficients));
-//
-//	m_triangle->nFacets = nfaces;
-//	m_triangle->pasFacetCoefficients = m_barycentricCoefficients;
-//	m_triangle->pasFacets = m_facets;
-//
-//	for (int i = 0; i<nfaces; i++)
-//	{
-//		ifs.getline(cnstTmpchar, 2048);
-//		sscanf(cnstTmpchar, "%d%d%d%d%d%d%lf%lf%lf%lf%lf%lf", &m_triangle->pasFacets[i].anVertexIdx[0], &m_triangle->pasFacets[i].anVertexIdx[1], &m_triangle->pasFacets[i].anVertexIdx[2],
-//			&m_triangle->pasFacets[i].anNeighborIdx[0], &m_triangle->pasFacets[i].anNeighborIdx[1], &m_triangle->pasFacets[i].anNeighborIdx[2],
-//			&m_triangle->pasFacetCoefficients->dfCstX, &m_triangle->pasFacetCoefficients->dfCstY, &m_triangle->pasFacetCoefficients->dfMul1X, &m_triangle->pasFacetCoefficients->dfMul1Y,
-//			&m_triangle->pasFacetCoefficients->dfMul2X, &m_triangle->pasFacetCoefficients->dfMul2Y);
-//
-//	}
-//	ifs.close();
-//	return m_triangle;
-//}
-////重采样函数-双线性插值
-//long  ReSampling2(float *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLines, int nReImgWidth, int nReLines, float *pRegBuffer, float *fDGrey, float *fDItem)
-//{
-//	memset(fDGrey, 0, nReImgWidth * nReLines*sizeof(float));
-//	memset(fDItem, 0, nReImgWidth * nReLines*sizeof(float));
-//
-//	for (long ns = 0; ns<nReImgWidth*nReLines; ns++)
-//		pRegBuffer[ns] = 0.0;
-//
-//	int i = 0, j = 0;
-//	int nC = 0, nY = 0;
-//	double fDX = 0, fDY = 0;
-//
-//	unsigned long nOffset = 0;
-//
-//	for (i = 0; i<nLines; i++)
-//	{
-//		for (j = 0; j<nImgWidth; j++)
-//		{
-//			nC = (int)pPositions[i*nImgWidth + j].dX;
-//			nY = (int)pPositions[i*nImgWidth + j].dY;       //dddd
-//
-//			fDX = pPositions[i*nImgWidth + j].dX - nC;
-//			fDY = pPositions[i*nImgWidth + j].dY - nY;
-//
-//			float fDN = pImgBuffer[i*nImgWidth + j];
-//
-//			float fTempGrey[4];
-//			memset(fTempGrey, 0, 4 * sizeof(float));
-//			fTempGrey[0] = float((1 - fDX)*(1 - fDY)*fDN);
-//			fTempGrey[1] = float(fDX*(1 - fDY)*fDN);
-//			fTempGrey[2] = float((1 - fDX)*fDY*fDN);
-//			fTempGrey[3] = float(fDX*fDY*fDN);
-//
-//			if (nC >= 0 && nC<nReImgWidth && nY >= 0 && nY<nReLines)
-//			{
-//				nOffset = nY*nReImgWidth + nC;
-//				fDGrey[nOffset] += fTempGrey[0];
-//				fDItem[nOffset] += float((1 - fDX)*(1 - fDY));
-//				if (nC < nReImgWidth - 1)
-//				{
-//					fDGrey[nOffset + 1] += fTempGrey[1];
-//					fDItem[nOffset + 1] += float(fDX*(1 - fDY));
-//				}
-//				if (nY < nReLines - 1)
-//				{
-//					fDGrey[nOffset + nReImgWidth] += fTempGrey[2];
-//					fDItem[nOffset + nReImgWidth] += float((1 - fDX)*fDY);
-//				}
-//				if (nC<nReImgWidth - 1 && nY<nReLines - 1)
-//				{
-//					fDGrey[nOffset + nReImgWidth + 1] += fTempGrey[3];
-//					fDItem[nOffset + nReImgWidth + 1] += float(fDX*fDY);
-//				}
-//			}
-//		}
-//	}
-//
-//	float fSumValues = 0;
-//	float fSumDItems = 0;
-//	int   nCount = 0;
-//	int sss = 0;
-//
-//	for (i = 0; i<nReLines; i++)
-//	{
-//		for (j = 0; j<nReImgWidth; j++)
-//		{
-//			nOffset = i*nReImgWidth + j;
-//			if (fDItem[nOffset] != 0)
-//			{
-//				pRegBuffer[nOffset] = fDGrey[nOffset] / fDItem[nOffset];
-//			}
-//			else
-//			{
-//				if (i>0 && i<nReLines - 1 && j>0 && j<nReImgWidth - 1)
-//				{
-//					fSumValues = 0;
-//					fSumDItems = 0;
-//					nCount = 0;
-//
-//					if (fDItem[nOffset - nReImgWidth - 1] != 0)
-//					{
-//						nCount++;
-//						fSumValues += fDGrey[nOffset - nReImgWidth - 1] / fDItem[nOffset - nReImgWidth - 1];//
-//						fSumDItems += fDItem[nOffset - nReImgWidth - 1];
-//					}
-//					if (fDItem[nOffset - nReImgWidth] != 0)
-//					{
-//						nCount++;
-//						fSumValues += fDGrey[nOffset - nReImgWidth] / fDItem[nOffset - nReImgWidth];
-//						fSumDItems += fDItem[nOffset - nReImgWidth];
-//					}
-//					if (fDItem[nOffset - nReImgWidth + 1] != 0)
-//					{
-//						nCount++;
-//						fSumValues += fDGrey[nOffset - nReImgWidth + 1] / fDItem[nOffset - nReImgWidth + 1];
-//						fSumDItems += fDItem[nOffset - nReImgWidth + 1];
-//					}
-//					if (fDItem[nOffset - 1] != 0)
-//					{
-//						nCount++;
-//						fSumValues += fDGrey[nOffset - 1] / fDItem[nOffset - 1];
-//						fSumDItems += fDItem[nOffset - 1];
-//					}
-//					if (fDItem[nOffset + 1] != 0)
-//					{
-//						nCount++;
-//						fSumValues += fDGrey[nOffset + 1] / fDItem[nOffset + 1];
-//						fSumDItems += fDItem[nOffset + 1];
-//					}
-//					if (fDItem[nOffset + nReImgWidth - 1] != 0)
-//					{
-//						nCount++;
-//						fSumValues += fDGrey[nOffset + nReImgWidth - 1] / fDItem[nOffset + nReImgWidth - 1];
-//						fSumDItems += fDItem[nOffset + nReImgWidth - 1];
-//					}
-//					if (fDItem[nOffset + nReImgWidth] != 0)
-//					{
-//						nCount++;
-//						fSumValues += fDGrey[nOffset + nReImgWidth] / fDItem[nOffset + nReImgWidth];
-//						fSumDItems += fDItem[nOffset + nReImgWidth];
-//					}
-//					if (fDItem[nOffset + nReImgWidth + 1] != 0)
-//					{
-//						nCount++;
-//						fSumValues += fDGrey[nOffset + nReImgWidth + 1] / fDItem[nOffset + nReImgWidth + 1];
-//						fSumDItems += fDItem[nOffset + nReImgWidth + 1];
-//					}
-//
-//					if (nCount >= 1)
-//					{
-//						//	if( fSumDItems>0.5 )
-//						pRegBuffer[nOffset] = fSumValues / nCount;
-//						sss++;
-//					}
-//
-//				}
-//			}
-//		}
-//	}
-//
-//
-//	return 0;
-//}
-////RST重采样函数
-//long  GeoGCPProcess::GeoProc_GCPTriangle(char* pathSrcImg, char* pathDstImg, char* pathTri, double* GCPs, int gcpNum, int UTMZone, double GroundSize)
-//{
-//	long			IError = 0;
-//	GDALDatasetH	m_datasetDst, m_datasetSrc;
-//	float			*pdfDstImgData = NULL, *pdfSrcImgData = NULL, *fDGrey = NULL, *fDItem = NULL;
-//	double			**facetadfGeoTrans = NULL, **facetadfGeoInvTrans = NULL, *padfXY = NULL, *padGeoXY = NULL;
-//	double			maxx, minx, maxy, miny;
-//	double			maxxGeo, minxGeo, maxyGeo, minyGeo;
-//	double			pntGeoLT[2], pntGeoLD[2], pntGeoRT[2], pntGeoRD[2];
-//	double			adfTrans[6];
-//	int				*pdfTriangleImg = NULL;
-//	char			*temp_tri = "~tri_temp.tri";
-//	int				bands, xsize, ysize, xsizetrans, ysizetrans, RealGCPNum = 0;
-//	char			*pszDstWkt;
-//	DPOINT			*pPositions = NULL;
-//	OGRSpatialReference oSRS;
-//	GDALTriangulation	*m_triangle;
-//
-//	//1-打开影像,判断控制点是否正确//////////////////////////////////////////////////////
-//	//a-打开影像
-//	if ((_access(pathDstImg, 0)) == 0)
-//		remove(pathDstImg);
-//	if (gcpNum<3)
-//	{
-//		cout << "输入控制点数量少于3个";
-//		IError = 1;
-//		goto ErrEnd;
-//	}
-//	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
-//	GDALAllRegister();
-//	m_datasetSrc = GDALOpen(pathSrcImg, GA_ReadOnly);
-//	if (m_datasetSrc == NULL)
-//	{
-//		cout << "待校正影像打开错误";
-//		IError = 2;
-//		goto ErrEnd;
-//	}
-//	//b-读取数据信息
-//	bands = GDALGetRasterCount(m_datasetSrc);
-//	xsize = GDALGetRasterXSize(m_datasetSrc);
-//	ysize = GDALGetRasterYSize(m_datasetSrc);
-//	//pszSrcWKT = GDALGetProjectionRef(m_datasetSrc);
-//	oSRS.SetUTM(UTMZone, TRUE);
-//	oSRS.SetWellKnownGeogCS("WGS84");
-//	oSRS.exportToWkt(&pszDstWkt);
-//
-//	//c-获取控制点在影像上的范围(采用影像坐标)
-//	padfXY = new double[2 * gcpNum];
-//	padGeoXY = new double[2 * gcpNum];
-//	for (int i = 0; i<gcpNum; i++)
-//	{
-//		if ((GCPs[4 * i + 0]<0) || (GCPs[4 * i + 0] >= xsize))
-//			continue;
-//		if ((GCPs[4 * i + 1]<0) || (GCPs[4 * i + 1] >= ysize))
-//			continue;
-//		padfXY[2 * RealGCPNum + 0] = GCPs[4 * i + 0];
-//		padfXY[2 * RealGCPNum + 1] = GCPs[4 * i + 1];
-//		padGeoXY[2 * RealGCPNum + 0] = GCPs[4 * i + 2];
-//		padGeoXY[2 * RealGCPNum + 1] = GCPs[4 * i + 3];
-//		RealGCPNum++;
-//
-//	}
-//	maxx = padfXY[0], minx = padfXY[0], maxy = padfXY[1], miny = padfXY[1];
-//	maxxGeo = padGeoXY[0], minxGeo = padGeoXY[0], maxyGeo = padGeoXY[1], minyGeo = padGeoXY[1];
-//	for (int i = 0; i<gcpNum; i++)
-//	{
-//		maxx = max(maxx, padfXY[2 * i + 0]);
-//		minx = min(minx, padfXY[2 * i + 0]);
-//		maxy = max(maxy, padfXY[2 * i + 1]);
-//		miny = min(miny, padfXY[2 * i + 1]);
-//
-//		maxxGeo = max(maxxGeo, padGeoXY[2 * i + 0]);
-//		minxGeo = min(maxxGeo, padGeoXY[2 * i + 0]);
-//		maxyGeo = max(maxyGeo, padGeoXY[2 * i + 1]);
-//		minyGeo = min(minyGeo, padGeoXY[2 * i + 1]);
-//	}
-//	if (RealGCPNum<3)
-//	{
-//		cout << "有效控制点数量少于3个";
-//		IError = 3;
-//		goto ErrEnd;
-//	}
-//	//xsize=(int)maxx-(int)minx;
-//	//ysize=(int)maxy-(int)miny;
-//
-//	//2-建立三角网///////////////////////////////////////////////////////////////////////
-//	GDALTool_TriangleDelaunay(padfXY, RealGCPNum, temp_tri);
-//	m_triangle = GDALTool_LoadTriangle(temp_tri, padfXY, RealGCPNum);
-//	if (m_triangle->nFacets<1)
-//	{
-//		cout << "构网错误";
-//		IError = 4;
-//		goto ErrEnd;
-//	}
-//
-//	//3-控制点在影像上的位置////////////////////////////////////////////////////////////
-//	//a-首先获取仿射变换参数
-//	Point2f *pnt1 = new Point2f[RealGCPNum];
-//	Point2f *pnt2 = new Point2f[RealGCPNum];
-//	double adfGeoTrans[6], adfGeoInvTrans[6];
-//	for (int i = 0; i<RealGCPNum; i++)
-//	{
-//		pnt1[i].x = float(GCPs[4 * i + 0])/*-minx*/;
-//		pnt1[i].y = float(GCPs[4 * i + 1])/*-miny*/;
-//		pnt2[i].x = float(GCPs[4 * i + 2]);
-//		pnt2[i].y = float(GCPs[4 * i + 3]);
-//	}
-//	GetTransInvTran(pnt1, pnt2, RealGCPNum, adfGeoTrans, adfGeoInvTrans);
-//	delete[]pnt1;
-//	delete[]pnt2;
-//
-//	//b-影像四个脚点的坐标
-//	pntGeoLT[0] = adfGeoTrans[2];
-//	pntGeoLT[1] = adfGeoTrans[5];
-//	pntGeoLD[0] = ysize*adfGeoTrans[1] + adfGeoTrans[2];
-//	pntGeoLD[1] = ysize*adfGeoTrans[4] + adfGeoTrans[5];
-//	pntGeoRT[0] = xsize*adfGeoTrans[0] + adfGeoTrans[2];
-//	pntGeoRT[1] = xsize*adfGeoTrans[3] + adfGeoTrans[5];
-//	pntGeoRD[0] = xsize*adfGeoTrans[0] + ysize*adfGeoTrans[1] + adfGeoTrans[2];
-//	pntGeoRD[1] = xsize*adfGeoTrans[3] + ysize*adfGeoTrans[4] + adfGeoTrans[5];
-//	xsizetrans = abs(max(max(pntGeoLT[0], pntGeoRD[0]), max(pntGeoLD[0], pntGeoRT[0])) - min(min(pntGeoLT[0], pntGeoRD[0]), min(pntGeoLD[0], pntGeoRT[0]))) / abs(GroundSize);
-//	ysizetrans = abs(max(max(pntGeoLT[1], pntGeoRD[1]), max(pntGeoLD[1], pntGeoRT[1])) - min(min(pntGeoLT[1], pntGeoRD[1]), min(pntGeoLD[1], pntGeoRT[1]))) / abs(GroundSize);
-//
-//	//c-投影系数
-//	adfTrans[0] = min(min(pntGeoLT[0], pntGeoRD[0]), min(pntGeoLD[0], pntGeoRT[0]));
-//	adfTrans[1] = GroundSize;
-//	adfTrans[2] = 0;
-//	adfTrans[3] = max(max(pntGeoLT[1], pntGeoRD[1]), max(pntGeoLD[1], pntGeoRT[1]));
-//	adfTrans[4] = 0;
-//	adfTrans[5] = -GroundSize;
-//
-//	//d-三角剖分影像
-//	pdfTriangleImg = new int[xsize*ysize];
-//	memset(pdfTriangleImg, 0, sizeof(int)*xsize*ysize);
-//	for (int i = 0; i<xsize; i++)
-//	{
-//		for (int j = 0; j<ysize; j++)
-//		{
-//			double curPnt[2] = { i,j };
-//			for (int k = 0; k<m_triangle->nFacets; k++)
-//			{
-//				if (IsInTriangle(&padfXY[2 * m_triangle->pasFacets[k].anVertexIdx[0]],
-//					&padfXY[2 * m_triangle->pasFacets[k].anVertexIdx[1]],
-//					&padfXY[2 * m_triangle->pasFacets[k].anVertexIdx[2]], curPnt))
-//				{
-//					pdfTriangleImg[j*xsize + i] = k + 1;
-//					break;
-//				}
-//			}
-//		}
-//	}
-//
-//	//e-每一个三角网内的仿射变换系数
-//	facetadfGeoTrans = new double *[m_triangle->nFacets];
-//	facetadfGeoInvTrans = new double *[m_triangle->nFacets];
-//	Point2f pnts1[3], pnts2[3];
-//	for (int i = 0; i<m_triangle->nFacets; i++)
-//	{
-//		facetadfGeoTrans[i] = new double[6];
-//		facetadfGeoInvTrans[i] = new double[6];
-//		for (int j = 0; j<3; j++)
-//		{
-//			pnts1[j].x = padfXY[2 * m_triangle->pasFacets[i].anVertexIdx[j] + 0];
-//			pnts1[j].y = padfXY[2 * m_triangle->pasFacets[i].anVertexIdx[j] + 1];
-//
-//			pnts2[j].x = padGeoXY[2 * m_triangle->pasFacets[i].anVertexIdx[j] + 0];
-//			pnts2[j].y = padGeoXY[2 * m_triangle->pasFacets[i].anVertexIdx[j] + 1];
-//		}
-//		GetTransInvTran(pnts1, pnts2, 3, facetadfGeoTrans[i], facetadfGeoInvTrans[i]);
-//	}
-//
-//	//f-三角剖分影像输出
-//	if (strlen(pathTri)>5)
-//	{
-//		GDALDatasetH m_data_tri = GDALCreate(GDALGetDriverByName("GTiff"), pathTri, xsize, ysize, 1, GDT_Int32, NULL);//三角网的位置
-//		GDALRasterIO(GDALGetRasterBand(m_data_tri, 1), GF_Write, 0, 0, xsize, ysize, pdfTriangleImg, xsize, ysize, GDT_Int32, 0, 0);
-//		GDALClose(m_data_tri);
-//	}
-//
-//	//g-计算原始图像到结果图像的像元映射
-//	pPositions = new DPOINT[xsize*ysize];
-//	double imgPnt[2];
-//	for (int i = 0; i<xsize; i++)
-//	{
-//		for (int j = 0; j<ysize; j++)
-//		{
-//			int triIndex = pdfTriangleImg[j*xsize + i] - 1;
-//			if (triIndex<0)
-//				continue;
-//
-//			imgPnt[0] = facetadfGeoTrans[triIndex][0] * i + facetadfGeoTrans[triIndex][1] * j + facetadfGeoTrans[triIndex][2];
-//			imgPnt[1] = facetadfGeoTrans[triIndex][3] * i + facetadfGeoTrans[triIndex][4] * j + facetadfGeoTrans[triIndex][5];
-//
-//			imgPnt[0] = (imgPnt[0] - adfTrans[0]) / adfTrans[1];
-//			imgPnt[1] = (imgPnt[1] - adfTrans[3]) / adfTrans[5];
-//			if (imgPnt[0]<0 || imgPnt[0] >= xsizetrans || imgPnt[1] >= ysizetrans || imgPnt[1]<0)
-//			{
-//				pPositions[j*xsize + i].dX = -3;
-//				pPositions[j*xsize + i].dX = -3;
-//			}
-//			else
-//			{
-//				pPositions[j*xsize + i].dX = imgPnt[0];
-//				pPositions[j*xsize + i].dY = imgPnt[1];
-//			}
-//		}
-//	}
-//
-//	//4-重采样影像////////////////////////////////////////////////////////////////////
-//	pdfSrcImgData = new float[xsize*ysize];
-//	pdfDstImgData = new float[xsizetrans*ysizetrans];
-//	fDGrey = new float[xsizetrans*ysizetrans];
-//	fDItem = new float[xsizetrans*ysizetrans];
-//	m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDstImg, xsizetrans, ysizetrans, bands, GDT_Float32, NULL);
-//	for (int bn = 1; bn <= bands; bn++)
-//	{
-//		GDALRasterIO(GDALGetRasterBand(m_datasetSrc, bn), GF_Read, 0, 0, xsize, ysize, pdfSrcImgData, xsize, ysize, GDT_Float32, 0, 0);
-//		ReSampling2(pdfSrcImgData, pPositions, xsize, ysize, xsizetrans, ysizetrans, pdfDstImgData, fDGrey, fDItem);
-//		GDALRasterIO(GDALGetRasterBand(m_datasetDst, bn), GF_Write, 0, 0, xsizetrans, ysizetrans, pdfDstImgData, xsizetrans, ysizetrans, GDT_Float32, 0, 0);
-//	}
-//	GDALSetGeoTransform(m_datasetDst, adfTrans);
-//	GDALSetProjection(m_datasetDst, pszDstWkt);
-//
-//ErrEnd:
-//	if (m_datasetDst)	GDALClose(m_datasetDst);
-//	if (m_datasetSrc)	GDALClose(m_datasetSrc);
-//	if (pdfDstImgData)	delete[]pdfDstImgData;
-//	if (pdfSrcImgData)	delete[]pdfSrcImgData;
-//	if (padfXY)			delete[]padfXY;
-//	if (padGeoXY)		delete[]padGeoXY;
-//	if (facetadfGeoInvTrans)
-//	{
-//		for (int i = 0; i<m_triangle->nFacets; i++)
-//			delete[]facetadfGeoInvTrans[i];
-//		delete[]facetadfGeoInvTrans;
-//	}
-//	if (facetadfGeoTrans)
-//	{
-//		for (int i = 0; i<m_triangle->nFacets; i++)
-//			delete[]facetadfGeoTrans[i];;
-//		delete[]facetadfGeoTrans;
-//	}
-//	if ((_access(temp_tri, 0)) == 0)
-//		remove(temp_tri);
-//
-//	if (pdfTriangleImg)	delete[]pdfTriangleImg;
-//	if (m_triangle)		GDALTriangulationFree(m_triangle);
-//	if (fDGrey)			delete[]fDGrey;
-//	if (fDItem)			delete[]fDItem;
-//	if (pPositions)		delete[]pPositions;
-//
-//	return IError;
-//}
+//三角网几何校正用到了OPENCV进行辅助,实用OPENCV仅仅只是为了获取仿射变换系数而已
+#include"opencv\opencv2\opencv.hpp"
+#pragma comment(lib,"opencv_world310d.lib")
+using namespace cv;
+#define ABS_FLOAT_0 0.0001 
+double GetTriangleSquar(double* pnt1, double* pnt2, double* pnt3)
+{
+	double tmp1, tmp2, tmp3, tmp4;
+	tmp1 = pnt2[0] - pnt1[0];
+	tmp2 = pnt2[1] - pnt1[1];
+	tmp3 = pnt3[0] - pnt2[0];
+	tmp4 = pnt3[1] - pnt2[1];
+	return fabs((tmp1 * tmp4 - tmp2 * tmp3)) / 2.0f;
+}
+bool  IsInTriangle(double* pnt1, double* pnt2, double* pnt3, double* pnt4)
+{
+	double SABC, SADB, SBDC, SADC;
+	SABC = GetTriangleSquar(pnt1, pnt2, pnt3);
+	SADB = GetTriangleSquar(pnt1, pnt4, pnt2);
+	SBDC = GetTriangleSquar(pnt2, pnt4, pnt3);
+	SADC = GetTriangleSquar(pnt1, pnt4, pnt3);
+
+	double SumSuqar = SADB + SBDC + SADC;
+
+	if ((-ABS_FLOAT_0 < (SABC - SumSuqar)) && ((SABC - SumSuqar) < ABS_FLOAT_0))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+void  GetTransInvTran(Point2f *pnt1, Point2f* pnt2, int gcps, double *adfGeoTransform, double *adfGeoInvTransform)
+{
+	//解算仿射变换系数
+	Mat geotrans, invgeotrans;
+	geotrans = getAffineTransform(pnt1, pnt2);
+	invgeotrans = getAffineTransform(pnt2, pnt1);
+
+	adfGeoTransform[0] = geotrans.at<double>(0, 0);
+	adfGeoTransform[1] = geotrans.at<double>(0, 1);
+	adfGeoTransform[2] = geotrans.at<double>(0, 2);
+	adfGeoTransform[3] = geotrans.at<double>(1, 0);
+	adfGeoTransform[4] = geotrans.at<double>(1, 1);
+	adfGeoTransform[5] = geotrans.at<double>(1, 2);
+
+	adfGeoInvTransform[0] = invgeotrans.at<double>(0, 0);
+	adfGeoInvTransform[1] = invgeotrans.at<double>(0, 1);
+	adfGeoInvTransform[2] = invgeotrans.at<double>(0, 2);
+	adfGeoInvTransform[3] = invgeotrans.at<double>(1, 0);
+	adfGeoInvTransform[4] = invgeotrans.at<double>(1, 1);
+	adfGeoInvTransform[5] = invgeotrans.at<double>(1, 2);
+}
+long  GDALTool_TriangleDelaunay(double* points, int pointNumber, const char* pathDst)
+{
+	if (points == NULL || pathDst == NULL)
+		return -1;
+
+	double *padfX = new double[pointNumber];
+	double *padfY = new double[pointNumber];
+	for (int i = 0; i<pointNumber; i++)
+	{
+		padfX[i] = points[2 * i + 0];
+		padfY[i] = points[2 * i + 1];
+	}
+
+	//构建三角网
+	if (GDALHasTriangulation() != TRUE)
+		return -1;
+	GDALTriangulation *pdfTriangle = GDALTriangulationCreateDelaunay(pointNumber, padfX, padfY);
+	GDALTriangulationComputeBarycentricCoefficients(pdfTriangle, padfX, padfY);
+	//保存到文件中将三角网
+	ofstream ofs(pathDst, ios_base::out);
+	if (!ofs.is_open())
+		return -1;
+
+	ofs << "POINTS\n";
+	ofs << "point numbers of Tin:\n" << pointNumber << endl;
+	for (int i = 0; i<pointNumber; i++)
+		ofs << i + 1 << setw(15) << padfX[i] << setw(15) << padfY[i] << endl;
+	ofs << "TRIANGLES\n";
+	ofs << "triangle number:\n" << pdfTriangle->nFacets << endl;
+	for (int i = 0; i<pdfTriangle->nFacets; i++)
+		ofs << pdfTriangle->pasFacets[i].anVertexIdx[0] << setw(5) << pdfTriangle->pasFacets[i].anVertexIdx[1] << setw(5) << pdfTriangle->pasFacets[i].anVertexIdx[2] << setw(5) <<
+		pdfTriangle->pasFacets[i].anNeighborIdx[0] << setw(5) << pdfTriangle->pasFacets[i].anNeighborIdx[1] << setw(5) << pdfTriangle->pasFacets[i].anNeighborIdx[2] << setw(15) <<
+		pdfTriangle->pasFacetCoefficients[i].dfCstX << setw(15) << pdfTriangle->pasFacetCoefficients[i].dfCstY << setw(15) <<
+		pdfTriangle->pasFacetCoefficients[i].dfMul1X << setw(15) << pdfTriangle->pasFacetCoefficients[i].dfMul1Y << setw(15) <<
+		pdfTriangle->pasFacetCoefficients[i].dfMul2X << setw(15) << pdfTriangle->pasFacetCoefficients[i].dfMul2Y << endl;
+	ofs << "END TIN";
+	ofs.close();
+
+	GDALTriangulationFree(pdfTriangle);
+	delete[]padfX;
+	delete[]padfY;
+	return 0;
+}
+GDALTriangulation* GDALTool_LoadTriangle(const char* pathTri, double* pdfTriVex, int &number)
+{
+	GDALTriangulation* m_triangle = NULL;
+	GDALTriFacet *m_facets = NULL;
+	GDALTriBarycentricCoefficients* m_barycentricCoefficients = NULL;
+
+	int triNumber, nfaces;
+	char cnstTmpchar[2048];
+	ifstream ifs(pathTri, ios_base::in);
+	ifs.getline(cnstTmpchar, 2048);
+	ifs.getline(cnstTmpchar, 2048);
+	ifs.getline(cnstTmpchar, 2048);
+	triNumber = atoi(cnstTmpchar);
+	number = triNumber;
+
+	for (int i = 0; i<triNumber; i++)
+	{
+		ifs.getline(cnstTmpchar, 2048);
+		int indexnum;
+		sscanf(cnstTmpchar, "%d%lf%lf", &indexnum, &pdfTriVex[2 * i + 0], &pdfTriVex[2 * i + 1]);
+	}
+
+	ifs.getline(cnstTmpchar, 2048);
+	ifs.getline(cnstTmpchar, 2048);
+	ifs.getline(cnstTmpchar, 2048);
+	nfaces = atoi(cnstTmpchar);
+
+	m_triangle = (GDALTriangulation*)CPLCalloc(1, sizeof(GDALTriangulation));
+	m_facets = (GDALTriFacet*)VSIMalloc2(nfaces, sizeof(GDALTriFacet));
+	m_barycentricCoefficients = (GDALTriBarycentricCoefficients*)VSIMalloc2(nfaces, sizeof(GDALTriBarycentricCoefficients));
+
+	m_triangle->nFacets = nfaces;
+	m_triangle->pasFacetCoefficients = m_barycentricCoefficients;
+	m_triangle->pasFacets = m_facets;
+
+	for (int i = 0; i<nfaces; i++)
+	{
+		ifs.getline(cnstTmpchar, 2048);
+		sscanf(cnstTmpchar, "%d%d%d%d%d%d%lf%lf%lf%lf%lf%lf", &m_triangle->pasFacets[i].anVertexIdx[0], &m_triangle->pasFacets[i].anVertexIdx[1], &m_triangle->pasFacets[i].anVertexIdx[2],
+			&m_triangle->pasFacets[i].anNeighborIdx[0], &m_triangle->pasFacets[i].anNeighborIdx[1], &m_triangle->pasFacets[i].anNeighborIdx[2],
+			&m_triangle->pasFacetCoefficients->dfCstX, &m_triangle->pasFacetCoefficients->dfCstY, &m_triangle->pasFacetCoefficients->dfMul1X, &m_triangle->pasFacetCoefficients->dfMul1Y,
+			&m_triangle->pasFacetCoefficients->dfMul2X, &m_triangle->pasFacetCoefficients->dfMul2Y);
+
+	}
+	ifs.close();
+	return m_triangle;
+}
+long  GeoGCPProcess::GeoProc_GCPTriangle(char* pathSrcImg, char* pathDstImg, char* pathTri, double* GCPs, int gcpNum, int UTMZone, double GroundSize)
+{
+	long			IError = 0;
+	GDALDatasetH	m_datasetDst=NULL, m_datasetSrc=NULL;
+	float			*pdfDstImgData = NULL, *pdfSrcImgData = NULL;
+	double			**facetadfGeoTrans = NULL, **facetadfGeoInvTrans = NULL, *padfXY = NULL, *padGeoXY = NULL;
+	double			maxx, minx, maxy, miny;
+	double			maxxGeo, minxGeo, maxyGeo, minyGeo;
+	double			pntGeoLT[2], pntGeoLD[2], pntGeoRT[2], pntGeoRD[2];
+	double			adfTrans[6];
+	int				*pdfTriangleImg = NULL;
+	char			*temp_tri = "~tri_temp.tri";
+	int				bands, xsize, ysize, xsizetrans, ysizetrans, RealGCPNum = 0;
+	char			*pszDstWkt;
+	DPOINT			*pPositions = NULL;
+	OGRSpatialReference oSRS;
+	GDALTriangulation	*m_triangle = NULL;
+
+	//1-打开影像,判断控制点是否正确//////////////////////////////////////////////////////
+	//a-打开影像
+	if ((_access(pathDstImg, 0)) == 0)
+		remove(pathDstImg);
+	if (gcpNum<3)
+	{
+		cout << "输入控制点数量少于3个";
+		IError = 1;
+		goto ErrEnd;
+	}
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
+	GDALAllRegister();
+	m_datasetSrc = GDALOpen(pathSrcImg, GA_ReadOnly);
+	if (m_datasetSrc == NULL)
+	{
+		cout << "待校正影像打开错误";
+		IError = 2;
+		goto ErrEnd;
+	}
+	//b-读取数据信息
+	bands = GDALGetRasterCount(m_datasetSrc);
+	xsize = GDALGetRasterXSize(m_datasetSrc);
+	ysize = GDALGetRasterYSize(m_datasetSrc);
+	//pszSrcWKT = GDALGetProjectionRef(m_datasetSrc);
+	oSRS.SetUTM(UTMZone, TRUE);
+	oSRS.SetWellKnownGeogCS("WGS84");
+	oSRS.exportToWkt(&pszDstWkt);
+
+	//c-获取控制点在影像上的范围(采用影像坐标)
+	padfXY = new double[2 * gcpNum];
+	padGeoXY = new double[2 * gcpNum];
+	for (int i = 0; i<gcpNum; i++)
+	{
+		if ((GCPs[4 * i + 0]<0) || (GCPs[4 * i + 0] >= xsize))
+			continue;
+		if ((GCPs[4 * i + 1]<0) || (GCPs[4 * i + 1] >= ysize))
+			continue;
+		padfXY[2 * RealGCPNum + 0] = GCPs[4 * i + 0];
+		padfXY[2 * RealGCPNum + 1] = GCPs[4 * i + 1];
+		padGeoXY[2 * RealGCPNum + 0] = GCPs[4 * i + 2];
+		padGeoXY[2 * RealGCPNum + 1] = GCPs[4 * i + 3];
+		RealGCPNum++;
+
+	}
+	maxx = padfXY[0], minx = padfXY[0], maxy = padfXY[1], miny = padfXY[1];
+	maxxGeo = padGeoXY[0], minxGeo = padGeoXY[0], maxyGeo = padGeoXY[1], minyGeo = padGeoXY[1];
+	for (int i = 0; i<gcpNum; i++)
+	{
+		maxx = max(maxx, padfXY[2 * i + 0]);
+		minx = min(minx, padfXY[2 * i + 0]);
+		maxy = max(maxy, padfXY[2 * i + 1]);
+		miny = min(miny, padfXY[2 * i + 1]);
+
+		maxxGeo = max(maxxGeo, padGeoXY[2 * i + 0]);
+		minxGeo = min(maxxGeo, padGeoXY[2 * i + 0]);
+		maxyGeo = max(maxyGeo, padGeoXY[2 * i + 1]);
+		minyGeo = min(minyGeo, padGeoXY[2 * i + 1]);
+	}
+	if (RealGCPNum<3)
+	{
+		cout << "有效控制点数量少于3个";
+		IError = 3;
+		goto ErrEnd;
+	}
+	//xsize=(int)maxx-(int)minx;
+	//ysize=(int)maxy-(int)miny;
+
+	//2-建立三角网///////////////////////////////////////////////////////////////////////
+	GDALTool_TriangleDelaunay(padfXY, RealGCPNum, temp_tri);
+	m_triangle = GDALTool_LoadTriangle(temp_tri, padfXY, RealGCPNum);
+	if (m_triangle->nFacets<1)
+	{
+		cout << "构网错误";
+		IError = 4;
+		goto ErrEnd;
+	}
+
+	//3-控制点在影像上的位置////////////////////////////////////////////////////////////
+	//a-首先获取仿射变换参数
+	Point2f *pnt1 = new Point2f[RealGCPNum];
+	Point2f *pnt2 = new Point2f[RealGCPNum];
+	double adfGeoTrans[6], adfGeoInvTrans[6];
+	for (int i = 0; i<RealGCPNum; i++)
+	{
+		pnt1[i].x = float(GCPs[4 * i + 0])/*-minx*/;
+		pnt1[i].y = float(GCPs[4 * i + 1])/*-miny*/;
+		pnt2[i].x = float(GCPs[4 * i + 2]);
+		pnt2[i].y = float(GCPs[4 * i + 3]);
+	}
+	GetTransInvTran(pnt1, pnt2, RealGCPNum, adfGeoTrans, adfGeoInvTrans);
+	delete[]pnt1;
+	delete[]pnt2;
+
+	//b-影像四个脚点的坐标
+	pntGeoLT[0] = adfGeoTrans[2];
+	pntGeoLT[1] = adfGeoTrans[5];
+	pntGeoLD[0] = ysize*adfGeoTrans[1] + adfGeoTrans[2];
+	pntGeoLD[1] = ysize*adfGeoTrans[4] + adfGeoTrans[5];
+	pntGeoRT[0] = xsize*adfGeoTrans[0] + adfGeoTrans[2];
+	pntGeoRT[1] = xsize*adfGeoTrans[3] + adfGeoTrans[5];
+	pntGeoRD[0] = xsize*adfGeoTrans[0] + ysize*adfGeoTrans[1] + adfGeoTrans[2];
+	pntGeoRD[1] = xsize*adfGeoTrans[3] + ysize*adfGeoTrans[4] + adfGeoTrans[5];
+	xsizetrans = abs(max(max(pntGeoLT[0], pntGeoRD[0]), max(pntGeoLD[0], pntGeoRT[0])) - min(min(pntGeoLT[0], pntGeoRD[0]), min(pntGeoLD[0], pntGeoRT[0]))) / abs(GroundSize);
+	ysizetrans = abs(max(max(pntGeoLT[1], pntGeoRD[1]), max(pntGeoLD[1], pntGeoRT[1])) - min(min(pntGeoLT[1], pntGeoRD[1]), min(pntGeoLD[1], pntGeoRT[1]))) / abs(GroundSize);
+
+	//c-投影系数
+	adfTrans[0] = min(min(pntGeoLT[0], pntGeoRD[0]), min(pntGeoLD[0], pntGeoRT[0]));
+	adfTrans[1] = GroundSize;
+	adfTrans[2] = 0;
+	adfTrans[3] = max(max(pntGeoLT[1], pntGeoRD[1]), max(pntGeoLD[1], pntGeoRT[1]));
+	adfTrans[4] = 0;
+	adfTrans[5] = -GroundSize;
+
+	//d-三角剖分影像
+	pdfTriangleImg = new int[xsize*ysize];
+	memset(pdfTriangleImg, 0, sizeof(int)*xsize*ysize);
+	for (int i = 0; i<xsize; i++)
+	{
+		for (int j = 0; j<ysize; j++)
+		{
+			double curPnt[2] = { i,j };
+			for (int k = 0; k<m_triangle->nFacets; k++)
+			{
+				if (IsInTriangle(&padfXY[2 * m_triangle->pasFacets[k].anVertexIdx[0]],
+					&padfXY[2 * m_triangle->pasFacets[k].anVertexIdx[1]],
+					&padfXY[2 * m_triangle->pasFacets[k].anVertexIdx[2]], curPnt))
+				{
+					pdfTriangleImg[j*xsize + i] = k + 1;
+					break;
+				}
+			}
+		}
+	}
+
+	//e-每一个三角网内的仿射变换系数
+	facetadfGeoTrans = new double *[m_triangle->nFacets];
+	facetadfGeoInvTrans = new double *[m_triangle->nFacets];
+	Point2f pnts1[3], pnts2[3];
+	for (int i = 0; i<m_triangle->nFacets; i++)
+	{
+		facetadfGeoTrans[i] = new double[6];
+		facetadfGeoInvTrans[i] = new double[6];
+		for (int j = 0; j<3; j++)
+		{
+			pnts1[j].x = padfXY[2 * m_triangle->pasFacets[i].anVertexIdx[j] + 0];
+			pnts1[j].y = padfXY[2 * m_triangle->pasFacets[i].anVertexIdx[j] + 1];
+
+			pnts2[j].x = padGeoXY[2 * m_triangle->pasFacets[i].anVertexIdx[j] + 0];
+			pnts2[j].y = padGeoXY[2 * m_triangle->pasFacets[i].anVertexIdx[j] + 1];
+		}
+		GetTransInvTran(pnts1, pnts2, 3, facetadfGeoTrans[i], facetadfGeoInvTrans[i]);
+	}
+
+	//f-三角剖分影像输出
+	if (strlen(pathTri)>5)
+	{
+		GDALDatasetH m_data_tri = GDALCreate(GDALGetDriverByName("GTiff"), pathTri, xsize, ysize, 1, GDT_Int32, NULL);//三角网的位置
+		GDALRasterIO(GDALGetRasterBand(m_data_tri, 1), GF_Write, 0, 0, xsize, ysize, pdfTriangleImg, xsize, ysize, GDT_Int32, 0, 0);
+		GDALClose(m_data_tri);
+	}
+
+	//g-计算原始图像到结果图像的像元映射
+	pPositions = new DPOINT[xsize*ysize];
+	double imgPnt[2];
+	for (int i = 0; i<xsize; i++)
+	{
+		for (int j = 0; j<ysize; j++)
+		{
+			int triIndex = pdfTriangleImg[j*xsize + i] - 1;
+			if (triIndex<0)
+				continue;
+
+			imgPnt[0] = facetadfGeoTrans[triIndex][0] * i + facetadfGeoTrans[triIndex][1] * j + facetadfGeoTrans[triIndex][2];
+			imgPnt[1] = facetadfGeoTrans[triIndex][3] * i + facetadfGeoTrans[triIndex][4] * j + facetadfGeoTrans[triIndex][5];
+
+			imgPnt[0] = (imgPnt[0] - adfTrans[0]) / adfTrans[1];
+			imgPnt[1] = (imgPnt[1] - adfTrans[3]) / adfTrans[5];
+			if (imgPnt[0]<0 || imgPnt[0] >= xsizetrans || imgPnt[1] >= ysizetrans || imgPnt[1]<0)
+			{
+				pPositions[j*xsize + i].dX = -3;
+				pPositions[j*xsize + i].dX = -3;
+			}
+			else
+			{
+				pPositions[j*xsize + i].dX = imgPnt[0];
+				pPositions[j*xsize + i].dY = imgPnt[1];
+			}
+		}
+	}
+
+	//4-重采样影像////////////////////////////////////////////////////////////////////
+	pdfSrcImgData = new float[xsize*ysize];
+	pdfDstImgData = new float[xsizetrans*ysizetrans];
+	m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDstImg, xsizetrans, ysizetrans, bands, GDT_Float32, NULL);
+	for (int bn = 1; bn <= bands; bn++)
+	{
+		GDALRasterIO(GDALGetRasterBand(m_datasetSrc, bn), GF_Read, 0, 0, xsize, ysize, pdfSrcImgData, xsize, ysize, GDT_Float32, 0, 0);
+		GetImgSample(pdfSrcImgData, pPositions, xsize, ysize, xsizetrans, ysizetrans, pdfDstImgData);
+		GDALRasterIO(GDALGetRasterBand(m_datasetDst, bn), GF_Write, 0, 0, xsizetrans, ysizetrans, pdfDstImgData, xsizetrans, ysizetrans, GDT_Float32, 0, 0);
+	}
+	GDALSetGeoTransform(m_datasetDst, adfTrans);
+	GDALSetProjection(m_datasetDst, pszDstWkt);
+
+ErrEnd:
+	if (m_datasetDst != NULL)	GDALClose(m_datasetDst);
+	if (m_datasetSrc != NULL)	GDALClose(m_datasetSrc);
+	if (pdfDstImgData)	delete[]pdfDstImgData;
+	if (pdfSrcImgData)	delete[]pdfSrcImgData;
+	if (padfXY)			delete[]padfXY;
+	if (padGeoXY)		delete[]padGeoXY;
+	if (facetadfGeoInvTrans)
+	{
+		for (int i = 0; i<m_triangle->nFacets; i++)
+			delete[]facetadfGeoInvTrans[i];
+		delete[]facetadfGeoInvTrans;
+	}
+	if (facetadfGeoTrans)
+	{
+		for (int i = 0; i<m_triangle->nFacets; i++)
+			delete[]facetadfGeoTrans[i];;
+		delete[]facetadfGeoTrans;
+	}
+	if ((_access(temp_tri, 0)) == 0)
+		remove(temp_tri);
+
+	if (pdfTriangleImg)	delete[]pdfTriangleImg;
+	if (m_triangle)		GDALTriangulationFree(m_triangle);
+	if (pPositions)		delete[]pPositions;
+
+	return IError;
+}
 long  GeoGCPProcess::GeoProc_GetENVIGcp(const char* pathGCP, double *gcps, int num, int headline/* =0 */)
 {
 	ifstream ifs(pathGCP, ios_base::in);

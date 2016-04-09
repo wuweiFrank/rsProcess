@@ -80,6 +80,7 @@ void WriteENVIHeader(const char* pathHeader, ENVIHeader mImgHeader)
 	fclose(fpHead);		//关闭文件
 }
 
+
 //获取均值和标准差
 void GetAveDev(unsigned char *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate)
 {
@@ -139,8 +140,195 @@ void GetAveDev(unsigned short *pBuffer, int nSamples, int nLines, int nBand, flo
 	fDeviate = (float)sqrt(dMul);
 	return;
 }
+void GetAveDev(float *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate)
+{
+	double dSum = 0, dMul = 0;
+	__int64 nCount = 0;
+	int i = 0, j = 0;
+	int nOffset = 0;
+	fAverage = 0;
+	fDeviate = 0;
+	int nPix = nLines*nSamples;
+	for (i = 0; i<nPix; i++)
+	{
+		nOffset = nBand*nPix + i;
+		if (pBuffer[nOffset] != 0)
+		{
+			dSum += pBuffer[nOffset];
+			dMul += pBuffer[nOffset] * pBuffer[nOffset];
+			nCount++;
+		}
+	}
+	if (nCount == 0)
+	{
+		return;
+	}
+	fAverage = dSum / nCount;
+	dMul /= nCount;
+	dMul -= fAverage*fAverage;
+	fDeviate = (float)sqrt(dMul);
+	return;
+}
 
 //对数据进行采样
+void GetImgSample(unsigned char *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned char *pRegBuffer)
+{
+	int i = 0, j = 0;			//行列循环变量
+	DPOINT originPnt;			//影像左上点
+	originPnt.dX = minPt.dX;
+	originPnt.dY = maxPt.dY;
+
+	float *fDGrey = NULL;			//灰度存储数组
+	float *fDItem = NULL;			//权值存储数组
+	try
+	{
+		fDGrey = new float[nReSamples*nReLines];
+	}
+	catch (bad_alloc)
+	{
+		exit(-1);
+	}
+	try
+	{
+		fDItem = new float[nReSamples*nReLines];
+	}
+	catch (bad_alloc)
+	{
+		exit(-1);
+	}
+	memset(fDGrey, 0, nReSamples*nReLines*sizeof(float));	//初始化化
+	memset(fDItem, 0, nReSamples*nReLines*sizeof(float));	//初始化化
+
+	for (i = 0; i<nLines; i++)
+	{
+#pragma omp parallel for
+		for (j = 0; j<nSamples; j++)
+		{
+			unsigned char fDN = 0;
+			float fTempGrey[4];						//定义权值数组	
+			int nC = 0, nY = 0;						//坐标取整变量
+			double fDX = 0, fDY = 0;				//坐标取余数变量
+			DPOINT presentPnt;
+			presentPnt.dX = 0;
+			presentPnt.dY = 0;
+
+			long lPixOffset = i*nSamples + j;
+			//对于原始影像(i,j)坐标为(x,y)，对应新图像位置为
+			presentPnt.dX = fabs(pGoundPt[lPixOffset].dX - originPnt.dX) / fGSDX;
+			presentPnt.dY = fabs(pGoundPt[lPixOffset].dY - originPnt.dY) / fGSDY;
+			//由于presentPnt不是整数，进行取整
+			nC = (int)presentPnt.dX;
+			nY = (int)presentPnt.dY;
+			//由于presentPnt不是整数，进行取余
+			fDX = presentPnt.dX - nC;
+			fDY = presentPnt.dY - nY;
+			fDN = pImgBuffer[lPixOffset];		//获取当前点的原始DN值
+
+			fTempGrey[0] = (float)(1 - fDX)*(1 - fDY)*fDN;
+			fTempGrey[1] = (float)fDX*(1 - fDY)*fDN;
+			fTempGrey[2] = (float)(1 - fDX)*fDY*fDN;
+			fTempGrey[3] = (float)fDX*fDY*fDN;
+
+			if (nC >= 0 && nC<nReSamples && nY >= 0 && nY<nReLines)
+			{
+				long lOffset = 0;
+				lOffset = nY*nReSamples + nC;
+				fDGrey[lOffset] += fTempGrey[0];
+				fDItem[lOffset] += (1 - fDX)*(1 - fDY);						//左上点
+				if (nC < nReSamples - 1)	//未处于右边界
+				{
+					fDGrey[lOffset + 1] += (float)fTempGrey[1];
+					fDItem[lOffset + 1] += (float)fDX*(1 - fDY);					//右上点
+				}
+				if (nY < nReLines - 1)	//未处于下边界
+				{
+					fDGrey[lOffset + nReSamples] += (float)fTempGrey[2];
+					fDItem[lOffset + nReSamples] += (float)(1 - fDX)*fDY;		//左下点
+				}
+				if (nC<nReSamples - 1 && nY<nReLines - 1)
+				{
+					fDGrey[lOffset + nReSamples + 1] += fTempGrey[3];
+					fDItem[lOffset + nReSamples + 1] += fDX*fDY;			//右下点
+				}
+			}
+		}
+	}
+	for (i = 0; i<nReLines; i++)
+	{
+#pragma omp parallel for
+		for (j = 0; j<nReSamples; j++)
+		{
+			long lOffset = i*nReSamples + j;
+			if (fDItem[lOffset] != 0)
+			{
+				pRegBuffer[lOffset] = unsigned char(fDGrey[lOffset] / fDItem[lOffset]);
+			}
+			else	//修复黑点
+			{
+				if (i>0 && i<nReLines - 1 && j>0 && j<nReSamples - 1)	//不处于边界位置
+				{
+					float fSumValues = 0;
+					int nCount = 0;
+
+					if (fDItem[lOffset - nReSamples - 1] != 0)	//左上
+					{
+						nCount++;
+						fSumValues += fDGrey[lOffset - nReSamples - 1] / fDItem[lOffset - nReSamples - 1];
+					}
+					if (fDItem[lOffset - nReSamples] != 0)		//上
+					{
+						nCount++;
+						fSumValues += fDGrey[lOffset - nReSamples] / fDItem[lOffset - nReSamples];
+					}
+					if (fDItem[lOffset - nReSamples + 1] != 0)	//右上
+					{
+						nCount++;
+						fSumValues += fDGrey[lOffset - nReSamples + 1] / fDItem[lOffset - nReSamples + 1];
+					}
+					if (fDItem[lOffset - 1] != 0)					//左
+					{
+						nCount++;
+						fSumValues += fDGrey[lOffset - 1] / fDItem[lOffset - 1];
+					}
+					if (fDItem[lOffset + 1] != 0)					//右
+					{
+						nCount++;
+						fSumValues += fDGrey[lOffset + 1] / fDItem[lOffset + 1];
+					}
+					if (fDItem[lOffset + nReSamples - 1] != 0)	//左下
+					{
+						nCount++;
+						fSumValues += fDGrey[lOffset + nReSamples - 1] / fDItem[lOffset + nReSamples - 1];
+					}
+					if (fDItem[lOffset + nReSamples] != 0)		//下
+					{
+						nCount++;
+						fSumValues += fDGrey[lOffset + nReSamples] / fDItem[lOffset + nReSamples];
+					}
+					if (fDItem[lOffset + nReSamples + 1] != 0)	//右下
+					{
+						nCount++;
+						fSumValues += fDGrey[lOffset + nReSamples + 1] / fDItem[lOffset + nReSamples + 1];
+					}
+					if (nCount >= 5)	//如果周围有五个以上不是黑点就进行均值处理
+					{
+						pRegBuffer[lOffset] = unsigned char(fSumValues / nCount);
+					}
+				}
+			}
+		}
+	}
+	if (fDGrey)
+	{
+		delete[]fDGrey;
+		fDGrey = NULL;
+	}
+	if (fDItem)
+	{
+		delete[]fDItem;
+		fDGrey = NULL;
+	}
+}
 void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned short *pRegBuffer)
 {
 	int i = 0, j = 0;			//行列循环变量
@@ -457,6 +645,165 @@ void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *
 		fDGrey = NULL;
 	}
 }
+void GetImgSample(float *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLines, int nReImgWidth, int nReLines, float *pRegBuffer)
+{
+	float *fDGrey = NULL, *fDItem = NULL;
+	try 
+	{
+		fDGrey = new float[nReImgWidth * nReLines];
+		fDItem = new float[nReImgWidth * nReLines];
+		memset(fDGrey, 0, nReImgWidth * nReLines*sizeof(float));
+		memset(fDItem, 0, nReImgWidth * nReLines*sizeof(float));
+	}
+	catch(bad_alloc)
+	{
+		printf("allocate memory error\n");
+		exit(-1);
+	}
+
+	for (long ns = 0; ns<nReImgWidth*nReLines; ns++)
+		pRegBuffer[ns] = 0.0;
+
+	int i = 0, j = 0;
+	int nC = 0, nY = 0;
+	double fDX = 0, fDY = 0;
+
+	unsigned long nOffset = 0;
+
+	for (i = 0; i<nLines; i++)
+	{
+		for (j = 0; j<nImgWidth; j++)
+		{
+			nC = (int)pPositions[i*nImgWidth + j].dX;
+			nY = (int)pPositions[i*nImgWidth + j].dY;       //dddd
+
+			fDX = pPositions[i*nImgWidth + j].dX - nC;
+			fDY = pPositions[i*nImgWidth + j].dY - nY;
+
+			float fDN = pImgBuffer[i*nImgWidth + j];
+
+			float fTempGrey[4];
+			memset(fTempGrey, 0, 4 * sizeof(float));
+			fTempGrey[0] = float((1 - fDX)*(1 - fDY)*fDN);
+			fTempGrey[1] = float(fDX*(1 - fDY)*fDN);
+			fTempGrey[2] = float((1 - fDX)*fDY*fDN);
+			fTempGrey[3] = float(fDX*fDY*fDN);
+
+			if (nC >= 0 && nC<nReImgWidth && nY >= 0 && nY<nReLines)
+			{
+				nOffset = nY*nReImgWidth + nC;
+				fDGrey[nOffset] += fTempGrey[0];
+				fDItem[nOffset] += float((1 - fDX)*(1 - fDY));
+				if (nC < nReImgWidth - 1)
+				{
+					fDGrey[nOffset + 1] += fTempGrey[1];
+					fDItem[nOffset + 1] += float(fDX*(1 - fDY));
+				}
+				if (nY < nReLines - 1)
+				{
+					fDGrey[nOffset + nReImgWidth] += fTempGrey[2];
+					fDItem[nOffset + nReImgWidth] += float((1 - fDX)*fDY);
+				}
+				if (nC<nReImgWidth - 1 && nY<nReLines - 1)
+				{
+					fDGrey[nOffset + nReImgWidth + 1] += fTempGrey[3];
+					fDItem[nOffset + nReImgWidth + 1] += float(fDX*fDY);
+				}
+			}
+		}
+	}
+
+	float fSumValues = 0;
+	float fSumDItems = 0;
+	int   nCount = 0;
+	int sss = 0;
+
+	for (i = 0; i<nReLines; i++)
+	{
+		for (j = 0; j<nReImgWidth; j++)
+		{
+			nOffset = i*nReImgWidth + j;
+			if (fDItem[nOffset] != 0)
+			{
+				pRegBuffer[nOffset] = fDGrey[nOffset] / fDItem[nOffset];
+			}
+			else
+			{
+				if (i>0 && i<nReLines - 1 && j>0 && j<nReImgWidth - 1)
+				{
+					fSumValues = 0;
+					fSumDItems = 0;
+					nCount = 0;
+
+					if (fDItem[nOffset - nReImgWidth - 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset - nReImgWidth - 1] / fDItem[nOffset - nReImgWidth - 1];//
+						fSumDItems += fDItem[nOffset - nReImgWidth - 1];
+					}
+					if (fDItem[nOffset - nReImgWidth] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset - nReImgWidth] / fDItem[nOffset - nReImgWidth];
+						fSumDItems += fDItem[nOffset - nReImgWidth];
+					}
+					if (fDItem[nOffset - nReImgWidth + 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset - nReImgWidth + 1] / fDItem[nOffset - nReImgWidth + 1];
+						fSumDItems += fDItem[nOffset - nReImgWidth + 1];
+					}
+					if (fDItem[nOffset - 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset - 1] / fDItem[nOffset - 1];
+						fSumDItems += fDItem[nOffset - 1];
+					}
+					if (fDItem[nOffset + 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset + 1] / fDItem[nOffset + 1];
+						fSumDItems += fDItem[nOffset + 1];
+					}
+					if (fDItem[nOffset + nReImgWidth - 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset + nReImgWidth - 1] / fDItem[nOffset + nReImgWidth - 1];
+						fSumDItems += fDItem[nOffset + nReImgWidth - 1];
+					}
+					if (fDItem[nOffset + nReImgWidth] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset + nReImgWidth] / fDItem[nOffset + nReImgWidth];
+						fSumDItems += fDItem[nOffset + nReImgWidth];
+					}
+					if (fDItem[nOffset + nReImgWidth + 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset + nReImgWidth + 1] / fDItem[nOffset + nReImgWidth + 1];
+						fSumDItems += fDItem[nOffset + nReImgWidth + 1];
+					}
+
+					if (nCount >= 1)
+					{
+						//	if( fSumDItems>0.5 )
+						pRegBuffer[nOffset] = fSumValues / nCount;
+						sss++;
+					}
+
+				}
+			}
+		}
+	}
+
+	if (fDGrey != NULL)
+		delete[]fDGrey;
+	if (fDItem != NULL)
+		delete[]fDItem;
+	fDGrey = NULL;
+	fDItem = NULL;
+}
+
 
 //获取直方图匹配后的直方图
 //影像2的直方图为基准

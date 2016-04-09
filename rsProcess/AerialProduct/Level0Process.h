@@ -33,6 +33,10 @@ public:
 	//修改短波红外Event信息，由于对于全谱段数据短波Event的百微秒是正确的，整数秒存在异常
 	//因此需要对全谱段短波数据进行处理
 	long Level0Proc_ModifySWIREvent(const char* pathEvent,const char* pathExEvent, float fTime);
+
+	//短波数据是反序的因此在转换为BSQ的时候要顺便反序排列
+	//在进行处理的时候给一个inverse变量判断是否需要进行反序运算
+	long Level0Proc_RawToBSQ(const char* pathRawBIL, const char* pathBSQ, bool inverse );
 };
 
 
