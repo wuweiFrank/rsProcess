@@ -120,6 +120,12 @@
     <ClInclude Include="UAV\UAVGeoCorrection.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="UAV\UAVUnityTest.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EXIF.H">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -201,6 +207,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UAV\UAVGeoCorrection.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UAV\UAVUnityTest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EXIF.CPP">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

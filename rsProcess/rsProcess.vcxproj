@@ -154,6 +154,7 @@
     <ClInclude Include="AerialProduct\ProductTest.h" />
     <ClInclude Include="AuxiliaryFunction.h" />
     <ClInclude Include="CoordinateTrans.h" />
+    <ClInclude Include="EXIF.H" />
     <ClInclude Include="FrequencyFunc\waveletTrans.h" />
     <ClInclude Include="GDALTools.h" />
     <ClInclude Include="GeoPOSProcess.h" />
@@ -175,6 +176,7 @@
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="tsmUTM.h" />
     <ClInclude Include="UAV\UAVGeoCorrection.h" />
+    <ClInclude Include="UAV\UAVUnityTest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AerialProduct\ExtractXML.cpp" />
@@ -186,6 +188,7 @@
     <ClCompile Include="AerialProduct\THRLevel1Process.cpp" />
     <ClCompile Include="AuxiliaryFunction.cpp" />
     <ClCompile Include="CoordinateTrans.cpp" />
+    <ClCompile Include="EXIF.CPP" />
     <ClCompile Include="FrequencyFunc\waveletTrans.cpp" />
     <ClCompile Include="GDALTools.cpp" />
     <ClCompile Include="GeoPOSProcess.cpp" />
@@ -209,6 +212,7 @@
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="tsmUTM.cpp" />
     <ClCompile Include="UAV\UAVGeoCorrection.cpp" />
+    <ClCompile Include="UAV\UAVUnityTest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

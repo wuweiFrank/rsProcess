@@ -3,8 +3,11 @@
 #include"..\gdal\include\gdal_priv.h"
 #include"..\GDALTools.h"
 #include"..\AuxiliaryFunction.h"
+#include"..\EXIF.H"
+
 #include"UAVGeoCorrection.h"
 #include<omp.h>
+#include<vector>
 using namespace std;
 
 long UAVPOSProcess::GeoPOSProc_ReadPartPOS(const char *pPOSFile, long nLines, double &dB, double &dL, double &dH, int nbeginLine)
@@ -53,16 +56,16 @@ long UAVPOSProcess::GeoPOSProc_ReadPartPOS(const char *pPOSFile, long nLines, do
 			goto ErrEnd;
 		}
 
-		dB += fReadData[1];
-		dL += fReadData[2];
+		dL += fReadData[1];
+		dB += fReadData[2];
 		dH += fReadData[3];
 
-		this->m_geo_POS[i].m_latitude	= double(fReadData[1] * PI / 180.0);       //X
-		this->m_geo_POS[i].m_longitude	= double(fReadData[2] * PI / 180.0);        //Y
-		this->m_geo_POS[i].m_height		= double(fReadData[3]);                 //height
+		this->m_geo_POS[i].m_longitude  = double(fReadData[1] * PI / 180.0);		//X
+		this->m_geo_POS[i].m_latitude   = double(fReadData[2] * PI / 180.0);        //Y
+		this->m_geo_POS[i].m_height		= double(fReadData[3]);						//height
 		this->m_geo_POS[i].m_roll		= double(fReadData[4] * PI / 180.0);        //roll
 		this->m_geo_POS[i].m_pitch		= double(fReadData[5] * PI / 180.0);        //pitch
-		this->m_geo_POS[i].m_yaw		= double((fReadData[6])*PI / 180.0);     //heading
+		this->m_geo_POS[i].m_yaw		= double((fReadData[6])*PI / 180.0);		//heading
 	}
 	lError = 0;
 	m_nPOSLines = realLines;
@@ -77,6 +80,175 @@ ErrEnd:
 		fpin = NULL;
 	}
 	return lError;
+}
+
+long UAVPOSProcess::GeoPOSProc_ExtractSBET(const char* pathSBET, const char* pathEvent, const char* pathPOS, float fOffsetGPS)
+{
+	FILE* fsbet = NULL;
+	FILE* fEvent = NULL;
+	FILE* fPOS = NULL;
+
+	char date1[50], date2[50];
+	double ID, hour, minute, second;
+	double dL, dB, dH, roll, pitch, yaw;
+	fopen_s(&fsbet, pathSBET, "r");
+	fopen_s(&fEvent, pathEvent, "r");
+	fopen_s(&fPOS, pathPOS, "w");
+
+	struct tmpSBET
+	{
+		double ImgID;
+		double hour, minute, second;
+		double dL, dB, dH, roll, pitch, yaw;
+	};
+	struct tmpEvent
+	{
+		double year, month, day;
+		double hour, minute, second;
+	};
+	vector<tmpSBET> sbets;
+	vector<tmpEvent>events;
+	if (fsbet == NULL || fEvent == NULL || fPOS == NULL)
+	{
+		printf("open file failed\n");
+		exit(-1);
+	}
+	char line[2048];
+
+	//获取sbet
+	do
+	{
+		fgets(line, 2048, fsbet);
+		if (line != "")
+			sscanf_s(line, "%lf%s%lf:%lf:%lf%lf%lf%lf%lf%lf%lf", &ID, date1, 50, &hour, &minute, &second, &dL, &dB, &dH, &roll, &pitch, &yaw);
+		tmpSBET sbet;
+		sbet.ImgID = ID;
+		sbet.hour = hour;
+		sbet.minute = minute;
+		sbet.second = second;
+		sbet.dL = dL;
+		sbet.dB = dB;
+		sbet.dH = dH;
+		sbet.roll = roll;
+		sbet.pitch = pitch;
+		sbet.yaw = yaw;
+		sbets.push_back(sbet);
+	} while (!feof(fsbet));
+
+	//获取event
+	do
+	{
+		tmpEvent tevent;
+		fgets(line, 2048, fEvent);
+		if (line != "")
+			sscanf_s(line, "%lf:%lf:%lf%lf:%lf:%lf:%lf",&tevent.year,&tevent.month,&tevent.day,&tevent.hour,&tevent.minute,&tevent.second);
+		if (tevent.second + fOffsetGPS >= 60)
+		{
+			if (tevent.minute + 1 >= 60)
+			{
+				tevent.hour += 1;
+				tevent.minute = int(tevent.minute+1) % 60;
+				tevent.second = int(tevent.second) % 60;
+
+			}
+			else
+			{
+				tevent.minute += 1;
+				tevent.second = int(tevent.second+ fOffsetGPS) % 60;
+			}
+		}
+		else
+		{
+			tevent.second += fOffsetGPS;
+		}
+		events.push_back(tevent);
+	} while (!feof(fEvent));
+
+	//插值
+	double totalExcludeImagesBeg = 0;
+	double totalExcludeImagesEnd = 0;
+	double begsbet = 0, endsbet = 0;
+	double imgTotal = 0;
+	for (int i = 0; i < events.size(); ++i)
+	{
+		double timeTosecondEvent = events[i].hour * 3600 + events[i].minute * 60 + events[i].second;
+		double timeTosecondBeg = sbets[begsbet].hour * 3600 + sbets[begsbet].minute * 60 + sbets[begsbet].second;
+		double timeTosecondEnd = sbets[endsbet].hour * 3600 + sbets[endsbet].minute * 60 + sbets[endsbet].second;
+		if (timeTosecondBeg > timeTosecondEvent&&begsbet == 0)
+		{
+			totalExcludeImagesBeg++;
+			continue;
+		}
+		if (timeTosecondEnd<timeTosecondEvent&&begsbet == sbets.size() - 1)
+		{
+			totalExcludeImagesEnd++;
+			continue;
+		}
+
+		double tempbegsbet = begsbet;
+		double tempendsbet = endsbet;
+		do {
+			if (begsbet < 0)
+				break;
+			if (begsbet >= sbets.size() - 1)
+				break;
+			timeTosecondBeg = sbets[begsbet].hour * 3600 + sbets[begsbet].minute * 60 + sbets[begsbet].second;
+			timeTosecondEnd = sbets[endsbet].hour * 3600 + sbets[endsbet].minute * 60 + sbets[endsbet].second;
+
+			if (timeTosecondBeg > timeTosecondEvent)
+			{
+				begsbet--;
+				continue;
+			}
+			if (begsbet<sbets.size()-1)
+			{
+				if ((sbets[begsbet + 1].hour * 3600 + sbets[begsbet + 1].minute * 60 + sbets[begsbet + 1].second)<timeTosecondEvent)
+				{
+					begsbet++;
+					continue;
+				}
+			}
+			if (timeTosecondEnd < timeTosecondEvent)
+			{
+				endsbet++;
+				continue;
+			}
+			if (endsbet > 0)
+			{
+				if (sbets[endsbet - 1].hour * 3600 + sbets[endsbet - 1].minute * 60 + sbets[endsbet - 1].second > timeTosecondEvent)
+				{
+					endsbet--;
+					continue;
+				}
+			}
+			if (timeTosecondBeg<=timeTosecondEvent&&timeTosecondEnd>=timeTosecondEvent)
+				break;
+		} while (tempbegsbet != begsbet||tempendsbet != endsbet);
+
+		if (begsbet < 0)
+			break;
+		if (begsbet > sbets.size() - 1)
+			break;
+
+		//根据三个时间对POS数据进行插值
+		float scale;
+		scale = (timeTosecondEvent - timeTosecondBeg) / (float)(timeTosecondEnd - timeTosecondBeg);
+		float dBscale = 0, dLscale = 0, dHscale = 0, rollscale = 0, pitchscale = 0, yawscale = 0;
+		dBscale = (sbets[endsbet].dB - sbets[begsbet].dB) * scale;
+		dLscale = (sbets[endsbet].dL - sbets[begsbet].dL) * scale;
+		dHscale = (sbets[endsbet].dH - sbets[begsbet].dH) * scale;
+		rollscale = (sbets[endsbet].roll - sbets[begsbet].roll) * scale;
+		pitchscale = (sbets[endsbet].pitch - sbets[begsbet].pitch) * scale;
+		yawscale = (sbets[endsbet].yaw - sbets[begsbet].yaw) * scale;
+		imgTotal++;
+		fprintf(fPOS, "%lf %lf %lf %lf %lf %lf %lf\n", imgTotal, sbets[begsbet].dL + dLscale, sbets[begsbet].dB + dBscale, sbets[begsbet].dH + dHscale
+			, sbets[begsbet].roll + rollscale, sbets[begsbet].pitch + pitchscale, sbets[begsbet].yaw + yawscale);
+	}
+	printf("begin exclude image :%lf\n", totalExcludeImagesBeg);
+	printf("end   exclude image :%lf\n", totalExcludeImagesEnd);
+	fclose(fsbet);
+	fclose(fEvent);
+	fclose(fPOS);
 }
 
 long UAVPOSProcess::GeoPOSProc_ExtractEO(POS m_perpos, EO &m_pereo)
@@ -129,23 +301,23 @@ long UAVGeoCorrection::UAVGeoCorrection_GeoCorrect(const char* pathSrcDir, const
 	if (lError != 0)
 		return lError;
 	m_POS_Proc.GeoPOSProc_ReadPartPOS(pathPOS, lines, dB, dL, dH, POSbegline);
-	//lError = m_POS_Proc.GeoPOSProc_ReadEOFile(pathDstEO, dB, dL, dH);
 
-#pragma omp parallel for
 	for (int i = IMGbegline; i<lines + IMGbegline; i++)
 	{
 		char pathSrcImg[256], pathDstImg[256], cA[20], cB[20];
 		EO tmpEO;
+		double tempdL = m_POS_Proc.m_geo_POS[i - IMGbegline].m_longitude;
+		double tempdB = m_POS_Proc.m_geo_POS[i - IMGbegline].m_latitude;
 		m_POS_Proc.GeoPOSProc_ExtractEO(m_POS_Proc.m_geo_POS[i - IMGbegline], tmpEO);
 		//指定格式
-		sprintf_s(cA, "\\IMG_%004d.JPG", i);
-		sprintf_s(cB, "\\IMG_%004d.tif", i);
+		sprintf_s(cA, "\\DSC%005d.JPG", i);
+		sprintf_s(cB, "\\DSC%005d.tif", i);
 
-		strcpy_s(pathSrcImg, pathDstDir);
+		strcpy_s(pathSrcImg, pathSrcDir);
 		strcat_s(pathSrcImg, cA);
 		strcpy_s(pathDstImg, pathDstDir);
 		strcat_s(pathDstImg, cB);
-		lError = UAVGeoCorrection_GeoCorrect(pathSrcImg, pathDstImg, /*m_POS_Proc.m_geo_EO[i - IMGbegline]*/tmpEO, dL, dB, fLen, fGSD, AvgHeight);
+		lError = UAVGeoCorrection_GeoCorrect(pathSrcImg, pathDstImg, /*m_POS_Proc.m_geo_EO[i - IMGbegline]*/tmpEO, tempdL, tempdB, fLen, fGSD, AvgHeight);
 		if (lError != 0)
 		{
 			printf("%s image correct error\n", pathSrcImg);
@@ -190,7 +362,8 @@ long UAVGeoCorrection::UAVGeoCorrection_GeoCorrect(const char* pathSrc, const ch
 
 	if (lError != 0)
 		return lError;
-
+	dLongitude = dL;
+	dLatitude = dB;
 	if (dLongitude*180.0 / PI < -180.0 || dLongitude*180.0 / PI > 180.0)
 		return -1;
 	if (dLatitude*180.0 / PI <= -90.0 || dLatitude*180.0 / PI >= 90.0)
@@ -215,7 +388,12 @@ long UAVGeoCorrection::UAVGeoCorrection_GeoCorrect(const char* pathSrc, const ch
 		DPOINT pImagePnts[5];
 		//计算对应的地面点的坐标
 		lError = UAVGeoCorrection_GeoPntsProb(dLatitude, dLongitude, AvgHeight, m_preeo, fLen,ImageWidth,ImageHeight, pGoundPnt, pModelPnts, 5);
-
+		
+		pImagePnts[0].dX = ImageWidth / 2; pImagePnts[0].dY = ImageHeight / 2;
+		pImagePnts[1].dX = 0; pImagePnts[1].dY = 0;
+		pImagePnts[2].dX = 0; pImagePnts[2].dY = ImageHeight;
+		pImagePnts[3].dX = ImageWidth; pImagePnts[3].dY = 0;
+		pImagePnts[4].dX = ImageWidth; pImagePnts[4].dY = ImageHeight;
 		double* pdfGCPs = new double[5 * 4];
 		for (int i = 0; i<5; i++)
 		{
@@ -326,8 +504,8 @@ long UAVGeoCorrection::UAVGeoCorrection_GeoPntsProb(double dB, double dL, double
 	pMapImgPnt[4].dX = width; pMapImgPnt[4].dY = height;
 	for (int i = 0; i<5; ++i)
 	{
-		pMapImgPnt[i].dX = pMapImgPnt[i].dX - width / 2;
-		pMapImgPnt[i].dY = height / 2 - pMapImgPnt[i].dY;
+		pMapImgPnt[i].dX = width / 2- pMapImgPnt[i].dX;
+		pMapImgPnt[i].dY = pMapImgPnt[i].dY- height / 2;
 	}
 
 	CoordinateTrans m_coordiTrans;
@@ -625,5 +803,36 @@ long UAVGeoCorrection::UAVGeoCorrection_GeoPntsAccu(double dB, double dL, double
 	}
 	if (pDEMPt != NULL)
 		delete[]pDEMPt;
+	return 0;
+}
+
+long UAVGeoCorrection::UAVGeoCorrection_ExifTime(const char* pathDir, int begImgNum, int imageNumbers, const char* pathTime)
+{
+
+	FILE* fout = NULL;
+	if (fopen_s(&fout, pathTime, "w") != 0)
+	{
+		printf("open output file error\n");
+		exit(-1);
+	}
+	for (int i = begImgNum; i<imageNumbers + begImgNum; i++)
+	{
+		char pathSrcImg[256], cA[20];
+		//指定格式
+		sprintf_s(cA, "\\DSC%005d.JPG", i);
+		strcpy_s(pathSrcImg, pathDir);
+		strcat_s(pathSrcImg, cA);
+		FILE* fin = NULL;
+		if (fopen_s(&fin, pathSrcImg, "rb") != 0)
+		{
+			printf("open jpeg file error\n");
+			exit(-1);
+		}
+		Cexif m_exif;
+		m_exif.DecodeExif(fin);
+		fprintf(fout, "%s\n", m_exif.m_exifinfo->DateTime);;
+		fclose(fin);
+	}
+	fclose(fout);
 	return 0;
 }

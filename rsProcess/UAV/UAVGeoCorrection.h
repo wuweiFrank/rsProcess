@@ -11,7 +11,8 @@ public:
 	long GeoPOSProc_ReadPartPOS(const char *pPOSFile, long nLines, double &dB, double &dL, double &dH, int nbeginLine);
 
 	//2.无人机影像一般不需要解算SBET文件，无人机POS数据可以直接获取
-	long GeoPOSProc_ExtractSBET(const char* pathSBET, const char* pathEvent, const char* pathPOS, float fOffsetGPS) { return 0; }
+	//2016/04/10 由于发现影像获取的时间和GPS时间存在差异，考虑根据影像时间内插GPS时间才行
+	long GeoPOSProc_ExtractSBET(const char* pathSBET, const char* pathEvent, const char* pathPOS, float fOffsetGPS);
 
 	//3.由单个POS数据解算EO元素，无人机不考虑安置角和安置矢量
 	long GeoPOSProc_ExtractEO(POS m_perpos, EO &m_pereo);
@@ -25,6 +26,18 @@ public:
 class UAVGeoCorrection : public Level2Process
 {
 public:
+	//必须重载的函数
+	long Level2Proc_Product2A(const char *pFile, const char *pCFile, const char *pEOFile, float fGSDX, float fGSDY, double fElevation, int nEOOffset,
+		float fFov, float fIFov, float fFocalLen, bool bIGM, const char *pIGMFile, bool bInverse = false) {
+		printf("UAV Image not product\n"); 
+		return 0;
+	}
+	long Level2Proc_Product2B(const char *pFile, const char *pCFile, const char *pEOFile, float fGSDX, float fGSDY, double fElevation, int nEOOffset,
+		float fFov, float fIFov, float fFocalLen, const char* pDEMFile, bool bIGM, const char *pIGMFile, bool bInverse = false) {
+		printf("UAV Image not product\n");
+		return 0;
+	}
+
 	//1.对影像集进行校正
 	long UAVGeoCorrection_GeoCorrect(const char* pathSrcDir, const char* pathDstDir, const char* pathPOS, const char* pathDEM,
 																			int IMGbegline, int POSbegline, int lines,double fLen , double fGSD, double AvgHeight);
@@ -37,4 +50,8 @@ public:
 
 	//4.精确计算每个点的坐标然后进行校正
 	long UAVGeoCorrection_GeoPntsAccu(double dB, double dL, double dH, EO pEO, double fLen, int width, int height, THREEDPOINT *pGoundPnt,const char* pathDEM);
+
+	//5.解算影像获取的时间，感觉成像时间和GPS时间之间有差异，并不是同时的
+	long UAVGeoCorrection_ExifTime(const char* pathDir, int begImgNum, int imageNumbers, const char* pathTime);
+
 };
