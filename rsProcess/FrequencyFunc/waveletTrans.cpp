@@ -200,7 +200,6 @@ void LPFliter(char* pathSrc,char* pathDst)
 *		   int	 nWidth_H	      ：图像属性参数，数值为原始图像宽度值的一半	*
 *		   float fRadius		  ：小波变换因子，在调用时候已指定数值为1		*
 ********************************************************************************/
-
 void Hori_Transform(float ** spOriginData, float ** spTransData0, int nHeight, int nWidth_H, float fRadius)
 {
 	int Trans_W,				//图像扫描线控制：横坐标
@@ -415,7 +414,6 @@ void Vert_Transform(float *  spOriginData, float *  spTransData1, int nHeight_H,
 *			int   layer			：小波变换的层数，数值为1层						*
 *			float fRadius		：小波变换因子，在调用时候已指定数值为1.414		*
 ********************************************************************************/
-
 void DWT_Once(float ** spOriginData, float ** spTransData0, float ** spTransData1, int nHeight, int nHeight_H, int nWidth, int nWidth_H, int layer, float fRadius)
 {
 	int Trans_W,				//图像扫描线控制：横坐标
@@ -611,7 +609,6 @@ void DWT_Once(float *  spOriginData, float *  spTransData0, float *  spTransData
 *			int   layer			：小波变换的层数，数值为2层						*
 *			float fRadius		：小波变换因子，在调用时候已指定数值为1.414		*
 ********************************************************************************/
-
 void DWT_TwoLayers(float ** spOriginData, float ** spTransData0, float ** spTransData1, int nHeight, int nHeight_H, int nWidth, int nWidth_H, int layer, float fRadius)
 {
 	int i;
@@ -697,7 +694,6 @@ void DWT_TwoLayers(float *  spOriginData, float *  spTransData0, float *  spTran
 *			int   layer			：小波变换的层数,数值为3层						*
 *			float fRadius		：小波变换因子，在调用时候已指定数值为1.414		*
 ********************************************************************************/
-
 void DWT_TriLayers(float ** spOriginData, float ** spTransData0, float ** spTransData1, int nHeight, int nHeight_H, int nWidth, int nWidth_H, int layer, float fRadius)
 {
 	int i;
@@ -783,7 +779,6 @@ void DWT_TriLayers(float *  spOriginData, float *  spTransData0, float *  spTran
 *			int   layer			：小波变换的层数,数值为3层						*
 *			float fRadius		：小波变换因子，在调用时候已指定数值为1.414		*
 ********************************************************************************/
-
 void DWTi_Once(float  **spData, float  **spTransData0, float  **spTransData1, int nHeight, int nHeight_H, int nWidth, int nWidth_H, int layer, float fRadius)
 {
 	int Trans_W,				//图像扫描线控制：横坐标

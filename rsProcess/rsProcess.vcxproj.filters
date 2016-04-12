@@ -126,6 +126,18 @@
     <ClInclude Include="EXIF.H">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="RTree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lidar\Geometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lidar\LidarReader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lidar\LidarDefs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -213,6 +225,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="EXIF.CPP">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lidar\LidarDefs.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lidar\LidarReader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -161,6 +161,9 @@
     <ClInclude Include="Global.h" />
     <ClInclude Include="HyperSpectral\fusionfunc.h" />
     <ClInclude Include="HyperSpectral\HyperSpectural.h" />
+    <ClInclude Include="lidar\Geometry.h" />
+    <ClInclude Include="lidar\LidarDefs.h" />
+    <ClInclude Include="lidar\LidarReader.h" />
     <ClInclude Include="matrixOperation.h" />
     <ClInclude Include="OPENCVTools.h" />
     <ClInclude Include="rapidxml\rapidxml.hpp" />
@@ -170,6 +173,7 @@
     <ClInclude Include="rsImgProcess\ImageBlock.h" />
     <ClInclude Include="rsImgProcess\SampleFunc.h" />
     <ClInclude Include="rsImgProcess\spFliter.h" />
+    <ClInclude Include="RTree.h" />
     <ClInclude Include="RunObject.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -197,6 +201,8 @@
     <ClCompile Include="HyperSpectral\sparse_represent.cpp" />
     <ClCompile Include="HyperSpectral\umixing.cpp" />
     <ClCompile Include="HyperSpectral\wavelet_fusion.cpp" />
+    <ClCompile Include="lidar\LidarDefs.cpp" />
+    <ClCompile Include="lidar\LidarReader.cpp" />
     <ClCompile Include="matrixOperation.cpp" />
     <ClCompile Include="OPENCVTools.cpp" />
     <ClCompile Include="rsImgProcess\ImageBlock.cpp" />
