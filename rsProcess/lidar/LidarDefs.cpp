@@ -168,6 +168,42 @@ int  LASHeader::HasLASPointExt() const
 void LASHeader::LASHeader_Read(FILE *fs)
 {
 	//读取标准文件头长度
+	//如果字节不对齐的话就只能按照以下方式读取
+	//fseek(fs, 0, SEEK_SET);
+	//fread((void*)(file_signature), 4, 1, fs);
+	//fread((void*)(&reserved), 4, 1, fs);
+	//fread((void*)(&project_ID_GUID_data_1), 4, 1, fs);
+	//fread((void*)(&project_ID_GUID_data_2), 2, 1, fs);
+	//fread((void*)(&project_ID_GUID_data_3), 2, 1, fs);
+	//fread((void*)(project_ID_GUID_data_4),  8, 1, fs);
+	//fread((void*)(&version_major), 1, 1, fs);
+	//fread((void*)(&version_minor), 1, 1, fs);
+	//fread((void*)(&system_id), 32, 1, fs);
+	//fread((void*)(&generating_software), 32, 1, fs);
+	//fread((void*)(&file_creation_day), 2, 1, fs);
+	//fread((void*)(&file_creation_year), 2, 1, fs);
+	//fread((void*)(&header_size), 2, 1, fs);
+	//fread((void*)(&offset_to_point_data), 4, 1, fs);
+	//fread((void*)(&number_of_variable_length_records), 4, 1, fs);
+	//fread((void*)(&point_data_format), 1, 1, fs);
+	//fread((void*)(&point_data_record_length), 2, 1, fs);
+	//fread((void*)(&number_of_point_records), 4, 1, fs);
+	//fread((void*)(&number_of_points_by_return), 4, 5, fs);
+	//
+	//fread((void*)(&x_scale_factor), 8, 1, fs);
+	//fread((void*)(&y_scale_factor), 8, 1, fs);
+	//fread((void*)(&z_scale_factor), 8, 1, fs);
+	//fread((void*)(&x_offset), 8, 1, fs);
+	//fread((void*)(&y_offset), 8, 1, fs);
+	//fread((void*)(&z_offset), 8, 1, fs);
+
+	//fread((void*)(&max_x), 8, 1, fs);
+	//fread((void*)(&min_x), 8, 1, fs);
+	//fread((void*)(&max_y), 8, 1, fs);
+	//fread((void*)(&min_y), 8, 1, fs);
+	//fread((void*)(&max_z), 8, 1, fs);
+	//fread((void*)(&min_z), 8, 1, fs);
+	//int num = sizeof(LASHeader);
 	fread((void*)(this), HeaderSize_Def, 1, fs);
 	strcpy_s(generating_software, "W.W_Frank");
 

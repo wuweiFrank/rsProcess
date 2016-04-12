@@ -26,6 +26,7 @@ enum  LAS_CLASSIFICATION_TYPE
 	CLASSIFICATION_reserved						// 保留使用
 };
 
+#pragma pack(1)/*使得字节对齐*/
 class LASHeader
 {
 public:
@@ -44,6 +45,7 @@ public:												// 必须 说明		默认值	字节编号
 	* 1.0版las文件为4字节；1.1版为2字节，与上面的File_Source_ID合用4个字节
 	*/
 	unsigned long  reserved;						// -	保存使用	5-8		5-8
+	//unsigned short filesourceid;
 	unsigned long  project_ID_GUID_data_1;			// -	4字节		0		9-12
 	unsigned short project_ID_GUID_data_2;			// -	2字节		0		13-14
 	unsigned short project_ID_GUID_data_3;			// -	2字节		0		15-16
@@ -56,7 +58,7 @@ public:												// 必须 说明		默认值	字节编号
 	unsigned short file_creation_year;				// -						93-94
 	unsigned short header_size;						// *	Head大小			95-96
 	unsigned int offset_to_point_data;				// *	数据地址			97-100
-	unsigned long number_of_variable_length_records;// *	变长记录数目		101-104
+	unsigned int number_of_variable_length_records; // *	变长记录数目		101-104
 	unsigned char point_data_format;				// *	点数据格式GPS		105
 	unsigned short point_data_record_length;		// *	点数据长度			106-107
 	unsigned long number_of_point_records;			// *	点的数目			108-111
@@ -184,9 +186,8 @@ public:
 	const static char ErrorOffsettoData[];		 // "number of bytes of Variable Length Record is more than LasFileHead.Offset_to_data";
 };
 
-#pragma pack(1)
-
 // 变长记录头部
+#pragma pack(1)
 #define min_las_record_after_header 54;
 class  LASVariableRecord
 {
@@ -298,6 +299,7 @@ struct LASColorExt
 };
 
 /*点云XYZ文件*/
+#pragma pack(1)
 struct LAS_XYZ
 {
 	double x;
@@ -306,6 +308,7 @@ struct LAS_XYZ
 };
 
 //las点文件
+#pragma pack(1)/*字节对齐*/
 struct LASPoint
 {
 public:
@@ -314,7 +317,6 @@ public:
 	unsigned char   m_rnseByte;
 	char			m_classify;
 	char			m_scanAngle;
-	COLORREF		m_color;
 	unsigned char	m_userdata;
 	unsigned short  m_flightID;
 	double			m_gpsTime;
@@ -348,9 +350,10 @@ class LASSet
 public:
 	LASSet() { m_lasRectangles = NULL; m_lasBlockTree.RemoveAll(); m_numRectangles = 0; }
 	~LASSet(){
+		printf("正在释放内存...\n");
 		if (m_lasRectangles != NULL)
 			delete[]m_lasRectangles;
-		delete[]m_lasRectangles;
+		m_lasRectangles = NULL;
 		m_lasBlockTree.RemoveAll();
 	}
 

@@ -138,6 +138,9 @@
     <ClInclude Include="lidar\LidarDefs.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="GDALProgress.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -231,6 +234,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="lidar\LidarReader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GDALProgress.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

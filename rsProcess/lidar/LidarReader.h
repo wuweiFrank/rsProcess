@@ -1,11 +1,11 @@
 #pragma once
 #include"LidarDefs.h"
-
+#include"..\GDALProgress.h"
 /*读取lidar文件基类*/
 class LidarReader
 {
 public:
-	LidarReader() { m_lasFile = NULL; m_lasvarHeader = NULL; m_isDatasetOpen = false; }
+	LidarReader() { m_lasFile = NULL; m_lasvarHeader = NULL; m_isDatasetOpen = false; m_Progress = NULL; }
 	~LidarReader() {
 		if (m_lasFile != NULL)
 		{
@@ -26,6 +26,8 @@ public:
 	virtual long LidarReader_Read(bool inMemory,int sample) = 0;
 	//3.将las文件写入
 	virtual long LidarReader_Write(const char* pathLidar) = 0;
+	//4.设置进度条
+	virtual void LidarReader_SetProgress(GDALProcessBase* progress) { m_Progress = progress; }
 
 public:
 	LASHeader			m_lasHeader;
@@ -36,6 +38,7 @@ public:
 	//以上为las文件数据集
 	FILE				*m_lasFile;
 	bool                m_isDatasetOpen;
+	GDALProcessBase		*m_Progress;
 };
 
 /*LAS格式文件读取基类*/

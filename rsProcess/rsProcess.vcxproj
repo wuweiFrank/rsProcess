@@ -161,6 +161,7 @@
     <ClInclude Include="Global.h" />
     <ClInclude Include="HyperSpectral\fusionfunc.h" />
     <ClInclude Include="HyperSpectral\HyperSpectural.h" />
+    <ClInclude Include="GDALProgress.h" />
     <ClInclude Include="lidar\Geometry.h" />
     <ClInclude Include="lidar\LidarDefs.h" />
     <ClInclude Include="lidar\LidarReader.h" />
@@ -201,6 +202,7 @@
     <ClCompile Include="HyperSpectral\sparse_represent.cpp" />
     <ClCompile Include="HyperSpectral\umixing.cpp" />
     <ClCompile Include="HyperSpectral\wavelet_fusion.cpp" />
+    <ClCompile Include="GDALProgress.cpp" />
     <ClCompile Include="lidar\LidarDefs.cpp" />
     <ClCompile Include="lidar\LidarReader.cpp" />
     <ClCompile Include="matrixOperation.cpp" />
