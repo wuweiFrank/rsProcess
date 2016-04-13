@@ -14,12 +14,16 @@ float main()
 	//QPDLevel2ProcessUnitTestFunc();
 	//UAVGeoCorrectionTest();
 	LASLidarReader m_lasReader;
+	XYZLidarReader m_xyzReader;
 	GDALProcessBase* m_progress=new GDALConsoleProcess();
 	m_lasReader.LidarReader_SetProgress(m_progress);
+	m_xyzReader.LidarReader_SetProgress(m_progress);
 	m_lasReader.LidarReader_Open("D:\\las文件\\1.las");
 	m_lasReader.LidarReader_Read(true);
-	m_lasReader.LidarReader_Write("D:\\las文件\\100.las");
-
+	m_xyzReader.LidarReader_Open("D:\\las文件\\las.txt");
+	m_xyzReader.LidarReader_Read(true);
+	m_xyzReader.LidarReader_Write("D:\\las文件\\200.las");
+	m_xyzReader.LidarReader_WriteXYZ("D:\\las文件\\300.txt");
 	return 0;
 }
 

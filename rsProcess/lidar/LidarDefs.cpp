@@ -42,9 +42,9 @@ LASHeader::LASHeader()
 	for (int i = 0; i < 5; i++)
 		number_of_points_by_return[i] = 0;
 
-	x_scale_factor = 0.01;
-	y_scale_factor = 0.01;
-	z_scale_factor = 0.001;
+	x_scale_factor = 1;
+	y_scale_factor = 1;
+	z_scale_factor = 1;
 	x_offset = 0;
 	y_offset = 0;
 	z_offset = 0;

@@ -1,7 +1,7 @@
 #pragma once
 #include"LidarDefs.h"
 #include"..\GDALProgress.h"
-/*读取lidar文件基类*/
+/*读写lidar文件基类*/
 class LidarReader
 {
 public:
@@ -41,7 +41,7 @@ public:
 	GDALProcessBase		*m_Progress;
 };
 
-/*LAS格式文件读取基类*/
+/*LAS格式文件读写基类*/
 class LASLidarReader : public LidarReader
 {
 public:
@@ -51,4 +51,18 @@ public:
 	long LidarReader_Read(bool inMemory, int readSkip =1);
 	//3.将las文件写入
 	long LidarReader_Write(const char* pathLidar);
+};
+
+/*XYZ格式文件读写类*/
+class XYZLidarReader : public LidarReader
+{
+public:
+	//1.打开las文件，读取las文件头文件获取头文件信息
+	long LidarReader_Open(const char* pathLidar);
+	//2.读取数据，判断是否读取数据至内存，不读入内存则只读取index，给定采样参数
+	long LidarReader_Read(bool inMemory, int readSkip = 1);
+	//3.将xyz以las文件形式写入
+	long LidarReader_Write(const char* pathLidar);
+	//4.将xyz文件以xyz文件形式写入
+	long LidarReader_WriteXYZ(const char* pathLidar);
 };
