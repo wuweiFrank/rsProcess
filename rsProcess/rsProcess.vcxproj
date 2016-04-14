@@ -155,6 +155,7 @@
     <ClInclude Include="AuxiliaryFunction.h" />
     <ClInclude Include="CoordinateTrans.h" />
     <ClInclude Include="EXIF.H" />
+    <ClInclude Include="experiment\HyperRepair.h" />
     <ClInclude Include="FrequencyFunc\waveletTrans.h" />
     <ClInclude Include="GDALTools.h" />
     <ClInclude Include="GeoPOSProcess.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="AuxiliaryFunction.cpp" />
     <ClCompile Include="CoordinateTrans.cpp" />
     <ClCompile Include="EXIF.CPP" />
+    <ClCompile Include="experiment\HyperRepair.cpp" />
     <ClCompile Include="FrequencyFunc\waveletTrans.cpp" />
     <ClCompile Include="GDALTools.cpp" />
     <ClCompile Include="GeoPOSProcess.cpp" />

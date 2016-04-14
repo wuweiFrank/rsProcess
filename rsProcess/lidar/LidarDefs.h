@@ -250,9 +250,9 @@ public:
 
 
 //=======================================================las xyzµãÎÄ¼þ========================================================
-#ifndef COLORREF
-#define COLORREF long
-#endif
+//#ifndef COLORREF
+//#define COLORREF long
+//#endif
 
 #ifndef RGB
 #define RGB(r,g,b)          ((COLORREF)(((unsigned char)(r)|((unsigned long)((unsigned char)(g))<<8))|(((unsigned long)(unsigned char)(b))<<16)))

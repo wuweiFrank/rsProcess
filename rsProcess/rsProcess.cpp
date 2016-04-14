@@ -5,6 +5,7 @@
 #include"AerialProduct\ProductTest.h"
 #include"UAV\UAVUnityTest.h"
 #include"lidar\LidarReader.h"
+#include"OPENCVTools.h"
 
 float main()
 {
@@ -12,18 +13,16 @@ float main()
 	//QPDLevel0ProcessUnitTestFunc();
 	//QPDLevel1ProcessUnitTestFunc();
 	//QPDLevel2ProcessUnitTestFunc();
+	
 	//UAVGeoCorrectionTest();
-	LASLidarReader m_lasReader;
-	XYZLidarReader m_xyzReader;
-	GDALProcessBase* m_progress=new GDALConsoleProcess();
-	m_lasReader.LidarReader_SetProgress(m_progress);
-	m_xyzReader.LidarReader_SetProgress(m_progress);
-	m_lasReader.LidarReader_Open("D:\\las文件\\1.las");
-	m_lasReader.LidarReader_Read(true);
-	m_xyzReader.LidarReader_Open("D:\\las文件\\las.txt");
-	m_xyzReader.LidarReader_Read(true);
-	m_xyzReader.LidarReader_Write("D:\\las文件\\200.las");
-	m_xyzReader.LidarReader_WriteXYZ("D:\\las文件\\300.txt");
+
+	//ImageSegmentTools tools;
+	//tools.ImgSegmentTools_WaterShed("C:\\Users\\Public\\Pictures\\Sample Pictures\\repairTest.bmp", "D:\\watershed.bmp");
+	//tools.ImgSegmentTools_Canny("C:\\Users\\Public\\Pictures\\Sample Pictures\\badimg.bmp", "D:\\cannyedge.bmp");
+
+	BezierCurve curve;
+	curve.BezierCurve_BezierDraw();
+
 	return 0;
 }
 

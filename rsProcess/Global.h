@@ -14,6 +14,7 @@ using namespace std;
 #define WGS84LRadius 6378137
 #define WGS84Eccentricity 0.0066943850
 #define EQUAL_LIMIT 0.000001
+
 //数据头信息
 typedef struct stDataInfo
 {
