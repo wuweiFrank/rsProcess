@@ -6,7 +6,7 @@
 #include"UAV\UAVUnityTest.h"
 #include"lidar\LidarReader.h"
 #include"OPENCVTools.h"
-
+#include"experiment\HyperRepair.h"
 float main()
 {
 	//QPDPreProcessUnitTestFunc();
@@ -22,7 +22,8 @@ float main()
 
 	BezierCurve curve;
 	curve.BezierCurve_BezierDraw();
-
+	
+	//experiment_process();
 	return 0;
 }
 

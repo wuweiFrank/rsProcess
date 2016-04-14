@@ -14,15 +14,23 @@ struct Edge_Pixels
 	int m_segType;
 	vector<CPOINT> m_edge_pixels;
 };
-//每个分割与数据缺失点交点数据
-struct Edge_Intersection
-{
-	int m_segType;
-	vector<CPOINT> m_edge_intersction;
-};
 
 //获取影像边缘交点信息
 void get_segment_edge(const char* img_path, vector<Edge_Pixels> &edgeinter);
 
 //获取影像分割与数据缺失块交点信息
-void get_segment_intersection(const char* img_path, vector<Edge_Pixels> &edgeinter,int begLine,int endLine);
+void get_segment_intersection(const char* img_path, vector<Edge_Pixels> &intersecEdge,int begLine,int endLine);
+
+//边缘像素采样拟合（这里拟合方法的选取是个大麻烦）
+void get_fit_points(vector<Edge_Pixels> &edgeinter , Edge_Pixels preIntersectEdge,vector<vector<CPOINT>> &fitpoints);
+
+//找到拟合后的具体对象在在对应边的位置，或多个像素拟合的交点
+void get_fit_interesction(vector<vector<CPOINT>> &fitpoints, vector<CPOINT> &fitIntersect,vector<CPOINT> &edgeEntersect, int begLine, int endLine);
+
+//对于交点进行处理和整理，得到较好的结果
+void process_edge_fit_intersection(vector<CPOINT> &fitIntersect, vector<CPOINT> &edgeEntersect, vector<Edge_Pixels> &intersecEdge, int begLine, int endLine);
+
+
+
+//实验处理函数
+void experiment_process();
