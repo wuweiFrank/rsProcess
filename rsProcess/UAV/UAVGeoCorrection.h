@@ -53,5 +53,4 @@ public:
 
 	//5.解算影像获取的时间，感觉成像时间和GPS时间之间有差异，并不是同时的
 	long UAVGeoCorrection_ExifTime(const char* pathDir, int begImgNum, int imageNumbers, const char* pathTime);
-
 };

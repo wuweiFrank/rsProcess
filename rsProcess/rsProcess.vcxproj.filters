@@ -114,9 +114,6 @@
     <ClInclude Include="GDALTools.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="OPENCVTools.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="UAV\UAVGeoCorrection.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -142,6 +139,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="experiment\HyperRepair.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OPENCVTools.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -221,9 +221,6 @@
     <ClCompile Include="GDALTools.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="OPENCVTools.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="UAV\UAVGeoCorrection.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -243,6 +240,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="experiment\HyperRepair.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OPENCVTools.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

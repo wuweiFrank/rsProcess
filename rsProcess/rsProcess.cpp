@@ -20,10 +20,15 @@ float main()
 	//tools.ImgSegmentTools_WaterShed("C:\\Users\\Public\\Pictures\\Sample Pictures\\repairTest.bmp", "D:\\watershed.bmp");
 	//tools.ImgSegmentTools_Canny("C:\\Users\\Public\\Pictures\\Sample Pictures\\badimg.bmp", "D:\\cannyedge.bmp");
 
-	BezierCurve curve;
-	curve.BezierCurve_BezierDraw();
+	//BezierCurve curve;
+	//curve.BezierCurve_BezierDraw();
 	
-	//experiment_process();
+	experiment_process();
+
+	//ImageInpaint m_inPaint;
+	//m_inPaint.ImageInpaint_Inpaint("C:\\Users\\Public\\Pictures\\Sample Pictures\\lena.jpg");
+
+	//UAVGeoCorrectionTest();
+
 	return 0;
 }
-
