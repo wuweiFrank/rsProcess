@@ -101,6 +101,19 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_PixelToImgTrans(CornerCoordi
 	return 0;
 }
 
+//设置转换参数 
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_SetParam(double len, double px0, double py0, double tk[3], double tr[3], double tp[3])
+{
+	m_fLen = len;
+	m_px = px0;
+	m_py = py0;
+	memcpy(m_k, tk, sizeof(double) * 3);
+	memcpy(m_r, tr, sizeof(double) * 3);
+	memcpy(m_p, tp, sizeof(double) * 3);
+	isInternal = true;
+	return 0;
+}
+
 //影像数据点的内定向
 long UAVPhotogrammetryTools::UAVPhotogrammetryTools_IOrientation(vector<Point2f> &pointImg)
 {
@@ -114,107 +127,6 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_IOrientation(vector<Point2f>
 	}
 	return 0;
 }
-
-//空间前方交会
-long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVFesction(vector<Point2f> pnt1, EO imgEO1, vector<Point2f> pnt2, EO imgEO2, vector<Point3d> points)
-{
-
-
-	return 0;
-}
-
-//空间后方交会
-long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVResction(vector<Point2f> pnt1, vector<Point3d> pnt2, double Height, EO &eoElement)
-{
-	UAVPhotogrammetryTools_IOrientation(pnt1);
-	int point_num = pnt1.size();
-	double *A = NULL, *AT = NULL, *L = NULL, *LM = NULL;
-	try
-	{
-		A = new double[12 * point_num];
-		AT = new double[12 * point_num];
-		L = new double[2 * point_num];
-		LM = new double[2 * point_num];
-	}
-	catch (bad_alloc &e)
-	{
-		printf("%s", e.what());
-		exit(-1);
-	}
-
-	double FA[25];
-	double CH[6];
-	double var_add[6] = { 100,100,100,100,100,100 };				//变量的增量
-	int iteratornumber = 0;
-
-	//必须给出初始参数
-	memset(&eoElement, 0, sizeof(EO));
-	for (int i = 0; i < point_num; ++i)
-	{
-		eoElement.m_dX = pnt2[i].x / point_num;
-		eoElement.m_dY = pnt2[i].y / point_num;
-		eoElement.m_dZ = pnt2[i].z / point_num;
-	}
-	MatrixRotate(eoElement.m_dRMatrix, eoElement.m_phia, eoElement.m_omega, eoElement.m_kappa);
-
-	while ((OVER_LIMIT(var_add[0]) || OVER_LIMIT(var_add[1]) || OVER_LIMIT(var_add[2]) ||
-			OVER_LIMIT(var_add[3]) || OVER_LIMIT(var_add[4])) /*&& MaxTime < 20*/)
-	{
-		memset(FA, 0, sizeof(double) * 25);
-		memset(CH, 0, sizeof(double) * 5);
-		int num = 0;
-		for (int i = 0; i < point_num; ++i)
-		{
-			A[12 * i + 0] = -m_fLen / Height; A[12 * i + 1] = 0; A[12 * i + 2] = -pnt1[i].x / Height;
-			A[12 * i + 3] = 0; A[12 * i + 4] = -m_fLen / Height; A[12 * i + 5] = -pnt1[i].y / Height;
-			
-			A[12 * i + 6] = -m_fLen *(1+ pnt1[i].x*pnt1[i].x/ m_fLen/ m_fLen); A[12 * i + 7] = -pnt1[i].x*pnt1[i].y/ m_fLen; A[12 * i + 8] = pnt1[i].y;
-			A[12 * i + 9] = -pnt1[i].x*pnt1[i].y / m_fLen; A[12 * i + 10] = -m_fLen *(1 + pnt1[i].x*pnt1[i].x / m_fLen / m_fLen); A[12 * i + 11] = -pnt1[i].x;
-		
-			//计算结果
-			//double a1, a2, a3, b1, b2, b3, c1, c2, c3;
-			//a1 = eoElement.m_dRMatrix[0]; a2 = eoElement.m_dRMatrix[1]; a3 = eoElement.m_dRMatrix[2];
-			//b1 = eoElement.m_dRMatrix[3]; b2 = eoElement.m_dRMatrix[4]; b3 = eoElement.m_dRMatrix[5];
-			//c1 = eoElement.m_dRMatrix[6]; c2 = eoElement.m_dRMatrix[7]; c3 = eoElement.m_dRMatrix[8];
-			double tmp[3],tmpM[3];
-			tmp[0] = pnt2[i].x - eoElement.m_dX;
-			tmp[1] = pnt2[i].y - eoElement.m_dY;
-			tmp[2] = pnt2[i].z - eoElement.m_dZ;
-			MatrixMuti(eoElement.m_dRMatrix, 3, 3, 1, tmp, tmpM);
-			double x = -m_fLen*tmpM[0] / tmpM[2];
-			double y = -m_fLen*tmpM[1] / tmpM[2];
-			L[2 * i + 0] = pnt1[i].x - x;
-			L[2 * i + 0] = pnt1[i].y - y;
-		}
-		double IFA[36];
-		double MCH[6];
-		MatrixTrans(A, point_num * 2, 6, AT);
-		MatrixMuti(AT, 6,point_num * 2, 6, A, FA);
-		MatrixMuti(AT, 6, point_num * 2, 1, L, CH);
-		MatrixInverse(FA, 6, IFA);
-		MatrixMuti(IFA, 6, 6, 1, CH, MCH);
-
-		eoElement.m_dX += MCH[0];eoElement.m_dY += MCH[1];eoElement.m_dZ += MCH[2];
-		eoElement.m_phia += MCH[3];eoElement.m_omega += MCH[4];eoElement.m_kappa += MCH[5];
-		MatrixRotate(eoElement.m_dRMatrix, eoElement.m_phia, eoElement.m_omega, eoElement.m_kappa);
-	}
-	A = new double[12 * point_num];
-	AT = new double[12 * point_num];
-	L = new double[2 * point_num];
-	LM = new double[2 * point_num];
-
-	if (A != NULL)
-		delete[]A;
-	if (AT != NULL)
-		delete[]AT;
-	if (L != NULL)
-		delete[]L;
-	if (LM != NULL)
-		delete[]LM;
-	A = NULL; AT = NULL; L = NULL; LM = NULL;
-	return 0;
-}
-
 
 //相对定向
 long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f> pnt1, vector<Point2f> pnt2, REO &reoRElementL, REO &reoRElementR)
@@ -346,5 +258,134 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f>
 	delete[]A;
 	delete[]L;
 
+	return 0;
+}
+
+//空间前方交会
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVFesction(vector<Point2f> pnt1, EO imgEO1, vector<Point2f> pnt2, EO imgEO2, vector<Point3d> &points)
+{
+	double tmp1[3], tmp2[3];
+	double pt1[3], pt2[3];
+	for (size_t i = 0; i < pnt1.size(); i++)
+	{
+		pt1[0] = pnt1[i].x; pt1[1] = pnt1[i].y; pt1[2] = -m_fLen;
+		pt2[0] = pnt2[i].x; pt2[1] = pnt2[i].y; pt2[2] = -m_fLen;
+		MatrixMuti(imgEO1.m_dRMatrix, 3, 3, 1, pt1, tmp1);
+		MatrixMuti(imgEO2.m_dRMatrix, 3, 3, 1, pt2, tmp2);
+		double rato1[2], rato2[2];
+		rato1[0] = tmp1[0] / tmp1[2]; rato1[1] = tmp1[1] / tmp1[2];
+		rato2[0] = tmp2[0] / tmp2[2]; rato2[1] = tmp2[1] / tmp2[2];
+
+		double A[12], L[4], AT[12], ATA[9], IATA[9], ML[3];
+		A[0] = 1; A[1] = 0;  A[2] = -rato1[0]; L[0] = imgEO1.m_dX - rato1[0] * imgEO1.m_dZ;
+		A[3] = 0; A[4] = 1;  A[5] = -rato1[1]; L[1] = imgEO1.m_dY - rato1[1] * imgEO1.m_dZ;
+		A[6] = 1; A[7] = 0;  A[8] = -rato2[0]; L[2] = imgEO2.m_dX - rato2[0] * imgEO2.m_dZ;
+		A[9] = 0; A[10] = 1; A[11] = -rato2[0]; L[3] = imgEO2.m_dY - rato2[1] * imgEO2.m_dZ;
+
+		MatrixTrans(A, 4, 3, AT);
+		MatrixMuti(AT, 3, 4, 1, L, ML);
+		MatrixMuti(AT, 3, 4, 3, A, ATA);
+		MatrixInverse(ATA, 3, IATA);
+		double pt3d[3];
+		MatrixMuti(IATA, 3, 3, 1, ML, pt3d);
+		Point3d pnt;
+		pnt.x = pt3d[0];
+		pnt.y = pt3d[1];
+		pnt.z = pt3d[2];
+		points.push_back(pnt);
+	}
+
+	return 0;
+}
+
+//空间后方交会
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVResction(vector<Point2f> pnt1, vector<Point3d> pnt2, double Height, EO &eoElement)
+{
+	UAVPhotogrammetryTools_IOrientation(pnt1);
+	int point_num = pnt1.size();
+	double *A = NULL, *AT = NULL, *L = NULL, *LM = NULL;
+	try
+	{
+		A = new double[12 * point_num];
+		AT = new double[12 * point_num];
+		L = new double[2 * point_num];
+		LM = new double[2 * point_num];
+	}
+	catch (bad_alloc &e)
+	{
+		printf("%s", e.what());
+		exit(-1);
+	}
+
+	double FA[25];
+	double CH[6];
+	double var_add[6] = { 100,100,100,100,100,100 };				//变量的增量
+	int iteratornumber = 0;
+
+	//必须给出初始参数
+	memset(&eoElement, 0, sizeof(EO));
+	for (int i = 0; i < point_num; ++i)
+	{
+		eoElement.m_dX = pnt2[i].x / point_num;
+		eoElement.m_dY = pnt2[i].y / point_num;
+		eoElement.m_dZ = pnt2[i].z / point_num;
+	}
+	MatrixRotate(eoElement.m_dRMatrix, eoElement.m_phia, eoElement.m_omega, eoElement.m_kappa);
+
+	while ((OVER_LIMIT(var_add[0]) || OVER_LIMIT(var_add[1]) || OVER_LIMIT(var_add[2]) ||
+		OVER_LIMIT(var_add[3]) || OVER_LIMIT(var_add[4])) /*&& MaxTime < 20*/)
+	{
+		memset(FA, 0, sizeof(double) * 25);
+		memset(CH, 0, sizeof(double) * 5);
+		int num = 0;
+		for (int i = 0; i < point_num; ++i)
+		{
+			A[12 * i + 0] = -m_fLen / Height; A[12 * i + 1] = 0; A[12 * i + 2] = -pnt1[i].x / Height;
+			A[12 * i + 3] = 0; A[12 * i + 4] = -m_fLen / Height; A[12 * i + 5] = -pnt1[i].y / Height;
+
+			A[12 * i + 6] = -m_fLen *(1 + pnt1[i].x*pnt1[i].x / m_fLen / m_fLen); A[12 * i + 7] = -pnt1[i].x*pnt1[i].y / m_fLen; A[12 * i + 8] = pnt1[i].y;
+			A[12 * i + 9] = -pnt1[i].x*pnt1[i].y / m_fLen; A[12 * i + 10] = -m_fLen *(1 + pnt1[i].x*pnt1[i].x / m_fLen / m_fLen); A[12 * i + 11] = -pnt1[i].x;
+
+			//计算结果
+			//double a1, a2, a3, b1, b2, b3, c1, c2, c3;
+			//a1 = eoElement.m_dRMatrix[0]; a2 = eoElement.m_dRMatrix[1]; a3 = eoElement.m_dRMatrix[2];
+			//b1 = eoElement.m_dRMatrix[3]; b2 = eoElement.m_dRMatrix[4]; b3 = eoElement.m_dRMatrix[5];
+			//c1 = eoElement.m_dRMatrix[6]; c2 = eoElement.m_dRMatrix[7]; c3 = eoElement.m_dRMatrix[8];
+			double tmp[3], tmpM[3];
+			tmp[0] = pnt2[i].x - eoElement.m_dX;
+			tmp[1] = pnt2[i].y - eoElement.m_dY;
+			tmp[2] = pnt2[i].z - eoElement.m_dZ;
+			MatrixMuti(eoElement.m_dRMatrix, 3, 3, 1, tmp, tmpM);
+			double x = -m_fLen*tmpM[0] / tmpM[2];
+			double y = -m_fLen*tmpM[1] / tmpM[2];
+			L[2 * i + 0] = pnt1[i].x - x;
+			L[2 * i + 0] = pnt1[i].y - y;
+		}
+		double IFA[36];
+		double MCH[6];
+		MatrixTrans(A, point_num * 2, 6, AT);
+		MatrixMuti(AT, 6, point_num * 2, 6, A, FA);
+		MatrixMuti(AT, 6, point_num * 2, 1, L, CH);
+		MatrixInverse(FA, 6, IFA);
+		MatrixMuti(IFA, 6, 6, 1, CH, MCH);
+
+		eoElement.m_dX += MCH[0]; eoElement.m_dY += MCH[1]; eoElement.m_dZ += MCH[2];
+		eoElement.m_phia += MCH[3]; eoElement.m_omega += MCH[4]; eoElement.m_kappa += MCH[5];
+		MatrixRotate(eoElement.m_dRMatrix, eoElement.m_phia, eoElement.m_omega, eoElement.m_kappa);
+	}
+	A = new double[12 * point_num];
+	AT = new double[12 * point_num];
+	L = new double[2 * point_num];
+	LM = new double[2 * point_num];
+
+	if (A != NULL)
+		delete[]A;
+	if (AT != NULL)
+		delete[]AT;
+	if (L != NULL)
+		delete[]L;
+	if (LM != NULL)
+		delete[]LM;
+	A = NULL; AT = NULL; L = NULL; LM = NULL;
 	return 0;
 }

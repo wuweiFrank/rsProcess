@@ -147,6 +147,9 @@
     <ClInclude Include="UAV\UAVPhotogrammetry.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="lidar\LidarAlgorithm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -249,6 +252,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UAV\UAVPhotogrammetry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lidar\LidarAlgorithm.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

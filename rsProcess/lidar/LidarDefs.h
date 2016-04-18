@@ -4,6 +4,8 @@
 using namespace std;
 #include"Geometry.h"
 #include"..\RTree.h"
+#include"..\gdal\include\gdal_alg.h"
+#include"..\Global.h"
 
 //定义读取数据的最大内存量为512MB
 #define LargestMemoryToRead 536870912
@@ -338,6 +340,7 @@ public:
 	//分配内存
 	void LASRect_AllocateMemory(int lasPoints,bool inMemory,Rect rect);
 public:
+	THREEDPOINT m_rectCenter;
 	Rect m_Rectangle;
 	LASPoint* m_lasPoints;
 	long long m_lasPoints_numbers;
@@ -358,17 +361,21 @@ public:
 	}
 
 	//找到匹配的矩形的id，根据id获取在哪个矩形中
-	bool LASRect_Search(int rectID, Rect searchRect, vector<int> &rects);
-	bool LASRect_Search(int rectID, LAS_XYZ searchPnt, vector<int> &rects);
+	bool LASSet_Search(int rectID, Rect searchRect, vector<int> &rects);
+	bool LASSet_Search(int rectID, LAS_XYZ searchPnt, vector<int> &rects);
 
 	//构建R树的过程
-	long LASRect_BuildTree();
+	long LASSet_BuildTree();
 
 	//分配内存
-	void LASRect_AllocateMemory(int lasRects, bool inMemory);
+	void LASSet_AllocateMemory(int lasRects, bool inMemory);
 
+	//对数据进行整理
+	void LASSet_Trim();
 public:
+	THREEDPOINT m_SetCenter;
 	LASRectangle* m_lasRectangles;
 	LASBlockTree  m_lasBlockTree;
+	GDALTriangulation m_lasTriangle;
 	int			  m_numRectangles;
 };

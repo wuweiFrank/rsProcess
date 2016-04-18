@@ -320,7 +320,7 @@ bool SearchRectCallback(int id, void* arg)
 	rect->push_back(id);
 	return true; // keep going
 }
-bool LASSet::LASRect_Search(int rectID, Rect searchRect, vector<int> &rects)
+bool LASSet::LASSet_Search(int rectID, Rect searchRect, vector<int> &rects)
 {
 	if (m_lasBlockTree.Count() == 0)
 		return false;
@@ -328,7 +328,7 @@ bool LASSet::LASRect_Search(int rectID, Rect searchRect, vector<int> &rects)
 		m_lasBlockTree.Search(searchRect.min, searchRect.max, SearchRectCallback, &rects);
 	return true;
 }
-bool LASSet::LASRect_Search(int rectID, LAS_XYZ searchPnt, vector<int> &rects)
+bool LASSet::LASSet_Search(int rectID, LAS_XYZ searchPnt, vector<int> &rects)
 {
 	Rect searchRect(searchPnt.x, searchPnt.y, searchPnt.x, searchPnt.y);
 	if (m_lasBlockTree.Count() == 0)
@@ -337,7 +337,7 @@ bool LASSet::LASRect_Search(int rectID, LAS_XYZ searchPnt, vector<int> &rects)
 		m_lasBlockTree.Search(searchRect.min, searchRect.max, SearchRectCallback, &rects);
 	return true;
 }
-long LASSet::LASRect_BuildTree()
+long LASSet::LASSet_BuildTree()
 {
 	if (m_lasRectangles == NULL|| m_numRectangles == 0)
 	{
@@ -349,7 +349,7 @@ long LASSet::LASRect_BuildTree()
 		m_lasBlockTree.Insert(m_lasRectangles[i].m_Rectangle.min, m_lasRectangles[i].m_Rectangle.max, i);
 	return 0;
 }
-void LASSet::LASRect_AllocateMemory(int lasRects, bool inMemory)
+void LASSet::LASSet_AllocateMemory(int lasRects, bool inMemory)
 {
 	m_numRectangles = lasRects;
 	try
@@ -363,5 +363,27 @@ void LASSet::LASRect_AllocateMemory(int lasRects, bool inMemory)
 	{
 		printf("%s\n", e.what());
 		exit(-1);
+	}
+}
+void LASSet::LASSet_Trim()
+{
+	//获取数据的中心位置
+	THREEDPOINT pntLasSet;
+	memset(&pntLasSet, 0, sizeof(THREEDPOINT));
+	for (int i = 0; i < m_numRectangles; ++i)
+	{
+		THREEDPOINT pntRectSet;
+		memset(&pntRectSet, 0, sizeof(THREEDPOINT));
+		for (int j = 0; j < m_lasRectangles[i].m_lasPoints_numbers; ++j)
+		{
+			pntRectSet.dX += m_lasRectangles[i].m_lasPoints[j].m_vec3d.x / m_lasRectangles[i].m_lasPoints_numbers;
+			pntRectSet.dY += m_lasRectangles[i].m_lasPoints[j].m_vec3d.y / m_lasRectangles[i].m_lasPoints_numbers;
+			pntRectSet.dZ += m_lasRectangles[i].m_lasPoints[j].m_vec3d.z / m_lasRectangles[i].m_lasPoints_numbers;
+			memcpy(&m_lasRectangles[i].m_Rectangle, &pntRectSet, sizeof(THREEDPOINT));
+		}
+		pntLasSet.dX += pntRectSet.dX / m_numRectangles;
+		pntLasSet.dY += pntRectSet.dY / m_numRectangles;
+		pntLasSet.dZ += pntRectSet.dZ / m_numRectangles;
+		memcpy(&m_SetCenter, &pntLasSet, sizeof(THREEDPOINT));
 	}
 }

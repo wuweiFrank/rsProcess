@@ -68,7 +68,7 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 
 		//反正先统计信息
 		//分配内存
-		m_lasDataset.LASRect_AllocateMemory(widthNum*heightNum, inMemory);
+		m_lasDataset.LASSet_AllocateMemory(widthNum*heightNum, inMemory);
 		//构建R树结构
 		for (int i = 0; i < widthNum; ++i)
 		{
@@ -82,7 +82,7 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 		//感觉遍历了两遍 效率有点低，但是处理起来效率比较高
 		if (m_Progress != NULL)
 			m_Progress->SetMessage("read las file...");
-		m_lasDataset.LASRect_BuildTree();
+		m_lasDataset.LASSet_BuildTree();
 		pointsRect = new int[widthNum*heightNum];
 		memset(pointsRect, 0, sizeof(int)*widthNum*heightNum);
 		int alread_read = 0;
@@ -223,6 +223,7 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 		printf("%s\n", e.what());
 		exit(-1);
 	}
+	m_lasDataset.LASSet_Trim();
 	if (pointsRect != NULL)
 		delete[]pointsRect;
 	if (readOnce != NULL)
@@ -424,7 +425,7 @@ long XYZLidarReader::LidarReader_Read(bool inMemory, int readSkip/* = 1*/)
 
 		//反正先统计信息
 		//分配内存
-		m_lasDataset.LASRect_AllocateMemory(widthNum*heightNum, inMemory);
+		m_lasDataset.LASSet_AllocateMemory(widthNum*heightNum, inMemory);
 		//构建R树结构
 		for (int i = 0; i < widthNum; ++i)
 		{
@@ -437,7 +438,7 @@ long XYZLidarReader::LidarReader_Read(bool inMemory, int readSkip/* = 1*/)
 
 		pointsRect = new int[widthNum*heightNum];
 		//效率有点低，但是处理起来效率比较高
-		m_lasDataset.LASRect_BuildTree();
+		m_lasDataset.LASSet_BuildTree();
 		pointsRect = new int[widthNum*heightNum];
 		memset(pointsRect, 0, sizeof(int)*widthNum*heightNum);
 		//第二遍遍历获取数据信息
@@ -518,6 +519,7 @@ long XYZLidarReader::LidarReader_Read(bool inMemory, int readSkip/* = 1*/)
 		printf("%s", e.what());
 		exit(-1);
 	}
+	m_lasDataset.LASSet_Trim();
 	if (pointsRect == NULL)
 		delete[]pointsRect;
 	pointsRect = NULL;
