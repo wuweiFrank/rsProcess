@@ -23,6 +23,20 @@ typedef struct stExteriorOrientation
 	//旋转矩阵
 	double m_dRMatrix[9];
 }EO;
+typedef struct stRelativeOrientation
+{
+	//三个线元素
+	double m_Bx;
+	double m_By;
+	double m_Bz;
+	//三个角元素
+	double m_phia;
+	double m_omega;
+	double m_kappa;
+
+	//旋转矩阵
+	double m_dRMatrix[9];
+}REO;
 typedef struct stPositOrientationSys
 {
 	//经纬度和高度

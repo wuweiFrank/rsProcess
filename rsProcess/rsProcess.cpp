@@ -7,6 +7,7 @@
 #include"lidar\LidarReader.h"
 #include"OPENCVTools.h"
 #include"experiment\HyperRepair.h"
+#include"UAV\UAVPhotogrammetry.h"
 float main()
 {
 	//QPDPreProcessUnitTestFunc();
@@ -23,12 +24,14 @@ float main()
 	//BezierCurve curve;
 	//curve.BezierCurve_BezierDraw();
 	
-	experiment_process();
+	//experiment_process();
 
 	//ImageInpaint m_inPaint;
-	//m_inPaint.ImageInpaint_Inpaint("C:\\Users\\Public\\Pictures\\Sample Pictures\\lena.jpg");
+	//m_inPaint.ImageInpaint_Inpaint("C:\\Users\\Public\\Pictures\\Sample Pictures\\lena.jpg","test.jpg");
 
 	//UAVGeoCorrectionTest();
+	
 
+	PhotogrammetryToolsTest();
 	return 0;
 }

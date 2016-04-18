@@ -22,7 +22,10 @@ void get_segment_edge(const char* img_path, vector<Edge_Pixels> &edgeinter);
 void get_segment_intersection(const char* img_path, vector<Edge_Pixels> &intersecEdge,int begLine,int endLine);
 
 //边缘像素采样拟合（这里拟合方法的选取是个大麻烦）
-void get_fit_points(vector<Edge_Pixels> &edgeinter , Edge_Pixels preIntersectEdge,vector<vector<CPOINT>> &fitpoints);
+void get_fit_points(vector<Edge_Pixels> edgeinter , Edge_Pixels preIntersectEdge,vector<CPOINT> &fitpoints,int xsize,int ysize);
+
+//将控制点进行分解得到
+void split_points(vector<CPOINT> fitpoints, vector<CPOINT> &splitPoint1, vector<CPOINT> &splitPoint2);
 
 //找到拟合后的具体对象在在对应边的位置，或多个像素拟合的交点
 void get_fit_interesction(vector<vector<CPOINT>> &fitpoints, vector<CPOINT> &fitIntersect,vector<CPOINT> &edgeEntersect, int begLine, int endLine);

@@ -14,6 +14,8 @@ using namespace std;
 #define WGS84LRadius 6378137
 #define WGS84Eccentricity 0.0066943850
 #define EQUAL_LIMIT 0.000001
+const double LIMIT = 0.0000001;
+#define OVER_LIMIT( var) fabs(var)>LIMIT
 
 //数据头信息
 typedef struct stDataInfo

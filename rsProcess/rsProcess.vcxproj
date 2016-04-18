@@ -182,6 +182,7 @@
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="tsmUTM.h" />
     <ClInclude Include="UAV\UAVGeoCorrection.h" />
+    <ClInclude Include="UAV\UAVPhotogrammetry.h" />
     <ClInclude Include="UAV\UAVUnityTest.h" />
   </ItemGroup>
   <ItemGroup>
@@ -222,6 +223,7 @@
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="tsmUTM.cpp" />
     <ClCompile Include="UAV\UAVGeoCorrection.cpp" />
+    <ClCompile Include="UAV\UAVPhotogrammetry.cpp" />
     <ClCompile Include="UAV\UAVUnityTest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
