@@ -444,3 +444,12 @@ public:
 	*/
 	long GeoProc_GetENVIGcp(const char* pathGCP, double *gcps, int num, int headline = 0);
 };
+
+
+//三角网优化
+class TriangleOptimize
+{
+public:
+	//删除节点
+	long TriangleOptimize_DeleteNode(GDALTriangulation* m_triangle, int nodeIdx);
+};

@@ -815,3 +815,4 @@ void ImageInpaint::ImageInpaint_Inpaint(const char* pathImg, const char* pathDst
 		}
 	}
 }
+

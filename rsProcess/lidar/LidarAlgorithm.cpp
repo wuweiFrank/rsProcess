@@ -1,4 +1,5 @@
 #include <windows.h>
+#include<omp.h>
 #include"LidarAlgorithm.h"
 #include"..\AuxiliaryFunction.h"
 #include "glut.h"
@@ -181,81 +182,37 @@ long LidarGetRange(LASSet m_lasDataset, vector<int> &m_rectIdx)
 	return 0;
 }
 
-//创建三角网
-long LidarTinCreate(LASSet &m_lasDataset, THREEDPOINT centerView, vector<int> &m_rectIdx)
+//创建三角网,这里有一个问题，每次视角的移动都需要重新构建三角网，这样会不会比较慢,暂时还没想到解决办法
+long LidarTinCreate(LASSet &m_lasDataset)
 {
-	//计算距离获取层次细节
-	float* dis = NULL;
-	try
+#pragma omp parallel for
+	for (int i = 0; i < m_lasDataset.m_numRectangles; ++i)
 	{
-		dis = new float[m_rectIdx.size()];
-	}
-	catch (bad_alloc &e)
-	{
-		printf("%s\n", e.what());
-		exit(-1);
-	}
-	for (int i = 0; i < m_rectIdx.size(); ++i)
-		dis[i] = GetDisofPoints(m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_rectCenter, centerView);
-	
-	//获取数据点的范围
-	double minWidth = MAX_NUM, maxWidth = MIN_NUM, minHeight = MAX_NUM, maxHeight = MIN_NUM;
-	for (int i = 0; i < m_rectIdx.size(); ++i)
-	{
-		minWidth = min(m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_Rectangle.min[0], minWidth);
-		maxWidth = max(m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_Rectangle.max[0], maxWidth);
-
-		minHeight = min(m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_Rectangle.min[1], minHeight);
-		maxHeight = max(m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_Rectangle.max[0], maxHeight);
-	}
-	double diagonal = min(maxWidth - minWidth, maxHeight - minHeight);
-	float minElement = MAX_NUM;
-	for (int i = 0; i < m_rectIdx.size(); ++i)
-		minElement = min(minElement, dis[i]);
-	for (int i = 0; i < m_rectIdx.size(); ++i)
-		dis[i] = (dis[i]- minElement)/ (minElement+LIMIT); //防止为0值，虽然可能性不大
-
-	for (int i = 0; i < m_rectIdx.size(); ++i)
-		dis[i] +=0.5f+int(minElement/ diagonal);	   //四舍五入
-
-	//计算顶点个数
-	int totalVertix = 0;
-	for (size_t i = 0; i < m_rectIdx.size(); i++)
-		totalVertix += m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_lasPoints_numbers / int(dis[i] + 1);
-
-	double *padX = NULL;
-	double *padY = NULL;
-	try
-	{
-		padX = new double[totalVertix];
-		padY = new double[totalVertix];
-	}
-	catch (bad_alloc &e)
-	{
-		printf("%s\n", e.what());
-		exit(-1);
-	}
-
-	totalVertix = 0;
-	for (size_t i = 0; i < m_rectIdx.size(); i++)
-	{
-		for (size_t j = 0; j < m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_lasPoints_numbers; j+= int(dis[i] + 1))
+		double *padX = NULL;
+		double *padY = NULL;
+		try
 		{
-			padX[totalVertix] = m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_lasPoints[j].m_vec3d.x;
-			padY[totalVertix] = m_lasDataset.m_lasRectangles[m_rectIdx[i]].m_lasPoints[j].m_vec3d.y;
-			totalVertix++;
+			padX = new double[m_lasDataset.m_lasRectangles[i].m_lasPoints_numbers];
+			padY = new double[m_lasDataset.m_lasRectangles[i].m_lasPoints_numbers];
 		}
+		catch (bad_alloc &e)
+		{
+			printf("%s\n", e.what());
+			exit(-1);
+		}
+
+		for (size_t j = 0; j < m_lasDataset.m_lasRectangles[i].m_lasPoints_numbers; j ++)
+		{
+			padX[j] = m_lasDataset.m_lasRectangles[i].m_lasPoints[j].m_vec3d.x;
+			padY[j] = m_lasDataset.m_lasRectangles[i].m_lasPoints[j].m_vec3d.y;
+		}
+		m_lasDataset.m_lasRectangles[i].m_lasTriangle=GDALTriangulationCreateDelaunay(m_lasDataset.m_lasRectangles[i].m_lasPoints_numbers, padX, padY);
+		//然后对点进行采样 根据距离进行采样
+		if (padX != NULL)
+			delete[]padX;
+		if (padX != NULL)
+			delete[]padX;
+		padX = padY = NULL;
 	}
-	m_lasDataset.m_lasTriangle = GDALTriangulationCreateDelaunay(totalVertix, padX, padY);
-
-	//然后对点进行采样 根据距离进行采样
-	if (dis != NULL)
-		delete[]dis;
-	if (padX != NULL)
-		delete[]padX;
-	if (padX != NULL)
-		delete[]padX;
-	padX = padY = NULL;
-	dis = NULL;
+	return 0;
 }
-

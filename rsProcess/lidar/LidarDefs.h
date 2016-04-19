@@ -329,10 +329,13 @@ public:
 class LASRectangle
 {
 public:
-	LASRectangle() { m_lasPoints = NULL; m_point_index = NULL; m_lasPoints_numbers = 0; }
+	LASRectangle() { m_lasPoints = NULL; m_point_index = NULL; m_lasPoints_numbers = 0; m_lasTriangle = NULL; }
 	~LASRectangle(){
 		if (m_lasPoints != NULL)
 			delete[]m_lasPoints;
+		if (m_lasTriangle != NULL)
+			GDALTriangulationFree(m_lasTriangle);
+		m_lasTriangle = NULL;
 		m_lasPoints = NULL;
 		m_lasPoints_numbers = 0;
 	}
@@ -340,6 +343,7 @@ public:
 	//分配内存
 	void LASRect_AllocateMemory(int lasPoints,bool inMemory,Rect rect);
 public:
+	GDALTriangulation*	m_lasTriangle;
 	THREEDPOINT m_rectCenter;
 	Rect m_Rectangle;
 	LASPoint* m_lasPoints;
@@ -351,14 +355,11 @@ public:
 class LASSet
 {
 public:
-	LASSet() { m_lasRectangles = NULL; m_lasBlockTree.RemoveAll(); m_numRectangles = 0; m_lasTriangle = NULL; }
+	LASSet() { m_lasRectangles = NULL; m_lasBlockTree.RemoveAll(); m_numRectangles = 0;  }
 	~LASSet(){
 		printf("正在释放内存...\n");
 		if (m_lasRectangles != NULL)
 			delete[]m_lasRectangles;
-		if (m_lasTriangle != NULL)
-			GDALTriangulationFree(m_lasTriangle);
-		m_lasTriangle = NULL;
 		m_lasRectangles = NULL;
 		m_lasBlockTree.RemoveAll();
 	}
@@ -381,5 +382,4 @@ public:
 	LASRectangle*		m_lasRectangles;
 	LASBlockTree		m_lasBlockTree;
 	int					m_numRectangles;
-	GDALTriangulation*	m_lasTriangle;
 };

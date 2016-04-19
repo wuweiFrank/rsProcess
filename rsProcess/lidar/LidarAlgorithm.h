@@ -11,8 +11,9 @@ long LidarGetFrustumPlanes(float** g_frustumPlanes);
 //判断点是否在截体中
 bool LidarPointInFrustum(float** g_frustumPlanes,THREEDPOINT pnt);
 
-//通过视点位置和视点方向获取观察矩阵
+//判断哪个矩形区域在视图截体中
 long LidarGetRange(LASSet m_lasDataset, vector<int> &m_rectIdx);
 
 //根据视点和方向创建三角网
-long LidarTinCreate(LASSet &m_lasDataset,THREEDPOINT centerView, vector<int> &m_rectIdx);
+long LidarTinCreate(LASSet &m_lasDataset);
+
