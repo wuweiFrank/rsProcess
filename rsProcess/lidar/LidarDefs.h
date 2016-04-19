@@ -351,11 +351,14 @@ public:
 class LASSet
 {
 public:
-	LASSet() { m_lasRectangles = NULL; m_lasBlockTree.RemoveAll(); m_numRectangles = 0; }
+	LASSet() { m_lasRectangles = NULL; m_lasBlockTree.RemoveAll(); m_numRectangles = 0; m_lasTriangle = NULL; }
 	~LASSet(){
 		printf("正在释放内存...\n");
 		if (m_lasRectangles != NULL)
 			delete[]m_lasRectangles;
+		if (m_lasTriangle != NULL)
+			GDALTriangulationFree(m_lasTriangle);
+		m_lasTriangle = NULL;
 		m_lasRectangles = NULL;
 		m_lasBlockTree.RemoveAll();
 	}
@@ -372,10 +375,11 @@ public:
 
 	//对数据进行整理
 	void LASSet_Trim();
+
 public:
-	THREEDPOINT m_SetCenter;
-	LASRectangle* m_lasRectangles;
-	LASBlockTree  m_lasBlockTree;
-	GDALTriangulation m_lasTriangle;
-	int			  m_numRectangles;
+	THREEDPOINT			m_SetCenter;
+	LASRectangle*		m_lasRectangles;
+	LASBlockTree		m_lasBlockTree;
+	int					m_numRectangles;
+	GDALTriangulation*	m_lasTriangle;
 };

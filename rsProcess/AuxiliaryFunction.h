@@ -37,3 +37,6 @@ void GetImgSample(float *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLin
 //获取两幅影像匹配直方图
 //以img2为标准
 void GetImgHistroMatch(double* img1, double *img2, int xsize1, int ysize1, int xsize2, int ysize2, int minPix, int maxPix, int* histroMap);
+
+//获取两点之间的距离
+double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2);

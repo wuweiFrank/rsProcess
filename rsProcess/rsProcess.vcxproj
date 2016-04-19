@@ -164,6 +164,7 @@
     <ClInclude Include="HyperSpectral\HyperSpectural.h" />
     <ClInclude Include="GDALProgress.h" />
     <ClInclude Include="lidar\Geometry.h" />
+    <ClInclude Include="lidar\glut.h" />
     <ClInclude Include="lidar\LidarAlgorithm.h" />
     <ClInclude Include="lidar\LidarDefs.h" />
     <ClInclude Include="lidar\LidarReader.h" />

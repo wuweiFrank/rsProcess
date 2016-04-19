@@ -80,7 +80,6 @@ void WriteENVIHeader(const char* pathHeader, ENVIHeader mImgHeader)
 	fclose(fpHead);		//关闭文件
 }
 
-
 //获取均值和标准差
 void GetAveDev(unsigned char *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate)
 {
@@ -804,7 +803,6 @@ void GetImgSample(float *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLin
 	fDItem = NULL;
 }
 
-
 //获取直方图匹配后的直方图
 //影像2的直方图为基准
 void GetImgHistroMatch(double* img1, double *img2, int xsize1, int ysize1, int xsize2, int ysize2, int minPix, int maxPix, int* histroMap)
@@ -882,4 +880,10 @@ void GetImgHistroMatch(double* img1, double *img2, int xsize1, int ysize1, int x
 	delete[]ihistro2;
 	delete[]fhistro1;
 	delete[]fhistro2;
+}
+
+//两点之间的距离
+double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2)
+{
+	return sqrt((pnt1.dX - pnt2.dX)*(pnt1.dX - pnt2.dX) + (pnt1.dY - pnt2.dY)*(pnt1.dY - pnt2.dY) + (pnt1.dZ - pnt2.dZ)*(pnt1.dZ - pnt2.dZ));
 }
