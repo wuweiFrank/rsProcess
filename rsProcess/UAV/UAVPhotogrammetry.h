@@ -34,23 +34,26 @@ public:
 	long UAVPhotogrammetryTools_UAVFesction(vector<Point2f> pnt1,EO imgEO1, vector<Point2f> pnt2, EO imgEO2,vector<Point3d> &points);
 
 	//2.空间后方交会，根据控制点和影像点解算影像外方位元素
-	long UAVPhotogrammetryTools_UAVResction(vector<Point2f> pnt1, vector<Point3d> pnt2,double Height, EO &eoElement);
+	long UAVPhotogrammetryTools_UAVResction(vector<Point2f> pnt1, vector<Point3d> pnt2,EO &eoElement);
 
 	//3.空间相对定向，根据匹配点进行空间相对定向
 	long UAVPhotogrammetryTools_ROrientation(vector<Point2f> pnt1, vector<Point2f> pnt2, REO &reoRElementL, REO &reoRElementR);
 
 	//4.绝对定向
-	long UAVPhotogrammetryTools_AOrientation(vector<Point2f> pntModel, vector<Point3f> pntGeo, EO &eoAElement);
+	long UAVPhotogrammetryTools_AOrientation(vector<vector<Point2f>> pntModel, vector<vector<Point3f>> pntGeo, vector<EO> &eoAElement);
 
 	//TODO:5.光束法平差
 	long UAVPhotogrammetryTools_BundlerAdj();
 
 	//6.设置相机内参数
-	long UAVPhotogrammetryTools_SetParam(double len,double px0,double py0,double tk[3],double tr[3],double tp[3]);
+	long UAVPhotogrammetryTools_SetParam(double len,double px0,double py0,double tk[3],double tp[3],double alpha,double belta);
 
 	//7.像素坐标到影像坐标的转换系数
 	long UAVPhotogrammetryTools_PixelToImgTrans(CornerCoordi4 m_coordiTrans4);		//四个框标的框标坐标系的转换
 	long UAVPhotogrammetryTools_PixelToImgTrans(CornerCoordi8 m_coordiTrans8);		//八个框标的框标坐标系的转换
+
+	//8.径向和切向畸变校正
+	long UAVPhotogrammetryTools_DistortionCorrection(vector<Point2f> &pntCamera);
 
 	//8.将测试函数声明为友元函数方便获取
 	friend void PhotogrammetryToolsTest();
@@ -63,7 +66,7 @@ private:
 	double m_PixelToImgTrans[6];				//从像素坐标到影像坐标的转换
 	double m_fLen;								//相机焦距 m为单位
 	double m_px, m_py;							//主轴和相片的对应位置
-	double m_k[3],m_r[3],m_p[3];				//径向和切向畸变
+	double m_k[3], m_p[3], m_alpha, m_belta;	//径向和切向畸变
 	bool  isInternal;
 };
 

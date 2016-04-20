@@ -214,5 +214,8 @@ long LidarTinCreate(LASSet &m_lasDataset)
 			delete[]padX;
 		padX = padY = NULL;
 	}
+
+	//对块与块之间的数据建立一个三角网然后删除比较长的边
+
 	return 0;
 }

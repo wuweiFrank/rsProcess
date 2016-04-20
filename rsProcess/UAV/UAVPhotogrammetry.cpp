@@ -1,4 +1,5 @@
 #include"UAVPhotogrammetry.h"
+#include<fstream>
 #include"..\matrixOperation.h"
 #include"..\Global.h"
 void PhotogrammetryToolsTest()
@@ -17,8 +18,69 @@ void PhotogrammetryToolsTest()
 	m_Tools.UAVPhotogrammetryTools_PixelToImgTrans(m_coordiTrans4);
 	printf("%lf  %lf  %lf\n", m_Tools.m_PixelToImgTrans[0], m_Tools.m_PixelToImgTrans[1], m_Tools.m_PixelToImgTrans[2]);
 	printf("%lf  %lf  %lf\n", m_Tools.m_PixelToImgTrans[3], m_Tools.m_PixelToImgTrans[4], m_Tools.m_PixelToImgTrans[5]);
-}
 
+	//首先设置相机径向和切向畸变
+	double tk[3] = { -5.994e-005,2.927e-008,0 };
+	double tp[3] = { -2.713e-006,3.156e-006,0 };
+	double x0 = 0.4321, y0 = 0.1174, alpha= 8.447e-005, belta = 1.237e-004, flen = 40.9349;
+	m_Tools.UAVPhotogrammetryTools_SetParam(flen, x0, y0, tk, tp, alpha, belta);
+	
+	vector<Point2f> pntl, pntr; vector<Point3d> pntGeo;
+	//从文件中读取点的坐标
+	ifstream  fin;
+	fin.open("D:\\bundleadjustment_SCBA_Point_Result.txt");
+	int n, u; float z;
+	fin >> n;
+	fin >> u;
+	for (int i = 0; i<n; i++)
+	{
+		Point2f pntTmpl, pntTmpr;
+		Point3d pntTmpGeo;
+		fin >> u;
+		fin >> pntTmpGeo.x;
+		fin >> pntTmpGeo.y;
+		fin >> pntTmpGeo.z;
+		fin >> u >> u >> u;
+		fin >> pntTmpl.x;
+		fin >> pntTmpl.y;
+		fin >> u;
+		fin >> pntTmpr.x;
+		fin >> pntTmpr.y;
+		pntl.push_back(pntTmpl);
+		pntr.push_back(pntTmpr);
+		pntGeo.push_back(pntTmpGeo);
+	}
+	fin.close();
+	m_Tools.UAVPhotogrammetryTools_DistortionCorrection(pntl);
+	m_Tools.UAVPhotogrammetryTools_DistortionCorrection(pntr);
+	REO lEOt, rEOt;
+	memset(&lEOt, 0, sizeof(REO));
+	EO EOt;
+	m_Tools.UAVPhotogrammetryTools_ROrientation(pntl, pntr, lEOt, rEOt);
+	printf("%lf  %lf  %lf  %lf  %lf  %lf\n", rEOt.m_phia, rEOt.m_omega, rEOt.m_kappa, rEOt.m_Bx, rEOt.m_By, rEOt.m_Bz);
+	int temp = 0;
+	EOt.m_dX = 756.0875; EOt.m_dY = -131.6018; EOt.m_dZ = -15.0643;
+	EOt.m_phia = 0.225967; EOt.m_omega = 0.112503; EOt.m_kappa = -0.081294;
+	m_Tools.UAVPhotogrammetryTools_UAVResction(pntl, pntGeo, EOt);
+	printf("%lf  %lf  %lf  %lf  %lf  %lf\n", EOt.m_phia, EOt.m_omega, EOt.m_kappa, EOt.m_dX, EOt.m_dY, EOt.m_dZ);
+
+}
+//径向和切向畸变校正
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_DistortionCorrection(vector<Point2f> &pntCamera)
+{
+	if (!isInternal)
+		return -1;
+#pragma omp parallel for
+	for (int i = 0; i < pntCamera.size(); ++i)
+	{
+		double r= r = sqrt((pntCamera[i].x - m_px)*(pntCamera[i].x - m_px) + (pntCamera[i].y - m_py)*(pntCamera[i].y - m_py));
+		double delta_x = (pntCamera[i].x - m_px)*(m_k[0]*r*r + m_k[1] *r*r*r*r) + m_p[0]*(r*r + 2 * (pntCamera[i].x - m_px)*(pntCamera[i].x - m_px)) + 2 * m_p[1] *(pntCamera[i].x - m_px)*(pntCamera[i].y - m_py) + m_alpha*(pntCamera[i].x - m_px) + m_belta*(pntCamera[i].y - m_py);
+		double delta_y = (pntCamera[i].y - m_py)*(m_k[0] *r*r + m_k[1] *r*r*r*r) + m_p[1]*(r*r + 2 * (pntCamera[i].y - m_py)*(pntCamera[i].y - m_py)) + 2 * m_p[0] *(pntCamera[i].x - m_px)*(pntCamera[i].y - m_py);
+		pntCamera[i].x = pntCamera[i].x - m_px - delta_x;
+		pntCamera[i].y = pntCamera[i].y - m_py - delta_y;
+	}
+	return 0;
+}
 
 //获取数据转换系数
 long UAVPhotogrammetryTools::UAVPhotogrammetryTools_PixelToImgTrans(CornerCoordi4 m_coordiTrans4)
@@ -102,14 +164,15 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_PixelToImgTrans(CornerCoordi
 }
 
 //设置转换参数 
-long UAVPhotogrammetryTools::UAVPhotogrammetryTools_SetParam(double len, double px0, double py0, double tk[3], double tr[3], double tp[3])
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_SetParam(double len, double px0, double py0, double tk[3], double tp[3], double alpha, double belta)
 {
 	m_fLen = len;
 	m_px = px0;
 	m_py = py0;
 	memcpy(m_k, tk, sizeof(double) * 3);
-	memcpy(m_r, tr, sizeof(double) * 3);
 	memcpy(m_p, tp, sizeof(double) * 3);
+	m_alpha = alpha;
+	m_belta = belta;
 	isInternal = true;
 	return 0;
 }
@@ -132,8 +195,8 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_IOrientation(vector<Point2f>
 long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f> pnt1, vector<Point2f> pnt2, REO &reoRElementL, REO &reoRElementR)
 {
 	//必须先做内定向，将像素坐标转换到相片坐标
-	UAVPhotogrammetryTools_IOrientation(pnt1);
-	UAVPhotogrammetryTools_IOrientation(pnt2);
+	//UAVPhotogrammetryTools_IOrientation(pnt1);
+	//UAVPhotogrammetryTools_IOrientation(pnt2);
 
 	//然后进行相对定向获取相对定向元素
 	int num_point = pnt1.size();
@@ -142,7 +205,7 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f>
 	double var[5];											//5个参数
 	memset(var, 0, 5 * sizeof(double));
 	double B[3];
-	B[0] = pnt1[1].x - pnt2[1].x;//Bx本应当取2号点(6个点时)的视差，此时随机取2号点
+	B[0] = 14.288;/*pnt1[1].x - pnt2[1].x;*///Bx本应当取2号点(6个点时)的视差，此时随机取2号点
 											//var[3]=atan((pnts_left[1].y-pnts_right[1].y)/(pnts_left[1].x-pnts_right[2].x));
 
 	unsigned MaxTime = 0;					 //最大运算次数
@@ -180,24 +243,25 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f>
 		int num = 0;
 
 		//不严密求解
+		double phiar = var[0]; double omegar = var[1]; double kappar = var[2];
+		//微小角运算
+		//计算X2,Y2,Z2; X1, Y1, Z1
+		a1r = cos(phiar)*cos(kappar) - sin(phiar)*sin(omegar)*sin(kappar);
+		a2r = -cos(phiar)*sin(kappar) - sin(phiar)*sin(omegar)*cos(kappar);
+		a3r = -sin(phiar)*cos(omegar);
+
+		b1r = cos(omegar)*sin(kappar);
+		b2r = cos(omegar)*cos(kappar);
+		b3r = -sin(omegar);
+
+		c1r = sin(phiar)*cos(kappar) + cos(phiar)*sin(omegar)*sin(kappar);
+		c2r = -sin(phiar)*sin(kappar) + cos(phiar)*sin(omegar)*cos(kappar);
+		c3r = cos(phiar)*cos(omegar);
+
 		for (int i = 0; i< num_point; ++i)
 		{
 			num++;
 			double R_XYZ[3], L_XYZ[3];
-			double phiar = var[0]; double omegar = var[1]; double kappar = var[2];
-			//微小角运算
-			//计算X2,Y2,Z2; X1, Y1, Z1
-			a1r = cos(phiar)*cos(kappar) + sin(phiar)*sin(omegar)*sin(kappar);
-			a2r = -cos(phiar)*sin(omegar) - sin(phiar)*sin(omegar)*sin(kappar);
-			a3r = -sin(phiar)*cos(omegar);
-
-			b1r = cos(omegar)*sin(kappar);
-			b2r = cos(omegar)*cos(kappar);
-			b3r = -sin(omegar);
-
-			c1r = sin(phiar)*cos(kappar) + cos(phiar)*sin(omegar)*sin(kappar);
-			c2r = -sin(omegar)*sin(kappar) + cos(phiar)*sin(omegar)*sin(kappar);
-			c3r = cos(phiar)*cos(omegar);
 
 			R_XYZ[0] = a1r*pnt2[i].x + a2r*pnt2[i].y - a3r*m_fLen;
 			R_XYZ[1] = b1r*pnt2[i].x + b2r*pnt2[i].y - b3r*m_fLen;
@@ -208,8 +272,8 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f>
 			L_XYZ[2] = c1l*pnt1[i].x + c2l*pnt1[i].y - c3l*m_fLen;
 
 			//计算By,Bz,N',N,Q
-			B[1] = tan(var[3]) * B[0];					/*var[3]*B[0]*/;
-			B[2] = tan(var[4]) * B[0] / cos(var[3]);		/*var[4]*B[0]*/;
+			B[1] = tan(var[3]) * B[0];						/*var[3]*B[0];*/
+			B[2] = tan(var[4]) * B[0] / cos(var[3]);		/*var[4]*B[0];*/
 
 			double RN = (B[0] * L_XYZ[2] - B[2] * L_XYZ[0]) / (L_XYZ[0] * R_XYZ[2] - L_XYZ[2] * R_XYZ[0]);   //N'
 			double LN = (B[0] * R_XYZ[2] - B[2] * R_XYZ[0]) / (L_XYZ[0] * R_XYZ[2] - L_XYZ[2] * R_XYZ[0]);   //N
@@ -261,6 +325,12 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f>
 	return 0;
 }
 
+//绝对定向
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_AOrientation(vector<vector<Point2f>> pntModel, vector<vector<Point3f>> pntGeo, vector<EO> &eoAElement)
+{
+	return 0;
+}
+
 //空间前方交会
 long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVFesction(vector<Point2f> pnt1, EO imgEO1, vector<Point2f> pnt2, EO imgEO2, vector<Point3d> &points)
 {
@@ -299,9 +369,9 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVFesction(vector<Point2f> 
 }
 
 //空间后方交会
-long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVResction(vector<Point2f> pnt1, vector<Point3d> pnt2, double Height, EO &eoElement)
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVResction(vector<Point2f> pnt1, vector<Point3d> pnt2, EO &eoElement)
 {
-	UAVPhotogrammetryTools_IOrientation(pnt1);
+	//UAVPhotogrammetryTools_IOrientation(pnt1);
 	int point_num = pnt1.size();
 	double *A = NULL, *AT = NULL, *L = NULL, *LM = NULL;
 	try
@@ -317,7 +387,7 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVResction(vector<Point2f> 
 		exit(-1);
 	}
 
-	double FA[25];
+	double FA[36];
 	double CH[6];
 	double var_add[6] = { 100,100,100,100,100,100 };				//变量的增量
 	int iteratornumber = 0;
@@ -330,36 +400,50 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVResction(vector<Point2f> 
 		eoElement.m_dY = pnt2[i].y / point_num;
 		eoElement.m_dZ = pnt2[i].z / point_num;
 	}
+	int total = 0;
 	MatrixRotate(eoElement.m_dRMatrix, eoElement.m_phia, eoElement.m_omega, eoElement.m_kappa);
-
 	while ((OVER_LIMIT(var_add[0]) || OVER_LIMIT(var_add[1]) || OVER_LIMIT(var_add[2]) ||
 		OVER_LIMIT(var_add[3]) || OVER_LIMIT(var_add[4])) /*&& MaxTime < 20*/)
 	{
-		memset(FA, 0, sizeof(double) * 25);
+		memset(FA, 0, sizeof(double) * 36);
 		memset(CH, 0, sizeof(double) * 5);
 		int num = 0;
+		double Phi = eoElement.m_phia, Omega = eoElement.m_omega, Kappa = eoElement.m_kappa;
+		double a1 = cos(Phi)*cos(Kappa) - sin(Phi)*sin(Omega)*sin(Kappa);
+		double a2 = -cos(Phi)*sin(Kappa) - sin(Phi)*sin(Omega)*cos(Kappa);
+		double a3 = -sin(Phi)*cos(Omega);
+		double b1 = cos(Omega)*sin(Kappa);
+		double b2 = cos(Omega)*cos(Kappa);
+		double b3 = -sin(Omega);
+		double c1 = sin(Phi)*cos(Kappa) + cos(Phi)*sin(Omega)*sin(Kappa);
+		double c2 = -sin(Phi)*sin(Kappa) + cos(Phi)*sin(Omega)*cos(Kappa);
+		double c3 = cos(Phi)*cos(Omega);
 		for (int i = 0; i < point_num; ++i)
 		{
-			A[12 * i + 0] = -m_fLen / Height; A[12 * i + 1] = 0; A[12 * i + 2] = -pnt1[i].x / Height;
-			A[12 * i + 3] = 0; A[12 * i + 4] = -m_fLen / Height; A[12 * i + 5] = -pnt1[i].y / Height;
-
-			A[12 * i + 6] = -m_fLen *(1 + pnt1[i].x*pnt1[i].x / m_fLen / m_fLen); A[12 * i + 7] = -pnt1[i].x*pnt1[i].y / m_fLen; A[12 * i + 8] = pnt1[i].y;
-			A[12 * i + 9] = -pnt1[i].x*pnt1[i].y / m_fLen; A[12 * i + 10] = -m_fLen *(1 + pnt1[i].x*pnt1[i].x / m_fLen / m_fLen); A[12 * i + 11] = -pnt1[i].x;
-
+			A[12 * i + 0] = (a1*m_fLen + a3*pnt1[i].x) / (a3*(pnt2[i].x - eoElement.m_dX) + b3*(pnt2[i].y - eoElement.m_dY) + c3*(pnt2[i].z - eoElement.m_dZ));
+			A[12 * i + 1] = (b1*m_fLen + b3*pnt1[i].x) / (a3*(pnt2[i].x - eoElement.m_dX) + b3*(pnt2[i].y - eoElement.m_dY) + c3*(pnt2[i].z - eoElement.m_dZ));
+			A[12 * i + 2] = (c1*m_fLen + c3*pnt1[i].x) / (a3*(pnt2[i].x - eoElement.m_dX) + b3*(pnt2[i].y - eoElement.m_dY) + c3*(pnt2[i].z - eoElement.m_dZ));
+			
+			A[12 * i + 6] = (a2*m_fLen + a3*pnt1[i].y) / (a3*(pnt2[i].x - eoElement.m_dX) + b3*(pnt2[i].y - eoElement.m_dY) + c3*(pnt2[i].z - eoElement.m_dZ));
+			A[12 * i + 7] = (b2*m_fLen + b3*pnt1[i].y) / (a3*(pnt2[i].x - eoElement.m_dX) + b3*(pnt2[i].y - eoElement.m_dY) + c3*(pnt2[i].z - eoElement.m_dZ));
+			A[12 * i + 8] = (c2*m_fLen + c3*pnt1[i].y) / (a3*(pnt2[i].x - eoElement.m_dX) + b3*(pnt2[i].y - eoElement.m_dY) + c3*(pnt2[i].z - eoElement.m_dZ));
+			
+			A[12 * i + 3] = pnt1[i].y * sin(Omega) - (pnt1[i].x * (pnt1[i].x * cos(Kappa) - pnt1[i].y * sin(Kappa)) / m_fLen + m_fLen*cos(Kappa))*cos(Omega);
+			A[12 * i + 4] = -m_fLen*sin(Kappa) - pnt1[i].x * (pnt1[i].x * sin(Kappa) + pnt1[i].y * cos(Kappa)) / m_fLen;
+			A[12 * i + 5] = pnt1[i].y;
+			
+			A[12 * i + 9] = pnt1[i].x * sin(Omega) - (pnt1[i].y * (pnt1[i].x * cos(Kappa) - pnt1[i].y * sin(Kappa)) / m_fLen - m_fLen*sin(Kappa))*cos(Omega);
+			A[12 * i + 10] = -m_fLen*cos(Kappa) - pnt1[i].y * (pnt1[i].x * sin(Kappa) + pnt1[i].y * cos(Kappa)) / m_fLen;
+			A[12 * i + 11] = -pnt1[i].x;
 			//计算结果
 			//double a1, a2, a3, b1, b2, b3, c1, c2, c3;
 			//a1 = eoElement.m_dRMatrix[0]; a2 = eoElement.m_dRMatrix[1]; a3 = eoElement.m_dRMatrix[2];
 			//b1 = eoElement.m_dRMatrix[3]; b2 = eoElement.m_dRMatrix[4]; b3 = eoElement.m_dRMatrix[5];
 			//c1 = eoElement.m_dRMatrix[6]; c2 = eoElement.m_dRMatrix[7]; c3 = eoElement.m_dRMatrix[8];
-			double tmp[3], tmpM[3];
-			tmp[0] = pnt2[i].x - eoElement.m_dX;
-			tmp[1] = pnt2[i].y - eoElement.m_dY;
-			tmp[2] = pnt2[i].z - eoElement.m_dZ;
-			MatrixMuti(eoElement.m_dRMatrix, 3, 3, 1, tmp, tmpM);
-			double x = -m_fLen*tmpM[0] / tmpM[2];
-			double y = -m_fLen*tmpM[1] / tmpM[2];
+			double x = -m_fLen*(a1*(pnt2[i].x - eoElement.m_dX) + b1*(pnt2[i].y - eoElement.m_dY) + c1*(pnt2[i].z - eoElement.m_dZ)) / (a3*(pnt2[i].x - eoElement.m_dX) + b3*(pnt2[i].y - eoElement.m_dY) + c3*(pnt2[i].z - eoElement.m_dZ));
+			double y = -m_fLen*(a2*(pnt2[i].x - eoElement.m_dX) + b2*(pnt2[i].y - eoElement.m_dY) + c2*(pnt2[i].z - eoElement.m_dZ)) / (a3*(pnt2[i].x - eoElement.m_dX) + b3*(pnt2[i].y - eoElement.m_dY) + c3*(pnt2[i].z - eoElement.m_dZ));
 			L[2 * i + 0] = pnt1[i].x - x;
-			L[2 * i + 0] = pnt1[i].y - y;
+			L[2 * i + 1] = pnt1[i].y - y;
 		}
 		double IFA[36];
 		double MCH[6];
@@ -369,9 +453,13 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_UAVResction(vector<Point2f> 
 		MatrixInverse(FA, 6, IFA);
 		MatrixMuti(IFA, 6, 6, 1, CH, MCH);
 
+		memcpy(var_add, MCH, sizeof(double) * 6);
+
 		eoElement.m_dX += MCH[0]; eoElement.m_dY += MCH[1]; eoElement.m_dZ += MCH[2];
 		eoElement.m_phia += MCH[3]; eoElement.m_omega += MCH[4]; eoElement.m_kappa += MCH[5];
 		MatrixRotate(eoElement.m_dRMatrix, eoElement.m_phia, eoElement.m_omega, eoElement.m_kappa);
+		printf("迭代次数 ：%d\r", total);
+		total++;
 	}
 	A = new double[12 * point_num];
 	AT = new double[12 * point_num];
