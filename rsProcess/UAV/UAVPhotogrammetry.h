@@ -40,10 +40,7 @@ public:
 	long UAVPhotogrammetryTools_ROrientation(vector<Point2f> pnt1, vector<Point2f> pnt2, REO &reoRElementL, REO &reoRElementR);
 
 	//4.绝对定向
-	long UAVPhotogrammetryTools_AOrientation(vector<Point2f> pntModel1, vector<Point2f> pntModel2, REO REOl, REO REOr,vector<Point3f> pntGeo, EO &eoAElement,double &lamda);
-
-	//TODO:5.光束法平差
-	long UAVPhotogrammetryTools_BundlerAdj();
+	long UAVPhotogrammetryTools_AOrientation(vector<Point2f> pntModel1, vector<Point2f> pntModel2, REO& REOl, REO& REOr,vector<Point3d> pntGeo, EO &eoAElement,double &lamda);
 
 	//6.设置相机内参数
 	long UAVPhotogrammetryTools_SetParam(double len,double px0,double py0,double tk[3],double tp[3],double alpha,double belta);
@@ -54,6 +51,9 @@ public:
 
 	//8.径向和切向畸变校正
 	long UAVPhotogrammetryTools_DistortionCorrection(vector<Point2f> &pntCamera);
+
+	//TODO:5.光束法平差
+	long UAVPhotogrammetryTools_BundlerAdj();
 
 	//8.将测试函数声明为友元函数方便获取
 	friend void PhotogrammetryToolsTest();

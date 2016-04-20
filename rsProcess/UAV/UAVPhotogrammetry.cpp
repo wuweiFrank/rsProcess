@@ -54,12 +54,20 @@ void PhotogrammetryToolsTest()
 	fin.close();
 	m_Tools.UAVPhotogrammetryTools_DistortionCorrection(pntl);
 	m_Tools.UAVPhotogrammetryTools_DistortionCorrection(pntr);
+	
 	REO lEOt, rEOt;
 	memset(&lEOt, 0, sizeof(REO));
-	EO EOt;
 	m_Tools.UAVPhotogrammetryTools_ROrientation(pntl, pntr, lEOt, rEOt);
 	printf("%lf  %lf  %lf  %lf  %lf  %lf\n", rEOt.m_phia, rEOt.m_omega, rEOt.m_kappa, rEOt.m_Bx, rEOt.m_By, rEOt.m_Bz);
-	int temp = 0;
+
+	EO aEO; double lamda;
+	aEO.m_dX = 1000; aEO.m_dY = 2000; aEO.m_dZ = 1500;
+	aEO.m_phia = 0.011; aEO.m_omega = 0.022; aEO.m_kappa = 0.033;
+	lamda = 4.0;
+	m_Tools.UAVPhotogrammetryTools_AOrientation(pntl, pntr, lEOt, rEOt, pntGeo, aEO, lamda);
+	printf("%lf  %lf  %lf  %lf  %lf  %lf  %lf\n", aEO.m_phia, aEO.m_omega, aEO.m_kappa, aEO.m_dX, aEO.m_dY, aEO.m_dZ, lamda);
+	
+	EO EOt;
 	EOt.m_dX = 756.0875; EOt.m_dY = -131.6018; EOt.m_dZ = -15.0643;
 	EOt.m_phia = 0.225967; EOt.m_omega = 0.112503; EOt.m_kappa = -0.081294;
 	m_Tools.UAVPhotogrammetryTools_UAVResction(pntl, pntGeo, EOt);
@@ -273,8 +281,8 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f>
 			L_XYZ[2] = c1l*pnt1[i].x + c2l*pnt1[i].y - c3l*m_fLen;
 
 			//计算By,Bz,N',N,Q
-			B[1] = tan(var[3]) * B[0];						/*var[3]*B[0];*/
-			B[2] = tan(var[4]) * B[0] / cos(var[3]);		/*var[4]*B[0];*/
+			B[1] = /*tan(var[3]) * B[0];	*/					var[3]*B[0];
+			B[2] = /*tan(var[4]) * B[0] / cos(var[3]);*/		var[4]*B[0];
 
 			double RN = (B[0] * L_XYZ[2] - B[2] * L_XYZ[0]) / (L_XYZ[0] * R_XYZ[2] - L_XYZ[2] * R_XYZ[0]);   //N'
 			double LN = (B[0] * R_XYZ[2] - B[2] * R_XYZ[0]) / (L_XYZ[0] * R_XYZ[2] - L_XYZ[2] * R_XYZ[0]);   //N
@@ -327,7 +335,7 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f>
 }
 
 //绝对定向
-long UAVPhotogrammetryTools::UAVPhotogrammetryTools_AOrientation(vector<Point2f> pntModel1, vector<Point2f> pntModel2, REO REOl, REO REOr, vector<Point3f> pntGeo, EO &eoAElement, double &lamda)
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_AOrientation(vector<Point2f> pntModel1, vector<Point2f> pntModel2, REO &REOl, REO &REOr, vector<Point3d> pntGeo, EO &eoAElement, double &lamda)
 {
 	//求出模型点在辅助坐标系上的坐标
 	int pntsize = pntModel1.size();
@@ -396,13 +404,20 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_AOrientation(vector<Point2f>
 	double Xg = 0.0,Yg = 0.0,Zg = 0.0,Ug = 0.0,Vg = 0.0,Wg = 0.0;
 	for (int i = 0; i<pntsize; i++)
 	{
-		Xg += pntGeo[i].x / pntsize;
-		Yg += pntGeo[i].y / pntsize;
-		Zg += pntGeo[i].z / pntsize;
-		Ug += U[i] / pntsize;
-		Vg += V[i] / pntsize;
-		Wg += W[i] / pntsize;
+		Xg += pntGeo[i].x ;
+		Yg += pntGeo[i].y ;
+		Zg += pntGeo[i].z ;
+		Ug += U[i];
+		Vg += V[i];
+		Wg += W[i];
 	}
+	Xg /= pntsize;
+	Yg /= pntsize;
+	Zg /= pntsize;
+	Ug /= pntsize;
+	Vg /= pntsize;
+	Wg /= pntsize;
+
 	//比例尺
 	double S1 = sqrt(Xg*Xg + Yg*Yg + Zg*Zg);
 	double S2 = sqrt(Ug*Ug + Vg*Vg + Wg*Wg);
@@ -435,19 +450,21 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_AOrientation(vector<Point2f>
 	}
 
 	//迭代求解
-	double *AA = NULL, *LL = NULL, *AAT = NULL;
+	double *AA = NULL, *LL = NULL, *AAT = NULL, *AAIM = NULL;
 	double AAM[49], AAI[49], LLM[7],LLIM[7];
 	try
 	{
 		LL = new double[pntsize * 3];
 		AA = new double[pntsize*21]; 
 		AAT = new double[pntsize * 21];
+		AAIM = new double[pntsize * 21];
 	}
 	catch (bad_alloc &e)
 	{
 		printf("%s\n", e.what());
 		exit(-1);
 	}
+	int iteratorNum = 0;
 	do
 	{
 		//旋转矩阵
@@ -500,48 +517,52 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_AOrientation(vector<Point2f>
 		
 		MatrixTrans(AA, pntsize * 3, 7, AAT);
 		MatrixMuti(AAT, 7, pntsize * 3, 7, AA, AAM);
-		MatrixMuti(AAT, 7, pntsize * 3, 1, LL, LLM);
 		MatrixInverse(AAM, 7, AAI);
-		MatrixMuti(AAI, 7, 7, 1, LLM, LLIM);
+		MatrixMuti(AAI, 7, 7, pntsize * 3, AAT, AAIM);
+		MatrixMuti(AAIM, 7, pntsize * 3, 1, LL, LLIM);
 
 		eoAElement.m_dX += LLIM[0];
 		eoAElement.m_dY += LLIM[1];
 		eoAElement.m_dZ += LLIM[2];
 		lamda+= LLIM[3];
-		eoAElement.m_phia = LLIM[4];
-		eoAElement.m_omega = LLIM[5];
-		eoAElement.m_kappa = LLIM[6];
-	} while (true);
+		eoAElement.m_phia += LLIM[4];
+		eoAElement.m_omega += LLIM[5];
+		eoAElement.m_kappa += LLIM[6];
+		iteratorNum++;
+		printf("迭代次数：%d\r", iteratorNum);
+	} while (OVER_LIMIT(LLIM[0])|| OVER_LIMIT(LLIM[1]) || OVER_LIMIT(LLIM[2]) ||
+		OVER_LIMIT(LLIM[3]) || OVER_LIMIT(LLIM[4]) || OVER_LIMIT(LLIM[5]) || OVER_LIMIT(LLIM[6]));
 
 	//清空内存
 	if (U != NULL)
 		delete[]U;
 	if (V != NULL)
-		delete[]U;
+		delete[]V;
 	if (W != NULL)
-		delete[]U;
+		delete[]W;
 	if (Xba != NULL)
-		delete[]U;
+		delete[]Xba;
 	if (Yba != NULL)
-		delete[]U;
+		delete[]Yba;
 	if (Zba != NULL)
-		delete[]U;
+		delete[]Zba;
 	if (Uba != NULL)
-		delete[]U;
+		delete[]Uba;
 	if (Vba != NULL)
-		delete[]U;
+		delete[]Vba;
 	if (Wba != NULL)
-		delete[]U;
+		delete[]Wba;
 	if (AA != NULL)
-		delete[]U;
+		delete[]AA;
 	if (LL != NULL)
-		delete[]U;
+		delete[]LL;
 	if (AAT != NULL)
-		delete[]U;
-
+		delete[]AAT;
+	if (AAIM != NULL)
+		delete[]AAIM;
 	U =V =W = NULL;
 	Xba = Yba = Zba = Uba = Vba = Wba = NULL;
-	AA = LL = AAT = NULL;
+	AAIM=AA = LL = AAT = NULL;
 
 	return 0;
 }
