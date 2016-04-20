@@ -40,7 +40,7 @@ public:
 	long UAVPhotogrammetryTools_ROrientation(vector<Point2f> pnt1, vector<Point2f> pnt2, REO &reoRElementL, REO &reoRElementR);
 
 	//4.绝对定向
-	long UAVPhotogrammetryTools_AOrientation(vector<vector<Point2f>> pntModel, vector<vector<Point3f>> pntGeo, vector<EO> &eoAElement);
+	long UAVPhotogrammetryTools_AOrientation(vector<Point2f> pntModel1, vector<Point2f> pntModel2, REO REOl, REO REOr,vector<Point3f> pntGeo, EO &eoAElement,double &lamda);
 
 	//TODO:5.光束法平差
 	long UAVPhotogrammetryTools_BundlerAdj();

@@ -2,6 +2,7 @@
 #include<fstream>
 #include"..\matrixOperation.h"
 #include"..\Global.h"
+#include<stdio.h>
 void PhotogrammetryToolsTest()
 {
 	CornerCoordi4 m_coordiTrans4;
@@ -326,8 +327,222 @@ long UAVPhotogrammetryTools::UAVPhotogrammetryTools_ROrientation(vector<Point2f>
 }
 
 //绝对定向
-long UAVPhotogrammetryTools::UAVPhotogrammetryTools_AOrientation(vector<vector<Point2f>> pntModel, vector<vector<Point3f>> pntGeo, vector<EO> &eoAElement)
+long UAVPhotogrammetryTools::UAVPhotogrammetryTools_AOrientation(vector<Point2f> pntModel1, vector<Point2f> pntModel2, REO REOl, REO REOr, vector<Point3f> pntGeo, EO &eoAElement, double &lamda)
 {
+	//求出模型点在辅助坐标系上的坐标
+	int pntsize = pntModel1.size();
+	double *U = NULL, *V = NULL, *W = NULL;
+	try
+	{
+		U = new double[pntsize];
+		V = new double[pntsize];
+		W = new double[pntsize];
+	}
+	catch (bad_alloc &e)
+	{
+		printf("%s\n", e.what());
+		exit(-1);
+	}
+	double a1r, a2r, a3r, b1r, b2r, b3r, c1r, c2r, c3r;
+	double a1l, a2l, a3l, b1l, b2l, b3l, c1l, c2l, c3l;
+
+	double phial = REOl.m_phia;	double omegal = REOl.m_omega;double kappal = REOl.m_kappa;
+	a1l = cos(phial)*cos(kappal) + sin(phial)*sin(omegal)*sin(kappal);
+	a2l = -cos(phial)*sin(omegal) - sin(phial)*sin(omegal)*sin(kappal);
+	a3l = -sin(phial)*cos(omegal);
+
+	b1l = cos(omegal)*sin(kappal);
+	b2l = cos(omegal)*cos(kappal);
+	b3l = -sin(omegal);
+
+	c1l = sin(phial)*cos(kappal) + cos(phial)*sin(omegal)*sin(kappal);
+	c2l = -sin(omegal)*sin(kappal) + cos(phial)*sin(omegal)*sin(kappal);
+	c3l = cos(phial)*cos(omegal);
+	double phiar = REOr.m_phia; double omegar = REOr.m_omega; double kappar = REOr.m_kappa;
+	a1r = cos(phiar)*cos(kappar) - sin(phiar)*sin(omegar)*sin(kappar);
+	a2r = -cos(phiar)*sin(kappar) - sin(phiar)*sin(omegar)*cos(kappar);
+	a3r = -sin(phiar)*cos(omegar);
+
+	b1r = cos(omegar)*sin(kappar);
+	b2r = cos(omegar)*cos(kappar);
+	b3r = -sin(omegar);
+
+	c1r = sin(phiar)*cos(kappar) + cos(phiar)*sin(omegar)*sin(kappar);
+	c2r = -sin(phiar)*sin(kappar) + cos(phiar)*sin(omegar)*cos(kappar);
+	c3r = cos(phiar)*cos(omegar);
+
+	//求模型点坐标
+	for (int i = 0; i < pntsize; ++i)
+	{
+		double R_XYZ[3], L_XYZ[3];
+
+		R_XYZ[0] = a1r*pntModel2[i].x + a2r*pntModel2[i].y - a3r*m_fLen;
+		R_XYZ[1] = b1r*pntModel2[i].x + b2r*pntModel2[i].y - b3r*m_fLen;
+		R_XYZ[2] = c1r*pntModel2[i].x + c2r*pntModel2[i].y - c3r*m_fLen;
+
+		L_XYZ[0] = a1l*pntModel1[i].x + a2l*pntModel1[i].y - a3l*m_fLen;
+		L_XYZ[1] = b1l*pntModel1[i].x + b2l*pntModel1[i].y - b3l*m_fLen;
+		L_XYZ[2] = c1l*pntModel1[i].x + c2l*pntModel1[i].y - c3l*m_fLen;
+
+		double RN = (REOr.m_Bx * L_XYZ[2] - REOr.m_Bz * L_XYZ[0]) / (L_XYZ[0] * R_XYZ[2] - L_XYZ[2] * R_XYZ[0]);   //N'
+		double LN = (REOr.m_Bx * R_XYZ[2] - REOr.m_Bz * R_XYZ[0]) / (L_XYZ[0] * R_XYZ[2] - L_XYZ[2] * R_XYZ[0]);   //N
+	
+		U[i] = REOr.m_Bx + RN * R_XYZ[0];
+		V[i] = REOr.m_By + RN * R_XYZ[1];
+		W[i] = REOr.m_Bz + RN * R_XYZ[2];
+	}
+
+	//赋初值重心化坐标
+	double Xg = 0.0,Yg = 0.0,Zg = 0.0,Ug = 0.0,Vg = 0.0,Wg = 0.0;
+	for (int i = 0; i<pntsize; i++)
+	{
+		Xg += pntGeo[i].x / pntsize;
+		Yg += pntGeo[i].y / pntsize;
+		Zg += pntGeo[i].z / pntsize;
+		Ug += U[i] / pntsize;
+		Vg += V[i] / pntsize;
+		Wg += W[i] / pntsize;
+	}
+	//比例尺
+	double S1 = sqrt(Xg*Xg + Yg*Yg + Zg*Zg);
+	double S2 = sqrt(Ug*Ug + Vg*Vg + Wg*Wg);
+	double K = S1 / S2;
+
+	//去重心化坐标
+	double *Xba = NULL, *Yba = NULL, *Zba = NULL, *Uba  = NULL, *Vba = NULL, *Wba = NULL;
+	try
+	{
+		Xba= new double[pntsize];
+		Yba = new double[pntsize];
+		Zba = new double[pntsize];
+		Uba = new double[pntsize];
+		Vba = new double[pntsize];
+		Wba = new double[pntsize];
+	}
+	catch (bad_alloc &e)
+	{
+		printf("%s\n", e.what());
+		exit(-1);
+	}
+	for (int i = 0; i<pntsize; i++)
+	{
+		Xba[i] = pntGeo[i].x - Xg;
+		Yba[i] = pntGeo[i].y - Yg;
+		Zba[i] = pntGeo[i].z- Zg;
+		Uba[i] = (U[i] - Ug)*K;
+		Vba[i] = (V[i] - Vg)*K;
+		Wba[i] = (W[i] - Wg)*K;
+	}
+
+	//迭代求解
+	double *AA = NULL, *LL = NULL, *AAT = NULL;
+	double AAM[49], AAI[49], LLM[7],LLIM[7];
+	try
+	{
+		LL = new double[pntsize * 3];
+		AA = new double[pntsize*21]; 
+		AAT = new double[pntsize * 21];
+	}
+	catch (bad_alloc &e)
+	{
+		printf("%s\n", e.what());
+		exit(-1);
+	}
+	do
+	{
+		//旋转矩阵
+		double R0[9];
+		double Phi0 = eoAElement.m_phia, Omega0 = eoAElement.m_omega, Kappa0 = eoAElement.m_kappa;
+		R0[0] = cos(Phi0)*cos(Kappa0) - sin(Phi0)*sin(Omega0)*sin(Kappa0);
+		R0[1] = -cos(Phi0)*sin(Kappa0) - sin(Phi0)*sin(Omega0)*cos(Kappa0);
+		R0[2] = -sin(Phi0)*cos(Omega0);
+		R0[3] = cos(Omega0)*sin(Kappa0);
+		R0[4] = cos(Omega0)*cos(Kappa0);
+		R0[5] = -sin(Omega0);
+		R0[6] = sin(Phi0)*cos(Kappa0) + cos(Phi0)*sin(Omega0)*sin(Kappa0);
+		R0[7] = -sin(Phi0)*sin(Kappa0) + cos(Phi0)*sin(Omega0)*cos(Kappa0);
+		R0[8] = cos(Phi0)*cos(Omega0);
+
+		for (int i = 0; i<pntsize; i++)
+		{
+			AA[21 * i+0] = 1;
+			AA[21 * i+1] = 0;
+			AA[21 * i+2] = 0;
+			AA[21 * i+3] = Uba[i];
+			AA[21 * i+4] = -Wba[i];
+			AA[21 * i+5] = 0;
+			AA[21 * i+6] = -Vba[i];
+
+			AA[21 * i + 7] = 0;
+			AA[21 * i + 8] = 1;
+			AA[21 * i + 9] = 0;
+			AA[21 * i + 10]= Vba[i];
+			AA[21 * i + 11] = 0;
+			AA[21 * i + 12] = -Wba[i];
+			AA[21 * i + 13] = Uba[i];
+
+			AA[21 * i + 14] = 0;
+			AA[21 * i + 15] = 0;
+			AA[21 * i + 16] = 1;
+			AA[21 * i + 17] = Wba[i];
+			AA[21 * i + 18] = Uba[i];
+			AA[21 * i + 19] = Vba[i];
+			AA[21 * i + 20] = 0;
+		}
+
+		//求出改正数的常数项
+		for (int i = 0; i<pntsize; i++)
+		{
+			LL[3 * i + 0] = Xba[i] - lamda*(R0[0] * Uba[i] + R0[1] * Vba[i] + R0[2] * Wba[i]) - eoAElement.m_dX;
+			LL[3 * i + 1] = Yba[i] - lamda*(R0[3] * Uba[i] + R0[4] * Vba[i] + R0[5] * Wba[i]) - eoAElement.m_dY;
+			LL[3 * i + 2] = Zba[i] - lamda*(R0[6] * Uba[i] + R0[7] * Vba[i] + R0[8] * Wba[i]) - eoAElement.m_dZ;
+		}
+		
+		MatrixTrans(AA, pntsize * 3, 7, AAT);
+		MatrixMuti(AAT, 7, pntsize * 3, 7, AA, AAM);
+		MatrixMuti(AAT, 7, pntsize * 3, 1, LL, LLM);
+		MatrixInverse(AAM, 7, AAI);
+		MatrixMuti(AAI, 7, 7, 1, LLM, LLIM);
+
+		eoAElement.m_dX += LLIM[0];
+		eoAElement.m_dY += LLIM[1];
+		eoAElement.m_dZ += LLIM[2];
+		lamda+= LLIM[3];
+		eoAElement.m_phia = LLIM[4];
+		eoAElement.m_omega = LLIM[5];
+		eoAElement.m_kappa = LLIM[6];
+	} while (true);
+
+	//清空内存
+	if (U != NULL)
+		delete[]U;
+	if (V != NULL)
+		delete[]U;
+	if (W != NULL)
+		delete[]U;
+	if (Xba != NULL)
+		delete[]U;
+	if (Yba != NULL)
+		delete[]U;
+	if (Zba != NULL)
+		delete[]U;
+	if (Uba != NULL)
+		delete[]U;
+	if (Vba != NULL)
+		delete[]U;
+	if (Wba != NULL)
+		delete[]U;
+	if (AA != NULL)
+		delete[]U;
+	if (LL != NULL)
+		delete[]U;
+	if (AAT != NULL)
+		delete[]U;
+
+	U =V =W = NULL;
+	Xba = Yba = Zba = Uba = Vba = Wba = NULL;
+	AA = LL = AAT = NULL;
+
 	return 0;
 }
 
