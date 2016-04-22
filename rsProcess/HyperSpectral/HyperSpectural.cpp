@@ -2604,8 +2604,9 @@ long FastFinder(double* imgBuffer,double* endmember,int xsize,int ysize,int band
 			if(det>iterdet)
 			{
 				maxMember=j;
-				iterdet=det;
 			}
+			iterdet = det;
+
 			//for(int k=0;k<bandSum;k++)
 			//	randEndmember[j*bandSum+k]=temp[k];
 			memcpy(randEndmember+j*bandSum,temp,sizeof(double)*bandSum);

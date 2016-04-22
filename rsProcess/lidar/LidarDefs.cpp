@@ -379,7 +379,7 @@ void LASSet::LASSet_Trim()
 			pntRectSet.dX += m_lasRectangles[i].m_lasPoints[j].m_vec3d.x / m_lasRectangles[i].m_lasPoints_numbers;
 			pntRectSet.dY += m_lasRectangles[i].m_lasPoints[j].m_vec3d.y / m_lasRectangles[i].m_lasPoints_numbers;
 			pntRectSet.dZ += m_lasRectangles[i].m_lasPoints[j].m_vec3d.z / m_lasRectangles[i].m_lasPoints_numbers;
-			memcpy(&m_lasRectangles[i].m_Rectangle, &pntRectSet, sizeof(THREEDPOINT));
+			memcpy(&m_lasRectangles[i].m_rectCenter, &pntRectSet, sizeof(THREEDPOINT));
 		}
 		pntLasSet.dX += pntRectSet.dX / m_numRectangles;
 		pntLasSet.dY += pntRectSet.dY / m_numRectangles;

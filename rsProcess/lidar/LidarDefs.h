@@ -9,7 +9,7 @@ using namespace std;
 
 //定义读取数据的最大内存量为512MB
 #define LargestMemoryToRead 536870912
-#define BlockPointNumbers 2048
+#define BlockPointNumbers 102400
 //================================================las头文件定义=========================================================
 // 地面类型
 enum  LAS_CLASSIFICATION_TYPE

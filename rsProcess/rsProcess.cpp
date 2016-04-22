@@ -2,14 +2,22 @@
 //
 
 #include "stdafx.h"
-#include"AerialProduct\ProductTest.h"
-#include"UAV\UAVUnityTest.h"
+#include"lidar\LidarAlgorithm.h"
 #include"lidar\LidarReader.h"
-#include"OPENCVTools.h"
-#include"experiment\HyperRepair.h"
-#include"UAV\UAVPhotogrammetry.h"
+#include"RenderProcess.h"
 float main()
 {
+
+	LidarReader *reader = new LASLidarReader();
+	reader->LidarReader_Open("D:\\lasÎÄ¼þ\\cc_000341.las");
+	reader->LidarReader_Read(true, 1);
+	LidarTinCreate(reader->m_lasDataset);
+	LidarTriangleRender(&reader->m_lasDataset);
+
+	//Mat img = imread("C:\\Users\\Public\\Pictures\\Sample Pictures\\lena.jpg");
+	//imshow("img", img);
+	//waitKey(0);
+	//return 0;
 	//QPDPreProcessUnitTestFunc();
 	//QPDLevel0ProcessUnitTestFunc();
 	//QPDLevel1ProcessUnitTestFunc();
@@ -31,7 +39,7 @@ float main()
 
 	//UAVGeoCorrectionTest();
 
-	PhotogrammetryToolsTest();
+	//PhotogrammetryToolsTest();
 
 	return 0;
 }

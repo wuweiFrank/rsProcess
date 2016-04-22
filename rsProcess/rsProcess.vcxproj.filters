@@ -69,12 +69,6 @@
     <ClInclude Include="tsmUTM.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RunObject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadPool.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="AerialProduct\ExtractXML.h">
       <Filter>AerialProduct</Filter>
     </ClInclude>
@@ -150,7 +144,13 @@
     <ClInclude Include="lidar\LidarAlgorithm.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="lidar\glut.h">
+    <ClInclude Include="RunObject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderProcess.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -174,9 +174,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CoordinateTrans.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadPool.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="AerialProduct\ExtractXML.cpp">
@@ -233,9 +230,6 @@
     <ClCompile Include="UAV\UAVGeoCorrection.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="UAV\UAVUnityTest.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="EXIF.CPP">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -258,6 +252,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="lidar\LidarAlgorithm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadPool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderProcess.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
