@@ -9,7 +9,7 @@ using namespace std;
 
 //定义读取数据的最大内存量为512MB
 #define LargestMemoryToRead 536870912
-#define BlockPointNumbers 102400
+#define BlockPointNumbers 2048
 //================================================las头文件定义=========================================================
 // 地面类型
 enum  LAS_CLASSIFICATION_TYPE
@@ -313,7 +313,6 @@ struct LAS_XYZ
 #pragma pack(1)/*字节对齐*/
 struct LASPoint
 {
-public:
 	LAS_XYZ			m_vec3d;
 	unsigned short  m_intensity;
 	unsigned char   m_rnseByte;
@@ -323,6 +322,12 @@ public:
 	unsigned short  m_flightID;
 	double			m_gpsTime;
 	LASColorExt		m_colorExt;
+};
+#pragma pack(1)/*字节对齐*/
+struct LASIndex
+{
+	int rectangle_idx;
+	int point_idx_inRect;
 };
 
 //las块文件，将点文件分块得到的数据
@@ -355,11 +360,14 @@ public:
 class LASSet
 {
 public:
-	LASSet() { m_lasRectangles = NULL; m_lasBlockTree.RemoveAll(); m_numRectangles = 0;  }
+	LASSet() { m_lasRectangles = NULL; m_lasBlockTree.RemoveAll(); m_numRectangles = 0; m_LASPointID = NULL; }
 	~LASSet(){
 		printf("正在释放内存...\n");
 		if (m_lasRectangles != NULL)
 			delete[]m_lasRectangles;
+		if (m_LASPointID != NULL)
+			delete[]m_LASPointID;
+		m_LASPointID = NULL;
 		m_lasRectangles = NULL;
 		m_lasBlockTree.RemoveAll();
 	}
@@ -367,6 +375,8 @@ public:
 	//找到匹配的矩形的id，根据id获取在哪个矩形中
 	bool LASSet_Search(int rectID, Rect searchRect, vector<int> &rects);
 	bool LASSet_Search(int rectID, LAS_XYZ searchPnt, vector<int> &rects);
+	//根据顺次次序获取三维点
+	bool LasSet_Search(int pointID, LAS_XYZ &searchPnt);
 
 	//构建R树的过程
 	long LASSet_BuildTree();
@@ -382,4 +392,5 @@ public:
 	LASRectangle*		m_lasRectangles;
 	LASBlockTree		m_lasBlockTree;
 	int					m_numRectangles;
+	LASIndex            *m_LASPointID;
 };

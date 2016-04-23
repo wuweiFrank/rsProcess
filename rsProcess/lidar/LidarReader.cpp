@@ -91,7 +91,7 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 
 		long bytelen = read_once_max * m_lasHeader.point_data_record_length;
 		readOnce = new unsigned char[bytelen];
-
+		totalLasNumber = 0;
 		while (alread_read<m_lasHeader.number_of_point_records)
 		{
 			if (read_once>read_once_max)
@@ -115,11 +115,12 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 				int widtnIdx = int((vex.x - m_lasHeader.min_x) / widthPer);
 				int heighIdx = int((vex.y - m_lasHeader.min_y) / heightPer);
 				pointsRect[heighIdx*widthNum+ widtnIdx]++;
+				totalLasNumber++;
 			}
 			alread_read += read_once;
 			read_once_max = min(read_once_max, (m_lasHeader.number_of_point_records - alread_read));
 		}
-
+		m_lasDataset.m_LASPointID = new LASIndex[totalLasNumber];
 		//回到数据起点
 		fseek(m_lasFile, m_lasHeader.offset_to_point_data, SEEK_SET);
 		//第二遍遍历获取数据
@@ -128,11 +129,14 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 			m_lasDataset.m_lasRectangles[j].LASRect_AllocateMemory(pointsRect[j], inMemory, m_lasDataset.m_lasRectangles[j].m_Rectangle);
 		}
 		memset(pointsRect, 0, sizeof(int)*widthNum*heightNum);
+		int totallasPnts = 0;
+
 		if (inMemory)
 		{
 			alread_read = 0;
 			read_once_max = BlockPointNumbers;
 			read_once = m_lasHeader.number_of_point_records;
+
 			while (alread_read<m_lasHeader.number_of_point_records)
 			{
 				if (read_once>read_once_max)
@@ -140,7 +144,6 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 				int readLen = read_once * m_lasHeader.point_data_record_length;
 				fread(readOnce, readLen, 1, m_lasFile);
 				//先读取，然后进行处理
-				int totallasPnts = 0;
 				for (size_t i = 0; i < read_once; i += readSkip)
 				{
 					if (m_Progress != NULL)
@@ -176,8 +179,11 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 					int widtnIdx = int((vex.m_vec3d.x - m_lasHeader.min_x) / widthPer);
 					int heighIdx = int((vex.m_vec3d.y - m_lasHeader.min_y) / heightPer);
 					memcpy(m_lasDataset.m_lasRectangles[heighIdx*widthNum + widtnIdx].m_lasPoints + pointsRect[heighIdx*widthNum + widtnIdx],&vex,sizeof(LASPoint));
+					m_lasDataset.m_lasRectangles[heighIdx*widthNum + widtnIdx].m_point_index[pointsRect[heighIdx*widthNum + widtnIdx]] = alread_read + i;
+					m_lasDataset.m_LASPointID[totallasPnts].rectangle_idx = heighIdx*widthNum + widtnIdx;
+					m_lasDataset.m_LASPointID[totallasPnts].point_idx_inRect = pointsRect[heighIdx*widthNum + widtnIdx];
 					pointsRect[heighIdx*widthNum + widtnIdx]++;
-					m_lasDataset.m_lasRectangles[heighIdx*widthNum + widtnIdx].m_point_index[totallasPnts] = alread_read + i;
+					totallasPnts++;
 				}
 				alread_read += read_once;
 				read_once_max = min(read_once_max, (m_lasHeader.number_of_point_records - alread_read));
@@ -211,7 +217,10 @@ long LASLidarReader::LidarReader_Read(bool inMemory, int readSkip/*=1*/)
 					int widtnIdx = ceil((vex.m_vec3d.x - m_lasHeader.min_x) / widthPer);
 					int heighIdx = ceil((vex.m_vec3d.y - m_lasHeader.min_y) / heightPer);
 					m_lasDataset.m_lasRectangles[heighIdx*widthNum + widtnIdx].m_point_index[pointsRect[heighIdx*widthNum + widtnIdx]] = alread_read + i;
+					m_lasDataset.m_LASPointID[totallasPnts].rectangle_idx = heighIdx*widthNum + widtnIdx;
+					m_lasDataset.m_LASPointID[totallasPnts].point_idx_inRect = pointsRect[heighIdx*widthNum + widtnIdx];
 					pointsRect[heighIdx*widthNum + widtnIdx]++;
+					totallasPnts++;
 				}
 				alread_read += read_once;
 				read_once_max = min(read_once_max, (m_lasHeader.number_of_point_records - alread_read));
@@ -366,6 +375,7 @@ long XYZLidarReader::LidarReader_Read(bool inMemory, int readSkip/* = 1*/)
 	int totalLasNumber = 0;
 	long long  memoryUsed = 0;
 	totalLasNumber = m_lasHeader.number_of_point_records / readSkip;
+	m_lasDataset.m_LASPointID = new LASIndex[totalLasNumber];
 	memoryUsed = totalLasNumber*m_lasHeader.point_data_record_length;
 	if (inMemory&&memoryUsed > LargestMemoryToRead)
 	{
@@ -488,6 +498,9 @@ long XYZLidarReader::LidarReader_Read(bool inMemory, int readSkip/* = 1*/)
 					int heighIdx = int((vex.m_vec3d.y - m_lasHeader.min_y) / heightPer);
 					m_lasDataset.m_lasRectangles[heighIdx*widthNum + widtnIdx].m_point_index[pointsRect[heighIdx*widthNum + widtnIdx]] = number;
 					memcpy(m_lasDataset.m_lasRectangles[heighIdx*widthNum + widtnIdx].m_lasPoints + pointsRect[heighIdx*widthNum + widtnIdx], &vex, sizeof(LASPoint));
+					m_lasDataset.m_LASPointID[number].rectangle_idx = heighIdx*widthNum + widtnIdx;
+					m_lasDataset.m_LASPointID[number].point_idx_inRect = pointsRect[heighIdx*widthNum + widtnIdx];
+					number++;
 					pointsRect[heighIdx*widthNum + widtnIdx]++;
 				}
 			}
@@ -509,6 +522,9 @@ long XYZLidarReader::LidarReader_Read(bool inMemory, int readSkip/* = 1*/)
 					int widtnIdx = int((vex.m_vec3d.x - m_lasHeader.min_x) / widthPer);
 					int heighIdx = int((vex.m_vec3d.y - m_lasHeader.min_y) / heightPer);
 					m_lasDataset.m_lasRectangles[heighIdx*widthNum + widtnIdx].m_point_index[pointsRect[heighIdx*widthNum + widtnIdx]] = number;
+					m_lasDataset.m_LASPointID[number].rectangle_idx = heighIdx*widthNum + widtnIdx;
+					m_lasDataset.m_LASPointID[number].point_idx_inRect = pointsRect[heighIdx*widthNum + widtnIdx];
+					number++;
 					pointsRect[heighIdx*widthNum + widtnIdx]++;
 				}
 			}

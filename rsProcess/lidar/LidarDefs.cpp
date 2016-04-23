@@ -337,6 +337,23 @@ bool LASSet::LASSet_Search(int rectID, LAS_XYZ searchPnt, vector<int> &rects)
 		m_lasBlockTree.Search(searchRect.min, searchRect.max, SearchRectCallback, &rects);
 	return true;
 }
+//根据顺次次序找到对应的点
+bool LASSet::LasSet_Search(int pointID, LAS_XYZ &searchPnt)
+{
+	int pntBegIdz=0, pntEndIdx=0;
+	for (int i = 0; i < m_numRectangles; ++i)
+	{
+		//起始和终止点号
+		pntBegIdz = pntEndIdx;
+		pntEndIdx += m_lasRectangles[i].m_lasPoints_numbers - 1;
+		if (pointID >= pntBegIdz&&pointID <= pntEndIdx)
+		{
+			memcpy(&searchPnt, &m_lasRectangles[i].m_lasPoints[pointID - pntBegIdz].m_vec3d, sizeof(LAS_XYZ));
+			return true;
+		}
+	}
+	return false;
+}
 long LASSet::LASSet_BuildTree()
 {
 	if (m_lasRectangles == NULL|| m_numRectangles == 0)

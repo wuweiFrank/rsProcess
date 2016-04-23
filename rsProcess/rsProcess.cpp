@@ -10,10 +10,12 @@ float main()
 
 	LidarReader *reader = new LASLidarReader();
 	reader->LidarReader_Open("D:\\lasÎÄ¼þ\\cc_000341.las");
-	reader->LidarReader_Read(true, 1);
-	LidarTinCreate(reader->m_lasDataset);
-	LidarTriangleRender(&reader->m_lasDataset);
-
+	reader->LidarReader_Read(true, 10);
+	//LidarTinCreateLocal(reader->m_lasDataset);
+	GDALTriangulation *lasTriangle = NULL;
+	lasTriangle=LidarTinCreateGlobal(reader->m_lasDataset);
+	LidarTriangleRenderGlobal(&reader->m_lasDataset, lasTriangle);
+	//GDALTriangulationFree(lasTriangle);
 	//Mat img = imread("C:\\Users\\Public\\Pictures\\Sample Pictures\\lena.jpg");
 	//imshow("img", img);
 	//waitKey(0);
