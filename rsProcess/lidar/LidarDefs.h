@@ -249,8 +249,6 @@ public:
 	unsigned short value_offset;
 };
 
-
-
 //=======================================================las xyz点文件========================================================
 //#ifndef COLORREF
 //#define COLORREF long
@@ -299,7 +297,6 @@ struct LASColorExt
 	unsigned short Green;
 	unsigned short Blue;
 };
-
 /*点云XYZ文件*/
 #pragma pack(1)
 struct LAS_XYZ
