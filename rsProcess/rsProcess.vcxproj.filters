@@ -156,6 +156,9 @@
     <ClInclude Include="lidar\LidarFliter.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="UAV\UAVMosaicFast.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -261,6 +264,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RenderProcess.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UAV\UAVMosaicFast.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

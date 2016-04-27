@@ -40,3 +40,5 @@ void GetImgHistroMatch(double* img1, double *img2, int xsize1, int ysize1, int x
 
 //获取两点之间的距离
 double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2);
+
+void GetImageList(const char* pathList, vector<string> &pszImage);

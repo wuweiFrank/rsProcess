@@ -6,10 +6,27 @@
 #include"lidar\LidarReader.h"
 #include"RenderProcess.h"
 #include"UAV\UAVGeoCorrection.h"
+#include"UAV\UAVMosaicFast.h"
+#include"AuxiliaryFunction.h"
 
 float main()
 {
 
+	UAVMosaicFast m_mosaic_fast;
+	ImgFeaturesTools m_img_tools;
+	vector<vector<Point2f>> m_pnts;
+	vector<string> pszPath;
+	GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
+	bool* matchpairs = new bool[pszPath.size()*pszPath.size()];
+	memset(matchpairs, 0, sizeof(bool)*pszPath.size()*pszPath.size());
+	for (int i = 0; i < pszPath.size() - 1; ++i)
+		matchpairs[i*pszPath.size() + i + 1] = true;
+	m_img_tools.ImgFeaturesTools_ExtracMatches(pszPath, m_pnts, matchpairs, "AKAZE", "BruteForce-L1");
+	m_img_tools.ImgFeaturesTools_WriteENVIMatches("D:\\黑龙江实验照片\\ENVI", pszPath, m_pnts);
+	delete[]matchpairs;
+
+	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
+	//
 	//LidarReader *reader = new LASLidarReader();
 	//reader->LidarReader_Open("D:\\las文件\\cc_000341.las");
 	//reader->LidarReader_Read(true, 10);
@@ -23,7 +40,7 @@ float main()
 	//QPDLevel0ProcessUnitTestFunc();
 	//QPDLevel1ProcessUnitTestFunc();
 	//QPDLevel2ProcessUnitTestFunc();
-	
+	//
 	//UAVGeoCorrectionTest();
 
 	//ImageSegmentTools tools;
@@ -32,7 +49,7 @@ float main()
 
 	//BezierCurve curve;
 	//curve.BezierCurve_BezierDraw();
-	
+	//
 	//experiment_process();
 
 	//ImageInpaint m_inPaint;

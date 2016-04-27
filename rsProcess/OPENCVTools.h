@@ -1,5 +1,4 @@
 #pragma once
-
 #include<vector>
 #include<string>
 #include<Windows.h>
@@ -33,8 +32,8 @@ DWORD WINAPI ImgFeaturesTools_ExtractMatchThread(LPVOID lpParameters);
 descriptor method
 	("AKAZE-DESCRIPTOR_KAZE_UPRIGHT");    // see http://docs.opencv.org/trunk/d8/d30/classcv_1_1AKAZE.html
 	("AKAZE");							  // see http://docs.opencv.org/trunk/d8/d30/classcv_1_1AKAZE.html
-	("ORB");							  // see http://docs.opencv.org/trunk/de/dbf/classcv_1_1BRISK.html
-	("BRISK");							  // see http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html
+	("BRISK");							  // see http://docs.opencv.org/trunk/de/dbf/classcv_1_1BRISK.html
+	("ORB");							  // see http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html
 match algorithm
 	see http://docs.opencv.org/trunk/db/d39/classcv_1_1DescriptorMatcher.html#ab5dc5036569ecc8d47565007fa518257
 	("BruteForce");
@@ -57,6 +56,9 @@ public:
 
 	//4.解算SURF匹配算子<对于序列图像>
 	long ImgFeaturesTools_ExtracMatches(vector<string> pathList, vector<vector<Point2f>> &pts, bool* ismatchpair, string descriptorMethod, string matchMethod);
+
+	//5.将匹配点写成ENVI格式
+	long ImgFeaturesTools_WriteENVIMatches(const char* pathDir, vector<string> pathList, vector<vector<Point2f>> &pts);
 private:
 	//5.获取SURF匹配特征点和特征描述
 	long ImgFeatruesTools_ExtractFeatures(const char* pathImage, Mat& descriptor, vector<Point2f> &keypoints,string descriptorMethod);

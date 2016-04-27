@@ -1,6 +1,7 @@
 #include"stdafx.h"
 #include"AuxiliaryFunction.h"
-
+#include<fstream>
+using namespace std;
 //写ENVI头文件到文件中
 void WriteENVIHeader(const char* pathHeader, ENVIHeader mImgHeader)
 {
@@ -886,4 +887,24 @@ void GetImgHistroMatch(double* img1, double *img2, int xsize1, int ysize1, int x
 double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2)
 {
 	return sqrt((pnt1.dX - pnt2.dX)*(pnt1.dX - pnt2.dX) + (pnt1.dY - pnt2.dY)*(pnt1.dY - pnt2.dY) + (pnt1.dZ - pnt2.dZ)*(pnt1.dZ - pnt2.dZ));
+}
+
+void GetImageList(const char* pathList, vector<string> &pszImage)
+{
+	fstream fin;
+	fin.open(pathList, ios_base::in);
+	if (!fin.is_open())
+	{
+		exit(-1);
+	}
+	do
+	{
+		string str;
+		char tmp[1024];
+		fin.getline(tmp, 1024);
+		str = tmp;
+		if (str != "")
+			pszImage.push_back(str);
+	} while (!fin.eof());
+	fin.close();
 }

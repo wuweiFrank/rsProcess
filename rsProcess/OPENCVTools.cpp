@@ -227,8 +227,8 @@ match algorithm
 */
 long ImgFeaturesTools::ImgFeaturesTools_ExtractMatch(const char* pathImage1, vector<Point2f> &pts1, const char* pathImage2, vector<Point2f> &pts2,string descriptorMethod, string matchMethod)
 {
-	Mat img1 = imread(pathImage1, IMREAD_LOAD_GDAL);
-	Mat img2 = imread(pathImage2, IMREAD_LOAD_GDAL);
+	Mat img1 = imread(pathImage1, 1);
+	Mat img2 = imread(pathImage2, 1);
 	if (img1.rows*img1.cols <= 0)
 	{
 		printf("Image %s is empty or cannot be found\n", pathImage1);
@@ -347,12 +347,14 @@ long ImgFeaturesTools::ImgFeaturesTools_ExtracMatches(vector<string> pathList, v
 	{
 		for (size_t j = i+1; j < size; j++)
 		{
-			matchpairs++;
-			printf("extract match pairs %d\r", matchpairs);
-			if (ismatchpair[j*size + i])
+			if (ismatchpair[i*size + j])
 			{
+				matchpairs++;
+				printf("extract match pairs %d\r", matchpairs);
 				vector<Point2f> pts1, pts2;
 				ImgFeaturesTools_ExtractMatch(pathList[i].c_str(), pts1, pathList[j].c_str(), pts2, descriptorMethod, matchMethod);
+				pts.push_back(pts1);
+				pts.push_back(pts2);
 			}
 		}
 	}
@@ -437,7 +439,7 @@ long ImgFeaturesTools::ImgFeaturesTools_MatchOptimize(vector<Point2f> &pts1, vec
 	vector<Point2f> ptsOpt1, ptsOpt2;
 	for (size_t i = 0; i < pts1.size(); i++)
 	{
-		if (fabs(err[i] - fAverage) < 2 * fDeviation)
+		if (fabs(err[i] - fAverage) < fDeviation)
 		{
 			ptsOpt1.push_back(pts1[i]);
 			ptsOpt2.push_back(pts2[i]);
@@ -449,6 +451,19 @@ long ImgFeaturesTools::ImgFeaturesTools_MatchOptimize(vector<Point2f> &pts1, vec
 	pts1.insert(pts1.begin(), ptsOpt1.begin(), ptsOpt1.end());
 	pts2.insert(pts2.begin(), ptsOpt2.begin(), ptsOpt2.end());
 
+	return 0;
+}
+
+long ImgFeaturesTools::ImgFeaturesTools_WriteENVIMatches(const char* pathDir, vector<string> pathList, vector<vector<Point2f>> &pts)
+{
+	for (size_t i = 0; i < pts.size()/2; i++)
+	{
+		char pathDstPts[256], cA[20], cB[20];
+		sprintf_s(cA, "\\%d.pts", i);
+		strcpy_s(pathDstPts, pathDir);
+		strcat_s(pathDstPts, cA);
+		ImgFeaturesTools_SaveENVIMatches(pathDstPts, pathList[i].c_str(), pathList[i + 1].c_str(), pts[2 * i + 0], pts[2 * i + 1]);
+	}
 	return 0;
 }
 
