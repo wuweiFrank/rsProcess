@@ -166,6 +166,7 @@
     <ClInclude Include="lidar\Geometry.h" />
     <ClInclude Include="lidar\LidarAlgorithm.h" />
     <ClInclude Include="lidar\LidarDefs.h" />
+    <ClInclude Include="lidar\LidarFliter.h" />
     <ClInclude Include="lidar\LidarReader.h" />
     <ClInclude Include="matrixOperation.h" />
     <ClInclude Include="OPENCVTools.h" />

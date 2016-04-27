@@ -8,5 +8,3 @@ long LidarTinCreateLocal(LASSet &m_lasDataset);
 //创建全局三角网
 GDALTriangulation* LidarTinCreateGlobal(LASSet &m_lasDataset);
 
-//创建规则格网局部
-

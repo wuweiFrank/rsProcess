@@ -404,3 +404,4 @@ void LASSet::LASSet_Trim()
 		memcpy(&m_SetCenter, &pntLasSet, sizeof(THREEDPOINT));
 	}
 }
+
