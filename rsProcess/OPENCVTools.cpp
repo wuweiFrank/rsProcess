@@ -224,11 +224,14 @@ match algorithm
 	("BruteForce-L1");
 	("BruteForce-Hamming");
 	("BruteForce-Hamming(2)");
+	("FlannBased")
 */
 long ImgFeaturesTools::ImgFeaturesTools_ExtractMatch(const char* pathImage1, vector<Point2f> &pts1, const char* pathImage2, vector<Point2f> &pts2,string descriptorMethod, string matchMethod)
 {
 	Mat img1 = imread(pathImage1, 1);
+	cvtColor(img1, img1, CV_RGB2GRAY);
 	Mat img2 = imread(pathImage2, 1);
+	cvtColor(img2, img2, CV_RGB2GRAY);
 	if (img1.rows*img1.cols <= 0)
 	{
 		printf("Image %s is empty or cannot be found\n", pathImage1);

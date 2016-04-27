@@ -16,15 +16,10 @@ float main()
 	ImgFeaturesTools m_img_tools;
 	vector<vector<Point2f>> m_pnts;
 	vector<string> pszPath;
+	int width, height;
 	GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
-	bool* matchpairs = new bool[pszPath.size()*pszPath.size()];
-	memset(matchpairs, 0, sizeof(bool)*pszPath.size()*pszPath.size());
-	for (int i = 0; i < pszPath.size() - 1; ++i)
-		matchpairs[i*pszPath.size() + i + 1] = true;
-	m_img_tools.ImgFeaturesTools_ExtracMatches(pszPath, m_pnts, matchpairs, "AKAZE", "BruteForce-L1");
-	m_img_tools.ImgFeaturesTools_WriteENVIMatches("D:\\黑龙江实验照片\\ENVI", pszPath, m_pnts);
-	delete[]matchpairs;
-
+	m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
+	m_mosaic_fast.UAVMosaicFast_GetMosaicRange(pszPath,width, height);
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
 	//
 	//LidarReader *reader = new LASLidarReader();
@@ -34,7 +29,6 @@ float main()
 	//GDALTriangulation *lasTriangle = NULL;
 	//lasTriangle=LidarTinCreateGlobal(reader->m_lasDataset);
 	//LidarTriangleRenderGlobal(&reader->m_lasDataset, lasTriangle);
-
 
 	//QPDPreProcessUnitTestFunc();
 	//QPDLevel0ProcessUnitTestFunc();

@@ -882,13 +882,89 @@ void GetImgHistroMatch(double* img1, double *img2, int xsize1, int ysize1, int x
 	delete[]fhistro1;
 	delete[]fhistro2;
 }
+void GetImgHistroMatch(unsigned char* img1, unsigned char*img2, int xsize1, int ysize1, int xsize2, int ysize2, int minPix, int maxPix, int* histroMap)
+{
+	int *ihistro1 = NULL;
+	double* fhistro1 = NULL;
+	int *ihistro2 = NULL;
+	double* fhistro2 = NULL;
+	try
+	{
+		ihistro1 = new int[maxPix - minPix];
+		fhistro1 = new double[maxPix - minPix];
+		ihistro2 = new int[maxPix - minPix];
+		fhistro2 = new double[maxPix - minPix];
 
+		memset(ihistro1, 0, sizeof(int)*(maxPix - minPix));
+		memset(ihistro2, 0, sizeof(int)*(maxPix - minPix));
+		memset(fhistro1, 0, sizeof(double)*(maxPix - minPix));
+		memset(fhistro2, 0, sizeof(double)*(maxPix - minPix));
+	}
+	catch (bad_alloc)
+	{
+		printf("allocate memory error\n");
+		exit(-1);
+	}
+
+	for (int i = 0; i<xsize1*ysize1; ++i)
+		ihistro1[int(img1[i]) - minPix]++;
+	for (int i = 0; i<xsize2*ysize2; ++i)
+		ihistro2[int(img2[i]) - minPix]++;
+	for (int i = minPix; i<maxPix; ++i)
+	{
+		fhistro1[i] = double(ihistro1[i]) / xsize1 / ysize1;
+		fhistro2[i] = double(ihistro2[i]) / xsize2 / ysize2;
+	}
+	//累积直方图
+	for (int i = 1; i<maxPix; ++i)
+	{
+		fhistro1[i] = fhistro1[i - 1] + fhistro1[i];
+		fhistro2[i] = fhistro2[i - 1] + fhistro2[i];
+	}
+
+
+
+	//直方图匹配
+	double m_diffA, m_diffB;  int k = 0;
+	for (int i = 0; i < maxPix - minPix; i++)
+	{
+		m_diffB = 1;
+		for (int j = k; j < maxPix - minPix; j++)
+		{
+			m_diffA = abs(fhistro1[i] - fhistro2[j]);
+			if (m_diffA - m_diffB < 1.0E-5)
+			{
+				m_diffB = m_diffA;
+				k = j;
+			}
+			else
+			{
+				k = j - 1;
+				break;
+			}
+		}
+		if (k == maxPix - minPix - 1)
+		{
+			for (int l = i; l < maxPix - minPix; l++)
+				histroMap[l] = k;
+			break;
+		}
+		histroMap[i] = k;
+	}
+
+	//清理内存
+	delete[]ihistro1;
+	delete[]ihistro2;
+	delete[]fhistro1;
+	delete[]fhistro2;
+}
 //两点之间的距离
 double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2)
 {
 	return sqrt((pnt1.dX - pnt2.dX)*(pnt1.dX - pnt2.dX) + (pnt1.dY - pnt2.dY)*(pnt1.dY - pnt2.dY) + (pnt1.dZ - pnt2.dZ)*(pnt1.dZ - pnt2.dZ));
 }
 
+//获取影像
 void GetImageList(const char* pathList, vector<string> &pszImage)
 {
 	fstream fin;
