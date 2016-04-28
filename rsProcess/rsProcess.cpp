@@ -18,8 +18,9 @@ float main()
 	vector<string> pszPath;
 	int width, height;
 	GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
-	m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
-	m_mosaic_fast.UAVMosaicFast_GetMosaicRange(pszPath,width, height);
+	m_mosaic_fast.UAVMosaicFast_Mosaic(pszPath, "D:\\img.tif");
+	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
+	//m_mosaic_fast.UAVMosaicFast_GetMosaicRange(pszPath,width, height);
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
 	//
 	//LidarReader *reader = new LASLidarReader();
