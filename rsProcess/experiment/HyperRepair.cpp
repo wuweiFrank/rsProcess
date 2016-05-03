@@ -30,12 +30,13 @@ void get_segment_edge(const char* img_path, vector<Edge_Pixels> &edgeinter)
 	vector<int> seg;
 	for (size_t i = 0; i < xsize*ysize; ++i)
 	{
+		printf("process pixel %d\r", i + 1);
 		bool isIn = false;
-		if (imgData[i] == 255 || imgData[i] == 0)
+		if (imgData[i] == -1)
 			continue;
 		for (size_t j = 0; j < seg.size(); ++j)
 		{
-			if (imgData[i] == seg[j] || imgData[i] == 0 || imgData[i]  == 255)
+			if (imgData[i] == seg[j] ||imgData[i]  == -1)
 				isIn = true;
 		}
 		if (!isIn)
@@ -48,11 +49,11 @@ void get_segment_edge(const char* img_path, vector<Edge_Pixels> &edgeinter)
 	}
 	edgeinter.resize(seg.size());
 
-	//获取每一个分割块的边界像素
-	for (size_t i = 1; i < xsize-1; i++)
+	//获取每一个分割块的边界像素 i++)
 	{
 		for (size_t j = 1; j < ysize-1; j++)
 		{
+			printf("process cols %d\r", i + 1);
 			if (imgData[j*xsize+i] == 0 || imgData[j*xsize + i] == 255)
 				continue;
 			//获取块
@@ -269,6 +270,105 @@ void split_points(vector<CPOINT> fitpoints, vector<CPOINT> &splitPoint1, vector<
 		}
 	}
 
+}
+
+//对非均匀性进行简单的校正
+void correct_non_nonhomogeneity(const char* pathImgIn, const char* pathImgOut)
+{
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//中文路径
+	GDALDatasetH m_dataset = GDALOpen(pathImgIn, GA_ReadOnly);
+	int xsize = GDALGetRasterXSize(m_dataset);
+	int ysize = GDALGetRasterYSize(m_dataset);
+	int bands = GDALGetRasterCount(m_dataset);
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathImgOut, xsize, ysize, bands, GDT_Byte, NULL);
+
+	unsigned char* pData = new unsigned char[xsize*ysize];
+	double* mean_line = new double[xsize];
+	double* correct_param1 = new double[xsize];
+	double* correct_param2 = new double[xsize];
+
+	for (int i = 0; i < bands; ++i)
+	{
+		GDALRasterIO(GDALGetRasterBand(m_dataset, i + 1), GF_Read, 0, 0, xsize, ysize, pData, xsize, ysize, GDT_Byte, 0, 0);
+		double mean_data = 0;
+		for (int j = 0; j < xsize*ysize; ++j)
+			mean_data += double(pData[j]) / xsize / ysize;
+
+		for (int j = 0; j < xsize; ++j)
+		{
+			mean_line[j] = 0;
+			for (int k = 0; k < ysize; k++)
+			{
+				mean_line[j] += double(pData[k*xsize + j]) / ysize;
+			}
+		}
+		for (int k = 0; k < xsize-1; k++)
+		{
+			correct_param1[k]=mean_line[k] /mean_line[k+1];
+		}
+		correct_param1[xsize - 1] = 1;
+		for (int j = 0; j < xsize; ++j)
+		{
+			correct_param2[j] = 1;
+			if (j < xsize / 2)
+			{
+				for (int k = j; k < xsize/2; ++k)
+				{
+					correct_param2[j] = correct_param2[j]/correct_param1[k];
+				}
+			}
+			else
+			{
+				for (int k = xsize / 2; k < j; ++k)
+				{
+					correct_param2[j] = correct_param2[j] * correct_param1[k];
+				}
+			}
+		}
+
+		for (int j = 0; j < xsize; ++j)
+		{
+			for (int k = 0; k < ysize; k++)
+			{
+				pData[k*xsize + j] = (unsigned char)(double(pData[k*xsize + j])*correct_param2[j]);
+			}
+		}
+		GDALRasterIO(GDALGetRasterBand(m_datasetDst, i + 1), GF_Write, 0, 0, xsize, ysize, pData, xsize, ysize, GDT_Byte, 0, 0);
+	}
+	GDALClose(m_dataset);
+	GDALClose(m_datasetDst);
+	delete[]pData;
+	delete[]mean_line;
+	delete[]correct_param1;
+	delete[]correct_param2;
+}
+
+void set_mask_region(const char* pathImgIn, const char* pathImgOut, CPOINT leftup, CPOINT rightdown)
+{
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//中文路径
+	GDALDatasetH m_dataset = GDALOpen(pathImgIn, GA_ReadOnly);
+	int xsize = GDALGetRasterXSize(m_dataset);
+	int ysize = GDALGetRasterYSize(m_dataset);
+	int bands = GDALGetRasterCount(m_dataset);
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("ENVI"), pathImgOut, xsize, ysize, bands, GDT_Int32, NULL);
+	int* pData = new int[xsize*ysize];
+	for (int i = 0; i < bands; ++i)
+	{
+		GDALRasterIO(GDALGetRasterBand(m_dataset, i + 1), GF_Read, 0, 0, xsize, ysize, pData, xsize, ysize, GDT_Int32, 0, 0);
+		for (int i = leftup.x; i < rightdown.x; ++i)
+		{
+			for (int j = leftup.y; j < rightdown.y; j++)
+			{
+				pData[j*xsize + i] = -1;
+			}
+		}
+		GDALRasterIO(GDALGetRasterBand(m_datasetDst, i + 1), GF_Write, 0, 0, xsize, ysize, pData, xsize, ysize, GDT_Int32, 0, 0);
+	}
+	GDALClose(m_dataset);
+	GDALClose(m_datasetDst);
+	delete[]pData;
 }
 
 //实验处理

@@ -8,21 +8,19 @@
 #include"UAV\UAVGeoCorrection.h"
 #include"UAV\UAVMosaicFast.h"
 #include"AuxiliaryFunction.h"
+#include"experiment\HyperRepair.h"
 
 float main()
 {
 
-	UAVMosaicFast m_mosaic_fast;
-	ImgFeaturesTools m_img_tools;
-	vector<vector<Point2f>> m_pnts;
-	vector<string> pszPath;
-	int width, height;
+	//UAVMosaicFast m_mosaic_fast;
+	//ImgFeaturesTools m_img_tools;
+	//vector<vector<Point2f>> m_pnts;
+	//vector<string> pszPath;
+	//int width, height;
 	//GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
 	//m_mosaic_fast.UAVMosaicFast_Mosaic(pszPath, "D:\\img.tif");
-	float data1[5] = { (float)1,(float)4,(float)6,(float)2,(float)5 };
-	float data2[5] = { (float)2,(float)8,(float)12,(float)4,(float)10 };
-	float tmp=GetCoefficient(data1, data2,5);
-	printf("%lf\n", tmp);
+
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
 	//m_mosaic_fast.UAVMosaicFast_GetMosaicRange(pszPath,width, height);
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
@@ -58,5 +56,12 @@ float main()
 
 	//PhotogrammetryToolsTest();
 
+	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
+	//CPOINT pnt1, pnt2;
+	//pnt1.x = 0; pnt1.y = 256;
+	//pnt2.x = 1024; pnt2.y = 296;
+	//set_mask_region("D:\\imgCut", "D:\\ImgCutSimulate", pnt1, pnt2);
+	vector<Edge_Pixels> edgeinter;
+	get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
 	return 0;
 }

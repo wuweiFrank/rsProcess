@@ -173,8 +173,8 @@ float GetCoefficient(float* data1, float* data2, int num)
 {
 	float avg1, avg2;
 	float dev1, dev2;
-	GetAveDev(data1, 1, 5, 1, avg1, dev1);
-	GetAveDev(data2, 1, 5, 1, avg2, dev2);
+	GetAveDev(data1, 1, 5, 0, avg1, dev1);
+	GetAveDev(data2, 1, 5, 0, avg2, dev2);
 
 	float tmp = 0;
 	for (int i = 0; i < 5; ++i)
