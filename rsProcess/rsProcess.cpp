@@ -17,8 +17,12 @@ float main()
 	vector<vector<Point2f>> m_pnts;
 	vector<string> pszPath;
 	int width, height;
-	GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
-	m_mosaic_fast.UAVMosaicFast_Mosaic(pszPath, "D:\\img.tif");
+	//GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
+	//m_mosaic_fast.UAVMosaicFast_Mosaic(pszPath, "D:\\img.tif");
+	float data1[5] = { (float)1,(float)4,(float)6,(float)2,(float)5 };
+	float data2[5] = { (float)2,(float)8,(float)12,(float)4,(float)10 };
+	float tmp=GetCoefficient(data1, data2,5);
+	printf("%lf\n", tmp);
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
 	//m_mosaic_fast.UAVMosaicFast_GetMosaicRange(pszPath,width, height);
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);

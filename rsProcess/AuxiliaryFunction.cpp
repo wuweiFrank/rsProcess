@@ -96,8 +96,8 @@ void GetAveDev(unsigned char *pBuffer, int nSamples, int nLines, int nBand, floa
 		nOffset = nBand*nPix + i;
 		if (pBuffer[nOffset] != 0)
 		{
-			dSum += pBuffer[nOffset];
-			dMul += pBuffer[nOffset] * pBuffer[nOffset];
+			dSum += (float)pBuffer[nOffset];
+			dMul += (float)(pBuffer[nOffset] * pBuffer[nOffset]);
 			nCount++;
 		}
 	}
@@ -169,7 +169,20 @@ void GetAveDev(float *pBuffer, int nSamples, int nLines, int nBand, float &fAver
 	fDeviate = (float)sqrt(dMul);
 	return;
 }
+float GetCoefficient(float* data1, float* data2, int num)
+{
+	float avg1, avg2;
+	float dev1, dev2;
+	GetAveDev(data1, 1, 5, 1, avg1, dev1);
+	GetAveDev(data2, 1, 5, 1, avg2, dev2);
 
+	float tmp = 0;
+	for (int i = 0; i < 5; ++i)
+	{
+		tmp += (float(data1[i]) - avg1)*(float(data2[i]) - avg2);
+	}
+	return tmp / 5.0f / dev1 / dev2;
+}
 //对数据进行采样
 void GetImgSample(unsigned char *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned char *pRegBuffer)
 {
@@ -663,6 +676,164 @@ void GetImgSample(float *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLin
 
 	for (long ns = 0; ns<nReImgWidth*nReLines; ns++)
 		pRegBuffer[ns] = 0.0;
+
+	int i = 0, j = 0;
+	int nC = 0, nY = 0;
+	double fDX = 0, fDY = 0;
+
+	unsigned long nOffset = 0;
+
+	for (i = 0; i<nLines; i++)
+	{
+		for (j = 0; j<nImgWidth; j++)
+		{
+			nC = (int)pPositions[i*nImgWidth + j].dX;
+			nY = (int)pPositions[i*nImgWidth + j].dY;       //dddd
+
+			fDX = pPositions[i*nImgWidth + j].dX - nC;
+			fDY = pPositions[i*nImgWidth + j].dY - nY;
+
+			float fDN = pImgBuffer[i*nImgWidth + j];
+
+			float fTempGrey[4];
+			memset(fTempGrey, 0, 4 * sizeof(float));
+			fTempGrey[0] = float((1 - fDX)*(1 - fDY)*fDN);
+			fTempGrey[1] = float(fDX*(1 - fDY)*fDN);
+			fTempGrey[2] = float((1 - fDX)*fDY*fDN);
+			fTempGrey[3] = float(fDX*fDY*fDN);
+
+			if (nC >= 0 && nC<nReImgWidth && nY >= 0 && nY<nReLines)
+			{
+				nOffset = nY*nReImgWidth + nC;
+				fDGrey[nOffset] += fTempGrey[0];
+				fDItem[nOffset] += float((1 - fDX)*(1 - fDY));
+				if (nC < nReImgWidth - 1)
+				{
+					fDGrey[nOffset + 1] += fTempGrey[1];
+					fDItem[nOffset + 1] += float(fDX*(1 - fDY));
+				}
+				if (nY < nReLines - 1)
+				{
+					fDGrey[nOffset + nReImgWidth] += fTempGrey[2];
+					fDItem[nOffset + nReImgWidth] += float((1 - fDX)*fDY);
+				}
+				if (nC<nReImgWidth - 1 && nY<nReLines - 1)
+				{
+					fDGrey[nOffset + nReImgWidth + 1] += fTempGrey[3];
+					fDItem[nOffset + nReImgWidth + 1] += float(fDX*fDY);
+				}
+			}
+		}
+	}
+
+	float fSumValues = 0;
+	float fSumDItems = 0;
+	int   nCount = 0;
+	int sss = 0;
+
+	for (i = 0; i<nReLines; i++)
+	{
+		for (j = 0; j<nReImgWidth; j++)
+		{
+			nOffset = i*nReImgWidth + j;
+			if (fDItem[nOffset] != 0)
+			{
+				pRegBuffer[nOffset] = fDGrey[nOffset] / fDItem[nOffset];
+			}
+			else
+			{
+				if (i>0 && i<nReLines - 1 && j>0 && j<nReImgWidth - 1)
+				{
+					fSumValues = 0;
+					fSumDItems = 0;
+					nCount = 0;
+
+					if (fDItem[nOffset - nReImgWidth - 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset - nReImgWidth - 1] / fDItem[nOffset - nReImgWidth - 1];//
+						fSumDItems += fDItem[nOffset - nReImgWidth - 1];
+					}
+					if (fDItem[nOffset - nReImgWidth] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset - nReImgWidth] / fDItem[nOffset - nReImgWidth];
+						fSumDItems += fDItem[nOffset - nReImgWidth];
+					}
+					if (fDItem[nOffset - nReImgWidth + 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset - nReImgWidth + 1] / fDItem[nOffset - nReImgWidth + 1];
+						fSumDItems += fDItem[nOffset - nReImgWidth + 1];
+					}
+					if (fDItem[nOffset - 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset - 1] / fDItem[nOffset - 1];
+						fSumDItems += fDItem[nOffset - 1];
+					}
+					if (fDItem[nOffset + 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset + 1] / fDItem[nOffset + 1];
+						fSumDItems += fDItem[nOffset + 1];
+					}
+					if (fDItem[nOffset + nReImgWidth - 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset + nReImgWidth - 1] / fDItem[nOffset + nReImgWidth - 1];
+						fSumDItems += fDItem[nOffset + nReImgWidth - 1];
+					}
+					if (fDItem[nOffset + nReImgWidth] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset + nReImgWidth] / fDItem[nOffset + nReImgWidth];
+						fSumDItems += fDItem[nOffset + nReImgWidth];
+					}
+					if (fDItem[nOffset + nReImgWidth + 1] != 0)
+					{
+						nCount++;
+						fSumValues += fDGrey[nOffset + nReImgWidth + 1] / fDItem[nOffset + nReImgWidth + 1];
+						fSumDItems += fDItem[nOffset + nReImgWidth + 1];
+					}
+
+					if (nCount >= 1)
+					{
+						//	if( fSumDItems>0.5 )
+						pRegBuffer[nOffset] = fSumValues / nCount;
+						sss++;
+					}
+
+				}
+			}
+		}
+	}
+
+	if (fDGrey != NULL)
+		delete[]fDGrey;
+	if (fDItem != NULL)
+		delete[]fDItem;
+	fDGrey = NULL;
+	fDItem = NULL;
+}
+void GetImgSample(unsigned char *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLines, int nReImgWidth, int nReLines, unsigned char *pRegBuffer)
+{
+	float *fDGrey = NULL, *fDItem = NULL;
+	try
+	{
+		fDGrey = new float[nReImgWidth * nReLines];
+		fDItem = new float[nReImgWidth * nReLines];
+		memset(fDGrey, 0, nReImgWidth * nReLines*sizeof(float));
+		memset(fDItem, 0, nReImgWidth * nReLines*sizeof(float));
+	}
+	catch (bad_alloc)
+	{
+		printf("allocate memory error\n");
+		exit(-1);
+	}
+
+	for (long ns = 0; ns<nReImgWidth*nReLines; ns++)
+		pRegBuffer[ns] = 0;
 
 	int i = 0, j = 0;
 	int nC = 0, nY = 0;

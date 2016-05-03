@@ -12,7 +12,7 @@ long UAVMosaicFast::UAVMosaicFast_AffineTrans(vector<string> pszImages)
 	for (int i = 0; i < pszImages.size() - 1; ++i)
 		matchpairs[i*pszImages.size() + i + 1] = true;
 	vector<vector<Point2f>> m_matches;
-	m_featureMatch.ImgFeaturesTools_ExtracMatches(pszImages, m_matches, matchpairs, "AKAZE", "BruteForce-L1");
+	m_featureMatch.ImgFeaturesTools_ExtracMatches(pszImages, m_matches, matchpairs, "AKAZE", "BruteForce-Hamming");
 
 	//仿射变换系数
 	vector<adfAffineTrans> affineTransParameters;
@@ -123,16 +123,128 @@ long UAVMosaicFast::UAVMosaicFast_HistroMatch(unsigned char* imgBuffer1, unsigne
 
 long UAVMosaicFast::UAVMosaicFast_AffineTrans(adfAffineTrans& affineTransParam, unsigned char* imgBuffer, int xsize, int ysize, unsigned char* imgMosaic, int mosaicx, int mosaicy)
 {
+	//只要牺牲内存换代码的简洁了......
+	DPOINT *pPositions = new DPOINT[xsize*ysize];
+	memset(pPositions, 0, sizeof(DPOINT)*xsize*ysize);
+	int maxx = -9999999, minx = 9999999, maxy = -9999999, miny = 9999999;
 	for (size_t i = 0; i < xsize; i++)
 	{
 		for (size_t j = 0; j < ysize; j++)
 		{
 			int tmpx = (int)(affineTransParam.m_affineTransParameters[0] * i + affineTransParam.m_affineTransParameters[1] * j + affineTransParam.m_affineTransParameters[2]);
 			int tmpy = (int)(affineTransParam.m_affineTransParameters[3] * i + affineTransParam.m_affineTransParameters[4] * j + affineTransParam.m_affineTransParameters[5]);
-			imgMosaic[(tmpy * mosaicx + tmpx)] = imgBuffer[(j*xsize + i)];
+			pPositions[j*xsize + i].dX = tmpx;
+			pPositions[j*xsize + i].dY = tmpy;
+
+			maxx = max(tmpx, maxx);
+			minx = min(tmpx, minx);
+			maxy = max(tmpy, maxy);
+			miny = min(tmpy, miny);
 		}
 	}
+	int transx = maxx - minx;
+	int transy = maxy - miny;
+	unsigned char* transImgBuffer = new unsigned char[transx*transy];
+	GetImgSample(imgBuffer, pPositions, xsize, ysize, transx, transy, transImgBuffer);
+	UAVMosaicFast_SeamFillFast(miny, minx, imgMosaic, mosaicx, mosaicy, transImgBuffer, transx, transy);
+	delete[]pPositions;
+	delete[]transImgBuffer;
 	return 0;
+}
+
+long UAVMosaicFast::UAVMosaicFast_SeamFillFast(int up, int left, unsigned char* imgMosaic, int mosaicx, int mosaicy, unsigned char* imgBuffer, int xsize, int ysize)
+{
+	vector<DPOINT> edge;
+	int maxrelation = -1.1; int posx = 0, posy = 0;
+	for (int j = 0; j < ysize; ++j)
+	{
+		if (posx == 0)
+		{
+			for (int i = 0; i < xsize - 5; ++i)
+			{
+				//获取一行的5个像素
+				float data1[5], data2[5];
+				for (int k = 0; k < 5; ++k)
+				{
+					data1[k] = imgMosaic[(j + up)*mosaicx + i + left + k];
+					data2[k] = imgBuffer[j*xsize + i + k];
+				}
+				//如果存在像素为0则跳出
+				bool isBreak = false;
+				for (int k = 0; k < 5; ++k)
+				{
+					if (data1[k] == 0 || data2[k] == 0)
+					{
+						isBreak = true;
+						break;
+					}
+				}
+				if (isBreak)
+					continue;
+
+				//求取这一行5个像素的相关性
+				double corr = GetCoefficient(data1, data2, 5);
+				maxrelation = max(corr, maxrelation);
+				if (maxrelation == corr)
+					posx++;
+			}
+			DPOINT tmp; tmp.dX = posx; tmp.dY = posy;
+			edge.push_back(tmp);
+		}
+		else  //在前后5个相邻位置中选取
+		{
+			int startxpos = posx - 5 > 0 ? posx - 5 : 0;
+			int endxpos = startxpos + 15 < xsize ? startxpos + 15 : xsize;
+			posx = startxpos;
+			for (int i = startxpos; i < endxpos - 5; ++i)
+			{
+				//获取一行的5个像素
+				float data1[5], data2[5];
+				for (int k = 0; k < 5; ++k)
+				{
+					data1[k] = imgMosaic[(j + up)*mosaicx + i + left + k];
+					data2[k] = imgBuffer[j*xsize + i + k];
+				}
+				//如果存在像素为0则跳出
+				bool isBreak = false;
+				for (int k = 0; k < 5; ++k)
+				{
+					if (data1[k] == 0 || data2[k] == 0)
+					{
+						isBreak = true;
+						break;
+					}
+				}
+				if (isBreak)
+					continue;
+
+				//求取这一行5个像素的相关性
+				double corr = GetCoefficient(data1, data2, 5);
+				maxrelation = max(corr, maxrelation);
+				if (maxrelation == corr)
+					posx++;
+			}
+			DPOINT tmp; tmp.dX = posx; tmp.dY = posy;
+			edge.push_back(tmp);
+		}
+	}
+	//根据拼接边填数据
+
+	for (size_t j = 0; j < ysize; j++)
+	{
+		if(edge[j].dX==0)
+		for (size_t i = 0; i < xsize; i++)
+			imgMosaic[(j + up)*mosaicx + i + left] = imgBuffer[j*xsize + i];
+		else
+		{
+			for (size_t i = edge[j].dX; i < xsize; i++)
+				imgMosaic[(j + up)*mosaicx + i + left] = imgBuffer[j*xsize + i];
+		}
+	}
+
+
+	return 0;
+
 }
 
 //接口

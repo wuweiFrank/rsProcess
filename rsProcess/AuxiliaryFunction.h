@@ -21,6 +21,9 @@ void GetAveDev(unsigned char *pBuffer, int nSamples, int nLines, int nBand, floa
 void GetAveDev(unsigned short *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate);
 void GetAveDev(float *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate);
 
+//获取相关系数
+float GetCoefficient(float* data1, float* data2, int num);
+
 //对数据进行采样
 /*
 	在几何校正后校正前数据和校正后数据并不是完全对应
@@ -32,6 +35,7 @@ void GetImgSample(unsigned short *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THRE
 void GetImgSample(float *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, float *pRegBuffer);
 
 void GetImgSample(float *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLines, int nReImgWidth, int nReLines, float *pRegBuffer);//pPositions为校正前影像为止对应校正后影像的影像位置
+void GetImgSample(unsigned char *pImgBuffer, DPOINT *pPositions, int nImgWidth, int nLines, int nReImgWidth, int nReLines, unsigned char *pRegBuffer);//pPositions为校正前影像为止对应校正后影像的影像位置
 
 
 //获取两幅影像匹配直方图
@@ -42,4 +46,5 @@ void GetImgHistroMatch(unsigned char* img1, unsigned char*img2, int xsize1, int 
 //获取两点之间的距离
 double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2);
 
+//获取影像列表
 void GetImageList(const char* pathList, vector<string> &pszImage);

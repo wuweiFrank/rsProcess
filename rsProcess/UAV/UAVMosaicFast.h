@@ -24,6 +24,9 @@ private:
 	//通过仿射变换向数据域中填入数据
 	long UAVMosaicFast_AffineTrans(adfAffineTrans& affineTransParam, unsigned char* imgBuffer, int xsize, int ysize, unsigned char* imgMosaic,int mosaicx,int mosaicy);
 
+	//通过影像最佳拼接线进行填写
+	long UAVMosaicFast_SeamFillFast(int up, int left, unsigned char* imgMosaic, int mosaicx, int mosaicy, unsigned char* imgBuffer, int xsize, int ysize);
+
 public:
 	//影像镶嵌
 	long UAVMosaicFast_Mosaic(vector<string> pszImages,const char* pathDst);
