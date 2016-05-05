@@ -61,7 +61,14 @@ float main()
 	//pnt1.x = 0; pnt1.y = 256;
 	//pnt2.x = 1024; pnt2.y = 296;
 	//set_mask_region("D:\\imgCut", "D:\\ImgCutSimulate", pnt1, pnt2);
-	vector<Edge_Pixels> edgeinter;
-	get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
+
+	//vector<Edge_Pixels> edgeinter;
+	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
+
+	ImgFeaturesTools features;
+	vector<Point2f> pnt1, pnt2;
+	features.ImgFeaturesTools_ExtractMatch("D:\\my_doc\\2015.12.18岳阳无人机数据\\GeoCorrect\\DSC00006.tif", pnt1, "D:\\my_doc\\2015.12.18岳阳无人机数据\\GeoCorrect\\DSC00007.tif", pnt2, "AKAZE", "BruteForce-Hamming");
+	features.ImgFeaturesTools_SaveENVIMatches("D:\\test.pts", "D:\\my_doc\\2015.12.18岳阳无人机数据\\GeoCorrect\\DSC00006.tif", "D:\\my_doc\\2015.12.18岳阳无人机数据\\GeoCorrect\\DSC00007.tif", pnt1, pnt2);
+
 	return 0;
 }

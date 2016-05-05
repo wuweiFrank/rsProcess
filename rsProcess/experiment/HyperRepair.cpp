@@ -49,36 +49,36 @@ void get_segment_edge(const char* img_path, vector<Edge_Pixels> &edgeinter)
 	}
 	edgeinter.resize(seg.size());
 
-	//获取每一个分割块的边界像素 i++)
-	{
-		for (size_t j = 1; j < ysize-1; j++)
-		{
-			printf("process cols %d\r", i + 1);
-			if (imgData[j*xsize+i] == 0 || imgData[j*xsize + i] == 255)
-				continue;
-			//获取块
-			int idx = 0;
-			for (int k = 0; k < seg.size(); ++k)
-			{
-				if (imgData[j*xsize + i] == seg[k])
-					idx = k;
-			}
-			
-			//判断是不是边界8邻域
-			if (imgData[j*xsize + i] != imgData[j*xsize + i - 1]	   ||
-				imgData[j*xsize + i] != imgData[j*xsize + i + 1]	   ||
-				imgData[(j - 1)*xsize + i] != imgData[j*xsize + i]	   ||
-				imgData[(j + 1)*xsize + i] != imgData[j*xsize + i]	   ||
-				imgData[(j + 1)*xsize + i] != imgData[j*xsize + i + 1] ||
-				imgData[(j + 1)*xsize + i] != imgData[j*xsize + i - 1] ||
-				imgData[(j - 1)*xsize + i] != imgData[j*xsize + i + 1] ||
-				imgData[(j - 1)*xsize + i] != imgData[j*xsize - i])
-			{
-				CPOINT pnt; pnt.x = i; pnt.y = j;
-				edgeinter[idx].m_edge_pixels.push_back(pnt);
-			}
-		}
-	}
+//	//获取每一个分割块的边界像素 i++)
+//	{
+//		for (size_t j = 1; j < ysize-1; j++)
+//		{
+//			printf("process cols %d\r", i + 1);
+//			if (imgData[j*xsize+i] == 0 || imgData[j*xsize + i] == 255)
+//				continue;
+//			//获取块
+//			int idx = 0;
+//			for (int k = 0; k < seg.size(); ++k)
+//			{
+//				if (imgData[j*xsize + i] == seg[k])
+//					idx = k;
+//			}
+//			
+//			//判断是不是边界8邻域
+//			if (imgData[j*xsize + i] != imgData[j*xsize + i - 1]	   ||
+//				imgData[j*xsize + i] != imgData[j*xsize + i + 1]	   ||
+//				imgData[(j - 1)*xsize + i] != imgData[j*xsize + i]	   ||
+//				imgData[(j + 1)*xsize + i] != imgData[j*xsize + i]	   ||
+//				imgData[(j + 1)*xsize + i] != imgData[j*xsize + i + 1] ||
+//				imgData[(j + 1)*xsize + i] != imgData[j*xsize + i - 1] ||
+//				imgData[(j - 1)*xsize + i] != imgData[j*xsize + i + 1] ||
+//				imgData[(j - 1)*xsize + i] != imgData[j*xsize - i])
+//			{
+////				CPOINT pnt; pnt.x = i; pnt.y = j;
+////				edgeinter[idx].m_edge_pixels.push_back(pnt);
+//			}
+//		}
+//	}
 	if (imgData != NULL)
 		delete[]imgData;
 	imgData = NULL;

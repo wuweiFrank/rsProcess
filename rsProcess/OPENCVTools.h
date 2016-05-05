@@ -59,6 +59,7 @@ public:
 
 	//5.将匹配点写成ENVI格式
 	long ImgFeaturesTools_WriteENVIMatches(const char* pathDir, vector<string> pathList, vector<vector<Point2f>> &pts);
+
 private:
 	//5.获取SURF匹配特征点和特征描述
 	long ImgFeatruesTools_ExtractFeatures(const char* pathImage, Mat& descriptor, vector<Point2f> &keypoints,string descriptorMethod);

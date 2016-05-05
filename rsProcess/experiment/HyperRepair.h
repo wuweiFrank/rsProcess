@@ -3,8 +3,7 @@
 #include"..\gdal\include\gdal_priv.h"
 #include<vector>
 using namespace std;
-
-#pragma comment(lib,"gdal_i.lib");
+#pragma comment(lib,"gdal_i.lib")
 /*
 	这个部分是实验性代码，代码并没有经过优化，代码结构也可能不合理，为了实现某个功能随意添加的代码
 */

@@ -159,6 +159,9 @@
     <ClInclude Include="UAV\UAVMosaicFast.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="experiment\BSCB.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -267,6 +270,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UAV\UAVMosaicFast.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="experiment\BSCB.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
