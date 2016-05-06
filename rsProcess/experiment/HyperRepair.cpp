@@ -352,7 +352,7 @@ void set_mask_region(const char* pathImgIn, const char* pathImgOut, CPOINT leftu
 	int xsize = GDALGetRasterXSize(m_dataset);
 	int ysize = GDALGetRasterYSize(m_dataset);
 	int bands = GDALGetRasterCount(m_dataset);
-	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("ENVI"), pathImgOut, xsize, ysize, bands, GDT_Int32, NULL);
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathImgOut, xsize, ysize, bands, GDT_Int32, NULL);
 	int* pData = new int[xsize*ysize];
 	for (int i = 0; i < bands; ++i)
 	{

@@ -1134,7 +1134,10 @@ double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2)
 {
 	return sqrt((pnt1.dX - pnt2.dX)*(pnt1.dX - pnt2.dX) + (pnt1.dY - pnt2.dY)*(pnt1.dY - pnt2.dY) + (pnt1.dZ - pnt2.dZ)*(pnt1.dZ - pnt2.dZ));
 }
-
+double GetDisofPoints(CPOINT pnt1, CPOINT pnt2)
+{
+	return sqrt(double(pnt1.x - pnt2.x)*double(pnt1.x - pnt2.x) + double(pnt1.y - pnt2.y)*double(pnt1.y - pnt2.y));
+}
 //»ñÈ¡Ó°Ïñ
 void GetImageList(const char* pathList, vector<string> &pszImage)
 {
@@ -1154,4 +1157,33 @@ void GetImageList(const char* pathList, vector<string> &pszImage)
 			pszImage.push_back(str);
 	} while (!fin.eof());
 	fin.close();
+}
+
+double MaxAvg(double data1, double data2, double data3)
+{
+	double m = data1;
+	if (data1>data2)
+		m = data2;
+	if (m>data3)
+		m = data3;
+	if (m == data1)
+		return (data2 + data3) / 2;
+	else if (m == data2)
+		return (data1 + data3) / 2;
+	else
+		return (data1 + data2) / 2;
+}
+double MinAvg(double data1, double data2, double data3)
+{
+	double m = data1;
+	if (data1<data2)
+		m = data2;
+	if (m<data3)
+		m = data3;
+	if (m == data1)
+		return (data2 + data3) / 2;
+	else if (m == data2)
+		return (data1 + data3) / 2;
+	else
+		return (data1 + data2) / 2;
 }

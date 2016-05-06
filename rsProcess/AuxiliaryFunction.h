@@ -45,6 +45,12 @@ void GetImgHistroMatch(unsigned char* img1, unsigned char*img2, int xsize1, int 
 
 //获取两点之间的距离
 double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2);
+double GetDisofPoints(CPOINT pnt1, CPOINT pnt2);
 
 //获取影像列表
 void GetImageList(const char* pathList, vector<string> &pszImage);
+
+//三个数中最大两个数的平均值
+double MaxAvg(double data1, double data2, double data3);
+//三个数中最小两个数的平均值
+double MinAvg(double data1, double data2, double data3);

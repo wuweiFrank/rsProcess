@@ -10,13 +10,15 @@ class BSCB
 public:
 	void BSBCImageInpaintingProcess(const char* pathImgIn, const char* pathImgMask, const char* pathImgRepair);
 private:
-	void DiffuseLoop(int* data, int* img, int x, int y, int xsize, int ysize);
+	void InterpolationInit(float* data, float *maskData, int xsize, int ysize);
 
-	void RepaireLoop(int* data, int* img, double delta, int x, int y, int xsize, int ysize);
+	void DiffuseLoop(float* data, float* img, int x, int y, int xsize, int ysize);
 
-	double RepairChange(int* img, int x, int y, int xsize, int ysize);
+	void RepaireLoop(float* data, float* img, double delta, int x, int y, int xsize, int ysize);
 
-	double Laplace(int* img, int x, int y, int xsize, int ysize);
+	double RepairChange(float* img, int x, int y, int xsize, int ysize);
 
-	bool TerminateBSCBCondition(int* preData, int* afterData, int *maskData, int xsize, int ysize);
+	double Laplace(float* img, int x, int y, int xsize, int ysize);
+
+	bool TerminateBSCBCondition(float* preData, float* afterData, float *maskData, int xsize, int ysize);
 };

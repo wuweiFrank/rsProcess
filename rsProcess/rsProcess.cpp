@@ -9,6 +9,7 @@
 #include"UAV\UAVMosaicFast.h"
 #include"AuxiliaryFunction.h"
 #include"experiment\HyperRepair.h"
+#include"experiment\BSCB.h"
 
 float main()
 {
@@ -57,18 +58,16 @@ float main()
 	//PhotogrammetryToolsTest();
 
 	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
-	//CPOINT pnt1, pnt2;
-	//pnt1.x = 0; pnt1.y = 256;
-	//pnt2.x = 1024; pnt2.y = 296;
-	//set_mask_region("D:\\imgCut", "D:\\ImgCutSimulate", pnt1, pnt2);
-
+	
+	CPOINT pnt1, pnt2;
+	pnt1.x = 110; pnt1.y = 100;
+	pnt2.x = 120; pnt2.y = 110;
+	//set_mask_region("D:\\mask.bmp", "D:\\mask.tif", pnt1, pnt2);
+	//set_mask_region("D:\\lena.jpg", "D:\\lena.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
 	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
-
-	ImgFeaturesTools features;
-	vector<Point2f> pnt1, pnt2;
-	features.ImgFeaturesTools_ExtractMatch("D:\\my_doc\\2015.12.18岳阳无人机数据\\GeoCorrect\\DSC00006.tif", pnt1, "D:\\my_doc\\2015.12.18岳阳无人机数据\\GeoCorrect\\DSC00007.tif", pnt2, "AKAZE", "BruteForce-Hamming");
-	features.ImgFeaturesTools_SaveENVIMatches("D:\\test.pts", "D:\\my_doc\\2015.12.18岳阳无人机数据\\GeoCorrect\\DSC00006.tif", "D:\\my_doc\\2015.12.18岳阳无人机数据\\GeoCorrect\\DSC00007.tif", pnt1, pnt2);
+	BSCB m_BSCB;
+	m_BSCB.BSBCImageInpaintingProcess("D:\\lena.tif", "D:\\mask.tif", "D:\\Repair.tif");
 
 	return 0;
 }
