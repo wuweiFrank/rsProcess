@@ -4,7 +4,7 @@
 using namespace std;
 #pragma comment(lib,"gdal_i.lib")
 
-void BSCB::BSBCImageInpaintingProcess(const char* pathImgIn, const char* pathImgMask, const char* pathImgRepair)
+void BSCB::BSCBImageInpaintingProcess(const char* pathImgIn, const char* pathImgMask, const char* pathImgRepair)
 {
 	GDALAllRegister();
 	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//ÖÐÎÄÂ·¾¶

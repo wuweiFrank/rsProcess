@@ -156,6 +156,7 @@
     <ClInclude Include="CoordinateTrans.h" />
     <ClInclude Include="EXIF.H" />
     <ClInclude Include="experiment\BSCB.h" />
+    <ClInclude Include="experiment\ExemplarBased.h" />
     <ClInclude Include="experiment\HyperRepair.h" />
     <ClInclude Include="FrequencyFunc\waveletTrans.h" />
     <ClInclude Include="GDALTools.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="CoordinateTrans.cpp" />
     <ClCompile Include="EXIF.CPP" />
     <ClCompile Include="experiment\BSCB.cpp" />
+    <ClCompile Include="experiment\ExemplarBased.cpp" />
     <ClCompile Include="experiment\HyperRepair.cpp" />
     <ClCompile Include="FrequencyFunc\waveletTrans.cpp" />
     <ClCompile Include="GDALTools.cpp" />

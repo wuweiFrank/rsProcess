@@ -50,8 +50,8 @@ float main()
 	//
 	//experiment_process();
 
-	//ImageInpaint m_inPaint;
-	//m_inPaint.ImageInpaint_Inpaint("C:\\Users\\Public\\Pictures\\Sample Pictures\\lena.jpg","test.jpg");
+	ImageInpaint m_inPaint;
+	m_inPaint.ImageInpaint_Inpaint("D:\\1.bmp","test.jpg");
 	//UAVGeoCorrection m_uav_correct;
 	//m_uav_correct.UAVGeoCorrection_GeoCorrect("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF", "D:", "D:\\my_doc\\2015.12.18岳阳无人机数据\\新建文本文档.txt", NULL, 6, 0, 1, 0.035, 0.2, 0);
 
@@ -66,8 +66,8 @@ float main()
 	//set_mask_region("D:\\lena.jpg", "D:\\lena.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
 	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
-	BSCB m_BSCB;
-	m_BSCB.BSBCImageInpaintingProcess("D:\\lena.tif", "D:\\mask.tif", "D:\\Repair.tif");
+	//BSCB m_BSCB;
+	//m_BSCB.BSCBImageInpaintingProcess("D:\\lena.tif", "D:\\mask.tif", "D:\\Repair.tif");
 
 	return 0;
 }

@@ -791,7 +791,7 @@ void BezierCurve::BezierCurve_BezierDraw()
 //================================================================================================================================================================================
 void ImageInpaint::ImageInpaint_Inpaint(const char* pathImg, const char* pathDst)
 {
-	Mat img0 = imread(pathImg, -1);
+	Mat img0 = imread(pathImg,1);
 	if (img0.empty())
 	{
 		printf("Couldn't open the image %s  . Usage: inpaint <image_name>\n",pathImg);

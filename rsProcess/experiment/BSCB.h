@@ -8,7 +8,7 @@
 class BSCB
 {
 public:
-	void BSBCImageInpaintingProcess(const char* pathImgIn, const char* pathImgMask, const char* pathImgRepair);
+	void BSCBImageInpaintingProcess(const char* pathImgIn, const char* pathImgMask, const char* pathImgRepair);
 private:
 	void InterpolationInit(float* data, float *maskData, int xsize, int ysize);
 
