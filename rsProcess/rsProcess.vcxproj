@@ -169,6 +169,7 @@
     <ClInclude Include="lidar\LidarFliter.h" />
     <ClInclude Include="lidar\LidarReader.h" />
     <ClInclude Include="matrixOperation.h" />
+    <ClInclude Include="mnistFile.h" />
     <ClInclude Include="OPENCVTools.h" />
     <ClInclude Include="rapidxml\rapidxml.hpp" />
     <ClInclude Include="rapidxml\rapidxml_iterators.hpp" />
@@ -214,6 +215,7 @@
     <ClCompile Include="lidar\LidarDefs.cpp" />
     <ClCompile Include="lidar\LidarReader.cpp" />
     <ClCompile Include="matrixOperation.cpp" />
+    <ClCompile Include="mnistFile.cpp" />
     <ClCompile Include="OPENCVTools.cpp" />
     <ClCompile Include="RenderProcess.cpp" />
     <ClCompile Include="rsImgProcess\ImageBlock.cpp" />

@@ -8,21 +8,22 @@
 #include"UAV\UAVGeoCorrection.h"
 #include"UAV\UAVMosaicFast.h"
 #include"AuxiliaryFunction.h"
+#include"mnistFile.h"
 
 float main()
 {
 
-	UAVMosaicFast m_mosaic_fast;
-	ImgFeaturesTools m_img_tools;
-	vector<vector<Point2f>> m_pnts;
-	vector<string> pszPath;
-	int width, height;
-	//GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
-	//m_mosaic_fast.UAVMosaicFast_Mosaic(pszPath, "D:\\img.tif");
-	float data1[5] = { (float)1,(float)4,(float)6,(float)2,(float)5 };
-	float data2[5] = { (float)2,(float)8,(float)12,(float)4,(float)10 };
-	float tmp=GetCoefficient(data1, data2,5);
-	printf("%lf\n", tmp);
+	//UAVMosaicFast m_mosaic_fast;
+	//ImgFeaturesTools m_img_tools;
+	//vector<vector<Point2f>> m_pnts;
+	//vector<string> pszPath;
+	//int width, height;
+	////GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
+	////m_mosaic_fast.UAVMosaicFast_Mosaic(pszPath, "D:\\img.tif");
+	//float data1[5] = { (float)1,(float)4,(float)6,(float)2,(float)5 };
+	//float data2[5] = { (float)2,(float)8,(float)12,(float)4,(float)10 };
+	//float tmp=GetCoefficient(data1, data2,5);
+	//printf("%lf\n", tmp);
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
 	//m_mosaic_fast.UAVMosaicFast_GetMosaicRange(pszPath,width, height);
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
@@ -57,6 +58,9 @@ float main()
 	//m_uav_correct.UAVGeoCorrection_GeoCorrect("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF", "D:", "D:\\my_doc\\2015.12.18岳阳无人机数据\\新建文本文档.txt", NULL, 6, 0, 1, 0.035, 0.2, 0);
 
 	//PhotogrammetryToolsTest();
+	mnistFile mnistImg;
+	mnistImg.MnistToBmp("D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte\\t10k-images.idx3-ubyte", "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte",
+		"D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\t10k-labels.idx1-ubyte", "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\link.txt", 100);
 
 	return 0;
 }
