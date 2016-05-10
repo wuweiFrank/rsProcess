@@ -54,3 +54,4 @@ void GetImageList(const char* pathList, vector<string> &pszImage);
 double MaxAvg(double data1, double data2, double data3);
 //三个数中最小两个数的平均值
 double MinAvg(double data1, double data2, double data3);
+

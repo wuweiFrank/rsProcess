@@ -32,14 +32,57 @@ void ExemplarBased::ExemplarBased_Inpaint(const char* pathImg, const char* pathM
 		CPOINT pos;
 		ExemplarBased_GetPriority(imgData, xsize, ysize, edges, pos);
 		ExemplarBased_PriorityInpaint(pos, regionsize, imgData, mskData, xsize, ysize);
-		GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDst, xsize, ysize, 1, GDT_Float32, NULL);
-		GDALRasterIO(GDALGetRasterBand(m_datasetDst, 1), GF_Write, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
-		GDALClose(m_datasetDst);
+		ExemplarBased_UpdateMask(imgData, tmpMskData, xsize, ysize);
+		ExemplarBased_UpdateEdge(tmpMskData, xsize, ysize, edges);
+	}
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDst, xsize, ysize, 1, GDT_Float32, NULL);
+	GDALRasterIO(GDALGetRasterBand(m_datasetDst, 1), GF_Write, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
+	GDALClose(m_datasetDst);
+	//数据输出
+	GDALClose(m_datasetImg);
+	GDALClose(m_datasetMsk);
+	delete[]imgData;
+	delete[]mskData;
+	delete[]tmpMskData;
+}
+void ExemplarBased::ExemplarBased_InpaintTexture(const char* pathImg, const char* pathMsk, const char* pathTexture, const char* pathDst)
+{
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//中文路径
+	GDALDatasetH m_datasetImg = GDALOpen(pathImg, GA_ReadOnly);
+	GDALDatasetH m_datasetMsk = GDALOpen(pathMsk, GA_ReadOnly);
+	GDALDatasetH m_datasetTxt = GDALOpen(pathTexture, GA_ReadOnly);
 
+	int xsize = GDALGetRasterXSize(m_datasetMsk);
+	int ysize = GDALGetRasterYSize(m_datasetMsk);
+	int bands = GDALGetRasterCount(m_datasetMsk);
+	int regionsize = 13;
+
+	//数据申请
+	float* imgData = new float[xsize*ysize];
+	float* mskData = new float[xsize*ysize];
+	float* txtData = new float[xsize*ysize];
+	float* tmpMskData = new float[xsize*ysize];
+
+	GDALRasterIO(GDALGetRasterBand(m_datasetImg, 1), GF_Read, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
+	GDALRasterIO(GDALGetRasterBand(m_datasetMsk, 1), GF_Read, 0, 0, xsize, ysize, mskData, xsize, ysize, GDT_Float32, 0, 0);
+	GDALRasterIO(GDALGetRasterBand(m_datasetTxt, 1), GF_Read, 0, 0, xsize, ysize, txtData, xsize, ysize, GDT_Float32, 0, 0);
+
+	vector<CPOINT> edges;
+	ExemplarBased_UpdateEdge(mskData, xsize, ysize, edges);
+	memcpy(tmpMskData, mskData, sizeof(float)*xsize*ysize);
+	while (edges.size() != 0)
+	{
+		CPOINT pos;
+		ExemplarBased_GetPriority(imgData, xsize, ysize, edges, pos);
+		ExemplarBased_ProprityInpaintTexture(pos, regionsize, imgData, mskData,txtData, xsize, ysize);
 		ExemplarBased_UpdateMask(imgData, tmpMskData, xsize, ysize);
 		ExemplarBased_UpdateEdge(tmpMskData, xsize, ysize, edges);
 	}
 
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDst, xsize, ysize, 1, GDT_Float32, NULL);
+	GDALRasterIO(GDALGetRasterBand(m_datasetDst, 1), GF_Write, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
+	GDALClose(m_datasetDst);
 	//数据输出
 	GDALClose(m_datasetImg);
 	GDALClose(m_datasetMsk);
@@ -128,7 +171,6 @@ void ExemplarBased::ExemplarBased_GetPriority(float* imgData, int xsize, int ysi
 
 void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, float* imgData, float* mskData, int xsize, int ysize)
 {
-
 	float *regionmask=new float[(2* regionSize +1)*(2* regionSize + 1)];
 	memset(regionmask, 0, sizeof(float) * (2 * regionSize + 1)*(2 * regionSize + 1));
 	int num = 0;
@@ -187,6 +229,7 @@ void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, fl
 			}//内层循环
 			if (!is)
 			{
+				//空间值的相似性
 				float tmp= GetSSD(data1, data2, num);
 				if (tmp<maxrel)
 				{
@@ -210,6 +253,104 @@ void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, fl
 			}
 		}
 	}
+
+
+	delete[]regionmask;
+	delete[]data1;
+	delete[]data2;
+}
+void ExemplarBased::ExemplarBased_ProprityInpaintTexture(CPOINT pos, int regionSize, float* imgData, float* mskData, float* txtData, int xsize, int ysize)
+{
+	float *regionmask = new float[(2 * regionSize + 1)*(2 * regionSize + 1)];
+	memset(regionmask, 0, sizeof(float) * (2 * regionSize + 1)*(2 * regionSize + 1));
+	int num = 0;
+	for (int i = pos.x - regionSize; i <= pos.x + regionSize; ++i)
+	{
+		for (int j = pos.y - regionSize; j <= pos.y + regionSize; ++j)
+		{
+			if (imgData[j * xsize + i] != -1)
+			{
+				regionmask[(j - (pos.y - regionSize))*(2 * regionSize + 1) + i - (pos.x - regionSize)] = 1;
+				num++;
+			}
+			else
+				regionmask[(j - (pos.y - regionSize))*(2 * regionSize + 1) + i - (pos.x - regionSize)] = 0;
+		}
+	}
+	//强度影像
+	float* data1 = new float[num];
+	float* data2 = new float[num];
+	//纹理影像
+	float* data3 = new float[num];
+	float* data4 = new float[num];
+
+	num = 0;
+	for (int i = pos.x - regionSize; i <= pos.x + regionSize; ++i)
+	{
+		for (int j = pos.y - regionSize; j <= pos.y + regionSize; ++j)
+		{
+			if (imgData[j * xsize + i] != -1)
+			{
+				data1[num] = imgData[j * xsize + i];
+				data3[num] = txtData[j * xsize + i];
+				num++;
+			}
+		}
+	}
+
+	double maxrel = 999999999; int maxidx = 0, maxidy = 0;
+	for (int i = 0; i <xsize - 2 * regionSize - 1; ++i)
+	{
+		for (int j = 0; j <ysize - 2 * regionSize - 1; ++j)
+		{
+			bool is = false;
+			num = 0;
+			for (int m = 0; m < (2 * regionSize + 1); m++)
+			{
+				for (int n = 0; n < (2 * regionSize + 1); n++)
+				{
+					if (mskData[(j + n)*xsize + i + m] == -1)
+						is = true;
+					else
+					{
+						if (regionmask[n*(2 * regionSize + 1) + m] == 1)
+						{
+							data2[num] = imgData[(j + n)*xsize + i + m];
+							data4[num] = txtData[(j + n)*xsize + i + m];
+							num++;
+						}
+					}
+				}
+			}//内层循环
+			if (!is)
+			{
+				//空间值的相似性
+				float tmp1 = GetSSD(data1, data2, num);
+				float tmp2 = GetSSD(data3, data4, num);
+				float tmp = tmp1 + 0.0*tmp2;
+				if (tmp<maxrel)
+				{
+					maxrel = tmp;
+					maxidx = i; maxidy = j;
+				}
+			}
+		}
+	}//遍历整个影像的循环
+	printf("best match:%d  %d\n", maxidx, maxidy);
+
+	//修补
+	for (int i = 0; i <2 * regionSize + 1; ++i)
+	{
+		for (int j = 0; j <2 * regionSize + 1; ++j)
+		{
+			if (imgData[(j + pos.y - regionSize)* xsize + i + pos.x - regionSize] == -1)
+			{
+				imgData[(j + pos.y - regionSize)* xsize + i + pos.x - regionSize] = imgData[(j + maxidy)* xsize + i + maxidx];
+			}
+		}
+	}
+
+
 	delete[]regionmask;
 	delete[]data1;
 	delete[]data2;

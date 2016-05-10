@@ -68,7 +68,7 @@ float main()
 	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
 
 	ExemplarBased m_eb;
-	m_eb.ExemplarBased_Inpaint("D:\\can_tmr.tif", "D:\\mask.tif", "D:\\Repair.tif");
+	m_eb.ExemplarBased_InpaintTexture("D:\\can_tmr.tif", "D:\\mask.tif","D:\\texture.tif", "D:\\Repair.tif");
 	//BSCB m_BSCB;
 	//m_BSCB.BSCBImageInpaintingProcess("D:\\can_tmr.tif", "D:\\mask.tif", "D:\\RepairD.tif");
 	return 0;
