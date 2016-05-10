@@ -10,7 +10,7 @@
 #include"AuxiliaryFunction.h"
 #include"experiment\HyperRepair.h"
 #include"experiment\BSCB.h"
-
+#include"experiment\ExemplarBased.h"
 float main()
 {
 
@@ -50,8 +50,8 @@ float main()
 	//
 	//experiment_process();
 
-	ImageInpaint m_inPaint;
-	m_inPaint.ImageInpaint_Inpaint("D:\\1.bmp","test.jpg");
+	//ImageInpaint m_inPaint;
+	//m_inPaint.ImageInpaint_Inpaint("D:\\1.bmp","test.jpg");
 	//UAVGeoCorrection m_uav_correct;
 	//m_uav_correct.UAVGeoCorrection_GeoCorrect("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF", "D:", "D:\\my_doc\\2015.12.18岳阳无人机数据\\新建文本文档.txt", NULL, 6, 0, 1, 0.035, 0.2, 0);
 
@@ -60,14 +60,16 @@ float main()
 	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
 	
 	CPOINT pnt1, pnt2;
-	pnt1.x = 110; pnt1.y = 100;
-	pnt2.x = 120; pnt2.y = 110;
-	//set_mask_region("D:\\mask.bmp", "D:\\mask.tif", pnt1, pnt2);
-	//set_mask_region("D:\\lena.jpg", "D:\\lena.tif", pnt1, pnt2);
+	pnt1.x = 228; pnt1.y = 60;
+	pnt2.x = 268; pnt2.y = 100;
+	set_mask_region("D:\\mask.bmp", "D:\\mask.tif", pnt1, pnt2);
+	set_mask_region("D:\\can_tmr.bmp", "D:\\can_tmr.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
 	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
-	//BSCB m_BSCB;
-	//m_BSCB.BSCBImageInpaintingProcess("D:\\lena.tif", "D:\\mask.tif", "D:\\Repair.tif");
 
+	ExemplarBased m_eb;
+	m_eb.ExemplarBased_Inpaint("D:\\can_tmr.tif", "D:\\mask.tif", "D:\\Repair.tif");
+	//BSCB m_BSCB;
+	//m_BSCB.BSCBImageInpaintingProcess("D:\\can_tmr.tif", "D:\\mask.tif", "D:\\RepairD.tif");
 	return 0;
 }

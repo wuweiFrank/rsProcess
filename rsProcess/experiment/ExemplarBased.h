@@ -18,10 +18,10 @@ private:
 	void ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, float* imgData, float* mskData, int xsize, int ysize);
 
 	//计算切线的垂直方向
-	double* ExemplarBased_Np(vector<CPOINT> edge, CPOINT pos, float* imgData,int xisze,int ysize);
+	void ExemplarBased_Np(vector<CPOINT> edge, CPOINT pos, float* imgData,int xisze,int ysize, double* np);
 
 	//计算等照度线方向
-	double* ExemplarBased_Ip(float* imgData, CPOINT pos, int xsize, int ysize);
+	void ExemplarBased_Ip(float* imgData, CPOINT pos, int xsize, int ysize, double*ip);
 
 public:
 	//影像修复

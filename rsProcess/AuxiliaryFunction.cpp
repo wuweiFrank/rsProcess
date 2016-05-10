@@ -183,6 +183,15 @@ float GetCoefficient(float* data1, float* data2, int num)
 	}
 	return tmp / 5.0f / dev1 / dev2;
 }
+float GetSSD(float* data1, float* data2, int num)
+{
+	float tmp = 0;
+	for (int i = 0; i < num; ++i)
+	{
+		tmp += (data1[i] - data2[i])*(data1[i] - data2[i]);
+	}
+	return sqrt(tmp);
+}
 //对数据进行采样
 void GetImgSample(unsigned char *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned char *pRegBuffer)
 {

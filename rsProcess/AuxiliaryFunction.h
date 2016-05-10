@@ -23,7 +23,7 @@ void GetAveDev(float *pBuffer, int nSamples, int nLines, int nBand, float &fAver
 
 //获取相关系数
 float GetCoefficient(float* data1, float* data2, int num);
-
+float GetSSD(float* data1, float* data2, int num);
 //对数据进行采样
 /*
 	在几何校正后校正前数据和校正后数据并不是完全对应

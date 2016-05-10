@@ -75,7 +75,7 @@ void BSCB::BSCBImageInpaintingProcess(const char* pathImgIn, const char* pathImg
 		}
 		IteratorN++;
 		printf("iterator number :%d\r", IteratorN);
-	} while (TerminateBSCBCondition(pocData, rpaData, mskData,xsize,ysize)&& IteratorN<100);
+	} while (TerminateBSCBCondition(pocData, rpaData, mskData,xsize,ysize)&& IteratorN<200);
 
 	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathImgRepair, xsize, ysize, 1, GDT_Float32, NULL);
 	GDALRasterIO(GDALGetRasterBand(m_datasetDst, 1), GF_Write, 0, 0, xsize, ysize, pocData, xsize, ysize, GDT_Float32, 0, 0);
