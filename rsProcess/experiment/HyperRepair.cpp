@@ -371,6 +371,166 @@ void set_mask_region(const char* pathImgIn, const char* pathImgOut, CPOINT leftu
 	delete[]pData;
 }
 
+//获取边界区域
+void get_mask_edge_region(float* imgData, vector<CPOINT> &outline, int xsize, int ysize)
+{
+	for (int i = 5; i < xsize-5; ++i)
+	{
+		for (int j = 5; j < ysize-5; ++j)
+		{
+			if ((imgData[j*xsize + i] == -1) && (
+				imgData[j*xsize + i + 1] != -1 ||
+				imgData[j*xsize + i - 1] != -1 ||
+				imgData[(j - 1)*xsize + i - 1] != -1 ||
+				imgData[(j - 1)*xsize + i] != -1 ||
+				imgData[(j - 1)*xsize + i + 1] != -1 ||
+				imgData[(j + 1)*xsize + i - 1] != -1 ||
+				imgData[(j + 1)*xsize + i] != -1 ||
+				imgData[(j + 1)*xsize + i + 1] != -1))
+			{
+				CPOINT pnt;
+				pnt.x = i; pnt.y = j;
+				outline.push_back(pnt);
+			}
+		}
+	}
+
+}
+void repair_outline(float* imgData, vector<CPOINT> &outline, int xsize, int ysize)
+{
+	float* tmp = new float[xsize*ysize];
+	memcpy(tmp, imgData, sizeof(float)*xsize*ysize);
+	for (int i = 0; i < outline.size(); ++i)
+	{
+		vector<CPOINT> pnt1;
+		int x = outline[i].x;
+		int y = outline[i].y;
+
+		if (imgData[(y - 1)*xsize + x-1] != -1)
+		{
+			CPOINT tp; tp.x = x-1; tp.y = y - 1;
+			pnt1.push_back(tp);
+		}
+		if (imgData[(y - 1)*xsize + x] != -1)
+		{
+			CPOINT tp; tp.x = x; tp.y = y - 1;
+			pnt1.push_back(tp);
+		}
+		if (imgData[(y - 1)*xsize + x+1] != -1)
+		{
+			CPOINT tp; tp.x = x+1; tp.y = y - 1;
+			pnt1.push_back(tp);
+		}
+		if (imgData[(y )*xsize + x-1] != -1)
+		{
+			CPOINT tp; tp.x = x-1; tp.y = y;
+			pnt1.push_back(tp);
+		}
+		if (imgData[(y)*xsize + x+1] != -1)
+		{
+			CPOINT tp; tp.x = x+1; tp.y = y;
+			pnt1.push_back(tp);
+		}
+		if (imgData[(y + 1)*xsize + x-1] != -1)
+		{
+			CPOINT tp; tp.x = x-1; tp.y = y + 1;
+			pnt1.push_back(tp);
+		}
+		if (imgData[(y + 1)*xsize + x] != -1)
+		{
+			CPOINT tp; tp.x = x; tp.y = y + 1;
+			pnt1.push_back(tp);
+		}
+		if (imgData[(y + 1)*xsize + x+1] != -1)
+		{
+			CPOINT tp; tp.x = x+1; tp.y = y + 1;
+			pnt1.push_back(tp);
+		}
+
+		float grad = 0;
+		vector<float> tmpf1;
+		vector<float> tmpf2;
+		float minf = 99999; int mini = -1;
+		for (int j = 0; j < pnt1.size(); ++j)
+		{
+			int x1, y1;
+			x1 = pnt1[j].x - x + pnt1[j].x;
+			y1 = pnt1[j].y - y + pnt1[j].y;
+			grad += abs(imgData[y1*xsize + x1] - imgData[pnt1[j].y*xsize + pnt1[j].x]);
+			if (abs(imgData[y1*xsize + x1] - imgData[pnt1[j].y*xsize + pnt1[j].x])<minf)
+			{
+				minf = abs(imgData[y1*xsize + x1] - imgData[pnt1[j].y*xsize + pnt1[j].x]);
+				mini = j;
+			}
+		}
+		for (int j = 0; j < pnt1.size(); ++j)
+		{
+			int x1, y1;
+			x1 = pnt1[j].x - x + pnt1[j].x;
+			y1 = pnt1[j].y - y + pnt1[j].y;
+			float tt = abs(imgData[y1*xsize + x1] - imgData[pnt1[j].y*xsize + pnt1[j].x]);
+			if(tt==0)
+				tmpf1.push_back(grad / 0.001);
+			else if(j== mini)
+				tmpf1.push_back(grad / tt*1.2);
+			else
+				tmpf1.push_back(grad / tt);
+		}
+
+		grad = 0;
+		for (int j = 0; j < pnt1.size(); ++j)
+			grad += tmpf1[j];
+		for (int j = 0; j < pnt1.size(); ++j)
+		{
+			
+			if (grad == 0)
+				tmpf2.push_back(1.0f/ pnt1.size());
+			else
+				tmpf2.push_back(tmpf1[j] / grad);
+		}
+
+		float temp = 0;
+		for (int j = 0; j < pnt1.size(); ++j)
+		{
+			int x1, y1;
+			x1 = pnt1[j].x - x + pnt1[j].x;
+			y1 = pnt1[j].y - y + pnt1[j].y;
+			float tt = imgData[pnt1[j].y*xsize + pnt1[j].x];
+			temp += tt*tmpf2[j];
+		}
+		tmp[y*xsize + x] = temp;
+	}
+	memcpy( imgData, tmp, sizeof(float)*xsize*ysize);
+	delete[]tmp;
+	outline.clear();
+}
+void repair(const char* pathImg, const char* pathDst)
+{
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//中文路径
+	GDALDatasetH m_dataset = GDALOpen(pathImg, GA_ReadOnly);
+
+	int xsize = GDALGetRasterXSize(m_dataset);
+	int ysize = GDALGetRasterYSize(m_dataset);
+	float* imgData = NULL;
+	imgData = new float[xsize*ysize];
+	GDALRasterIO(GDALGetRasterBand(m_dataset, 1), GF_Read, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
+	GDALClose(m_dataset);
+	vector<CPOINT> outline;
+	get_mask_edge_region(imgData, outline, xsize, ysize);
+
+	do
+	{
+		repair_outline(imgData, outline, xsize, ysize);
+		get_mask_edge_region(imgData, outline, xsize, ysize);
+	} while (!outline.empty());
+
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDst, xsize, ysize, 1, GDT_Float32, NULL);
+	GDALRasterIO(GDALGetRasterBand(m_datasetDst, 1), GF_Write, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
+	GDALClose(m_datasetDst);
+	delete[]imgData;
+}
+
 //实验处理
 void experiment_process()
 {

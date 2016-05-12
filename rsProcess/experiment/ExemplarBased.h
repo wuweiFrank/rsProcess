@@ -17,8 +17,11 @@ private:
 	//对最优先修复位置进行修复
 	void ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, float* imgData, float* mskData, int xsize, int ysize);
 
+	//每次只考虑修复少量缺失
+	void ExemplarBased_PriorityInpaintLess(CPOINT pos, int regionSize, float* imgData, float* mskData, int xsize, int ysize);
+
 	//考虑纹理信息的影像修复
-	void ExemplarBased_ProprityInpaintTexture(CPOINT pos, int regionSize, float* imgData, float* mskData,float* txtData, int xsize, int ysize);
+	void ExemplarBased_ProprityInpaintTexture(CPOINT pos, int regionSize, float* imgData, float* tmpMsk,float* mskData,float* txtData, int xsize, int ysize);
 
 	//计算切线的垂直方向
 	void ExemplarBased_Np(vector<CPOINT> edge, CPOINT pos, float* imgData,int xisze,int ysize, double* np);
@@ -29,10 +32,16 @@ private:
 	//最佳修补线进行修补
 	void ExemplarBased_BestInpaint(float* data1,float* data2,int xsize,int ysize);
 
+	//进行初始的修复
+	void ExemplarBased_Init(float* data, float *maskData, int xsize, int ysize);
+
 public:
 	//影像修复
 	void ExemplarBased_Inpaint(const char* pathImg,const char* pathMsk,const char* pathDst);
 
 	//考虑纹理信息的影像修复
 	void ExemplarBased_InpaintTexture(const char* pathImg, const char* pathMsk,const char* pathTexture,const char* pathDst);
+	
+	//小区域修复
+	void ExemplarBased_InpaintLess(const char* pathImg, const char* pathMsk, const char* pathDst);
 };
