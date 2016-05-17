@@ -371,6 +371,35 @@ void set_mask_region(const char* pathImgIn, const char* pathImgOut, CPOINT leftu
 	delete[]pData;
 }
 
+void set_mask_region(const char* pathImg1, const char* pathMsk, const char* pathDst)
+{
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//中文路径
+	GDALDatasetH m_dataset    = GDALOpen(pathImg1, GA_ReadOnly);
+	GDALDatasetH m_datasetMsk = GDALOpen(pathMsk, GA_ReadOnly);
+	int xsize = GDALGetRasterXSize(m_dataset);
+	int ysize = GDALGetRasterYSize(m_dataset);
+	int bands = GDALGetRasterCount(m_dataset);
+	int* pData1   = new int[xsize*ysize];
+	int* pDataMsk = new int[xsize*ysize];
+	GDALRasterIO(GDALGetRasterBand(m_dataset, 1), GF_Read, 0, 0, xsize, ysize, pData1, xsize, ysize, GDT_Int32, 0, 0);
+	GDALRasterIO(GDALGetRasterBand(m_datasetMsk, 1), GF_Read, 0, 0, xsize, ysize, pDataMsk, xsize, ysize, GDT_Int32, 0, 0);
+
+	for (int i = 0; i < xsize*ysize; ++i)
+	{
+		if (pDataMsk[i] == -1)
+			pData1[i] = -1;
+	}
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDst, xsize, ysize,1,GDT_Int32,NULL);
+	GDALRasterIO(GDALGetRasterBand(m_datasetDst, 1), GF_Write, 0, 0, xsize, ysize, pData1, xsize, ysize, GDT_Int32, 0, 0);
+
+	GDALClose(m_dataset);
+	GDALClose(m_datasetMsk);
+	GDALClose(m_datasetDst);
+	delete[]pData1;
+	delete[]pDataMsk;
+}
+
 //获取边界区域
 void get_mask_edge_region(float* imgData, vector<CPOINT> &outline, int xsize, int ysize)
 {

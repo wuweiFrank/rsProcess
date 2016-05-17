@@ -39,6 +39,7 @@ void correct_non_nonhomogeneity(const char* pathImgIn, const char* pathImgOut);
 
 //设置掩膜区域
 void set_mask_region(const char* pathImgIn, const char* pathImgOut, CPOINT leftup, CPOINT rightdown);
+void set_mask_region(const char* pathImg1, const char* pathMsk, const char* pathDst);
 
 //获取分割区域周围一圈像素
 void get_mask_edge_region(float* imgData, vector<CPOINT> &outline, int xsize, int ysize);

@@ -11,6 +11,8 @@
 #include"experiment\HyperRepair.h"
 #include"experiment\BSCB.h"
 #include"experiment\ExemplarBased.h"
+#include"FrequencyFunc\DCTTrans.h"
+
 float main()
 {
 
@@ -60,18 +62,20 @@ float main()
 	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
 	
 	CPOINT pnt1, pnt2;
-	pnt1.x = 80; pnt1.y = 200;
-	pnt2.x = 250; pnt2.y = 250;
-	//set_mask_region("D:\\m.jpg", "D:\\m.tif", pnt1, pnt2);
+	pnt1.x = 160; pnt1.y = 170;
+	pnt2.x = 190; pnt2.y = 200;
+	//set_mask_region("D:\\can_tmr.bmp", "D:\\mf.tif", pnt1, pnt2);
+	//set_mask_region("D:\\msk.bmp", "D:\\msk.tif", pnt1, pnt2);
 	//set_mask_region("D:\\my_doc\\2016-05-11测试数据\\TestData1", "D:\\test.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
 	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
+	set_mask_region("D:\\img.tif", "D:\\m.tif", "D:\\imgA.tif");
 
-	//ExemplarBased m_eb;
-	//m_eb.ExemplarBased_Inpaint("D:\\test.tif", "D:\\m.tif", "D:\\Repair.tif");
-	//m_eb.ExemplarBased_InpaintTexture("D:\\test.tif", "D:\\m.tif","D:\\texturem.tif", "D:\\Repair.tif");
+	ExemplarBased m_eb;
+	m_eb.ExemplarBased_Inpaint("D:\\imgA.tif", "D:\\m.tif", "D:\\Repair.tif");
+	//m_eb.ExemplarBased_InpaintTexture("D:\\mf.tif", "D:\\msk.tif", "D:\\Repair.tif");
 	//BSCB m_BSCB;
-	//m_BSCB.BSCBImageInpaintingProcess("D:\\can_tmr.tif", "D:\\mask.tif", "D:\\RepairD.tif");
+	//m_BSCB.BSCBImageInpaintingProcess("D:\\imgA.tif", "D:\\m.tif", "D:\\Repair.tif");
 
 	//ImgFeaturesTools imgFeature;
 	//char* pathImg1 = "D:\\ZY3_TEST\\ZY3_MUX_E126.1_N50.0_20150915.jpg";
@@ -81,8 +85,12 @@ float main()
 	//imgFeature.ImgFeaturesTools_ExtractMatch(pathImg1, pt1, pathImg2, pt2, "AKAZE", "BruteForce-Hamming");
 	//imgFeature.ImgFeaturesTools_SaveENVIMatches(pathPtsDat, pathImg1, pathImg2, pt1, pt2);
 
-	repair("D:\\my_doc\\2016-05-11测试数据\\TestData", "D:\\my_doc\\2016-05-11测试数据\\TestDataRepair.tif");
+	//repair("D:\\mf.tif", "D:\\Repair.tif");
 
-
+	float data1[8] = { 1,1,1,1,1,1,1,1 };
+	float data2[8];
+	float data3[8];
+	//DCT1D(data1, 8, data2);
+	//IDCT1D(data2, 8, data3);
 	return 0;
 }

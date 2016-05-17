@@ -14,7 +14,7 @@ void ExemplarBased::ExemplarBased_Inpaint(const char* pathImg, const char* pathM
 	int xsize = GDALGetRasterXSize(m_datasetMsk);
 	int ysize = GDALGetRasterYSize(m_datasetMsk);
 	int bands = GDALGetRasterCount(m_datasetMsk);
-	int regionsize = 13;
+	int regionsize = 5;
 
 	//数据申请
 	float* imgData = new float[xsize*ysize];
@@ -290,18 +290,18 @@ void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, fl
 	printf("best match:%d  %d\n", maxidx, maxidy);
 
 	//修补
-	for (int i =0; i <2*regionSize+1; ++i)
-	{
-		for (int j = 0; j <2* regionSize+1; ++j)
-		{
-			if (imgData[(j + tmpPos.y- regionSize)* xsize + i + tmpPos.x- regionSize] == -1)
-			{
-				imgData[(j + tmpPos.y- regionSize)* xsize + i + tmpPos.x-regionSize] = imgData[(j + maxidy)* xsize + i + maxidx];
-			}
-		}
-	}
-
-
+	//for (int i =0; i <2*regionSize+1; ++i)
+	//{
+	//	for (int j = 0; j <2* regionSize+1; ++j)
+	//	{
+	//		if (imgData[(j + tmpPos.y- regionSize)* xsize + i + tmpPos.x- regionSize] == -1)
+	//		{
+	//			imgData[(j + tmpPos.y- regionSize)* xsize + i + tmpPos.x-regionSize] = imgData[(j + maxidy)* xsize + i + maxidx];
+	//		}
+	//	}
+	//}
+	//只修复中心像素
+	imgData[(regionSize + tmpPos.y - regionSize)* xsize + regionSize + tmpPos.x - regionSize] = imgData[(regionSize + maxidy)* xsize + regionSize + maxidx];
 	delete[]regionmask;
 	delete[]data1;
 	delete[]data2;
@@ -675,6 +675,7 @@ void ExemplarBased::ExemplarBased_Ip(float* imgData, CPOINT pos, int xsize, int 
 
 void ExemplarBased::ExemplarBased_BestInpaint(float* data1, float* data2, int xsize, int ysize)
 {
+
 
 }
 
