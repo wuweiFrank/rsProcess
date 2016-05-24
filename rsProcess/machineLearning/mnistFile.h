@@ -13,8 +13,6 @@
 //  [3/14/2015 wuwei just you]
 
 #pragma once
-
-
 class EXT_CLASS_TYPE mnistFile
 {
 public:
@@ -29,7 +27,6 @@ public:
 
 	//test function
 	void mnist_func_test();
-
 };
 
 #endif

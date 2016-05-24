@@ -168,8 +168,9 @@
     <ClInclude Include="lidar\LidarDefs.h" />
     <ClInclude Include="lidar\LidarFliter.h" />
     <ClInclude Include="lidar\LidarReader.h" />
+    <ClInclude Include="machineLearning\CVMachineLearningTrain.h" />
     <ClInclude Include="matrixOperation.h" />
-    <ClInclude Include="mnistFile.h" />
+    <ClInclude Include="machineLearning\mnistFile.h" />
     <ClInclude Include="OPENCVTools.h" />
     <ClInclude Include="rapidxml\rapidxml.hpp" />
     <ClInclude Include="rapidxml\rapidxml_iterators.hpp" />
@@ -214,8 +215,9 @@
     <ClCompile Include="lidar\LidarAlgorithm.cpp" />
     <ClCompile Include="lidar\LidarDefs.cpp" />
     <ClCompile Include="lidar\LidarReader.cpp" />
+    <ClCompile Include="machineLearning\CVMachineLearningTrain.cpp" />
     <ClCompile Include="matrixOperation.cpp" />
-    <ClCompile Include="mnistFile.cpp" />
+    <ClCompile Include="machineLearning\mnistFile.cpp" />
     <ClCompile Include="OPENCVTools.cpp" />
     <ClCompile Include="RenderProcess.cpp" />
     <ClCompile Include="rsImgProcess\ImageBlock.cpp" />

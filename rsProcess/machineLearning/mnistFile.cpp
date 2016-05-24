@@ -1,10 +1,10 @@
-#include "StdAfx.h"
+#include "../stdafx.h"
 #include <io.h>
 #include <fstream>
 #include "mnistFile.h"
 using namespace std;
 
-#include "gdal\include\gdal_priv.h"
+#include "../gdal/include/gdal_priv.h"
 #pragma comment(lib,"gdal_i.lib")
 #pragma warning(disable : 4996)
 

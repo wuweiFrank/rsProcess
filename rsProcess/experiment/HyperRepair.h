@@ -33,7 +33,5 @@ void get_fit_interesction(vector<vector<CPOINT>> &fitpoints, vector<CPOINT> &fit
 //对于交点进行处理和整理，得到较好的结果
 void process_edge_fit_intersection(vector<CPOINT> &fitIntersect, vector<CPOINT> &edgeEntersect, vector<Edge_Pixels> &intersecEdge, int begLine, int endLine);
 
-
-
 //实验处理函数
 void experiment_process();

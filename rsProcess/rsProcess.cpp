@@ -8,8 +8,7 @@
 #include"UAV\UAVGeoCorrection.h"
 #include"UAV\UAVMosaicFast.h"
 #include"AuxiliaryFunction.h"
-#include"mnistFile.h"
-
+#include"machineLearning\CVMachineLearningTrain.h"
 float main()
 {
 
@@ -58,9 +57,13 @@ float main()
 	//m_uav_correct.UAVGeoCorrection_GeoCorrect("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF", "D:", "D:\\my_doc\\2015.12.18岳阳无人机数据\\新建文本文档.txt", NULL, 6, 0, 1, 0.035, 0.2, 0);
 
 	//PhotogrammetryToolsTest();
-	mnistFile mnistImg;
-	mnistImg.MnistToBmp("D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte\\t10k-images.idx3-ubyte", "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte",
-		"D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\t10k-labels.idx1-ubyte", "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\link.txt", 100);
+	//mnistFile mnistImg;
+	//mnistImg.MnistToBmp("D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte\\t10k-images.idx3-ubyte", "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte",
+	//	"D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\t10k-labels.idx1-ubyte", "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\link.txt", 100);
+	
+	CVMachineLearningTrain mlLearn;
+	mlLearn.CV_ANN_BP_TrainMnist("D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte\\t10k-images.idx3-ubyte",
+		"D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte", "test.xml");
 
 	return 0;
 }

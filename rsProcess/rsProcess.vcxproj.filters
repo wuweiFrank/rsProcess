@@ -159,7 +159,10 @@
     <ClInclude Include="UAV\UAVMosaicFast.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="mnistFile.h">
+    <ClInclude Include="machineLearning\mnistFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\CVMachineLearningTrain.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -272,7 +275,10 @@
     <ClCompile Include="UAV\UAVMosaicFast.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="mnistFile.cpp">
+    <ClCompile Include="machineLearning\mnistFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\CVMachineLearningTrain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
