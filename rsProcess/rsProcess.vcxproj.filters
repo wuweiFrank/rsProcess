@@ -159,16 +159,28 @@
     <ClInclude Include="UAV\UAVMosaicFast.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="machineLearning\mnistFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\CVMachineLearningTrain.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="experiment\BSCB.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="experiment\ExemplarBased.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="experiment\HyperSpectralRepair.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="FrequencyFunc\DCTTrans.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="experiment\HyperSpectralRepair.h">
+    <ClInclude Include="rsImgProcess\classify.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="rsImgProcess\KMeans.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -281,16 +293,28 @@
     <ClCompile Include="UAV\UAVMosaicFast.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="machineLearning\mnistFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\CVMachineLearningTrain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="experiment\BSCB.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="experiment\ExemplarBased.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="experiment\HyperSpectralRepair.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="FrequencyFunc\DCTTrans.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="experiment\HyperSpectralRepair.cpp">
+    <ClCompile Include="rsImgProcess\classify.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="rsImgProcess\KMeans.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

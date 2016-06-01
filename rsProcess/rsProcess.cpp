@@ -61,11 +61,11 @@ float main()
 
 	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
 	//
-	CPOINT pnt1, pnt2;
-	pnt1.x = 234; pnt1.y = 428;
-	pnt2.x = 300; pnt2.y = 496;
-	set_mask_region("D:\\111", "D:\\mf.tif", pnt1, pnt2);
-	set_mask_region("D:\\mask.bmp", "D:\\msk.tif", pnt1, pnt2);
+	//CPOINT pnt1, pnt2;
+	//pnt1.x = 234; pnt1.y = 428;
+	//pnt2.x = 300; pnt2.y = 496;
+	//set_mask_region("D:\\111", "D:\\mf.tif", pnt1, pnt2);
+	//set_mask_region("D:\\mask.bmp", "D:\\msk.tif", pnt1, pnt2);
 
 	//set_mask_region("D:\\my_doc\\2016-05-11≤‚ ‘ ˝æ›\\TestData1", "D:\\test.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
@@ -89,13 +89,13 @@ float main()
 
 	//repair("D:\\mf.tif", "D:\\Repair.tif");
 
-	//float data1[8] = { 1,1,1,1,1,1,1,1 };
-	//float data2[8];
-	//float data3[8];
-	//DCT1D(data1, 8, data2);
-	//IDCT1D(data2, 8, data3);
+	float data1[8] = { 1,1,1,1,1,1,1,1 };
+	float data2[8];
+	float data3[8];
+	DCT1D(data1, 8, data2);
+	IDCT1D(data2, 8, data3);
 
-	HyperRepairFuncTest();
+	//HyperRepairFuncTest();
 
 	return 0;
 }

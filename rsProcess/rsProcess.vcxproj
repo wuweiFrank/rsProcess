@@ -181,7 +181,9 @@
     <ClInclude Include="rapidxml\rapidxml_print.hpp" />
     <ClInclude Include="rapidxml\rapidxml_utils.hpp" />
     <ClInclude Include="RenderProcess.h" />
+    <ClInclude Include="rsImgProcess\classify.h" />
     <ClInclude Include="rsImgProcess\ImageBlock.h" />
+    <ClInclude Include="rsImgProcess\KMeans.h" />
     <ClInclude Include="rsImgProcess\SampleFunc.h" />
     <ClInclude Include="rsImgProcess\spFliter.h" />
     <ClInclude Include="RTree.h" />
@@ -228,7 +230,9 @@
     <ClCompile Include="machineLearning\mnistFile.cpp" />
     <ClCompile Include="OPENCVTools.cpp" />
     <ClCompile Include="RenderProcess.cpp" />
+    <ClCompile Include="rsImgProcess\classify.cpp" />
     <ClCompile Include="rsImgProcess\ImageBlock.cpp" />
+    <ClCompile Include="rsImgProcess\KMeans.cpp" />
     <ClCompile Include="rsImgProcess\SampleFunc.cpp" />
     <ClCompile Include="rsImgProcess\spFliter.cpp" />
     <ClCompile Include="rsProcess.cpp" />
