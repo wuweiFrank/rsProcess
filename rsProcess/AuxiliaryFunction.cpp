@@ -173,8 +173,8 @@ float GetCoefficient(float* data1, float* data2, int num)
 {
 	float avg1, avg2;
 	float dev1, dev2;
-	GetAveDev(data1, 1, 5, 1, avg1, dev1);
-	GetAveDev(data2, 1, 5, 1, avg2, dev2);
+	GetAveDev(data1, 1, 5, 0, avg1, dev1);
+	GetAveDev(data2, 1, 5, 0, avg2, dev2);
 
 	float tmp = 0;
 	for (int i = 0; i < 5; ++i)
@@ -182,6 +182,15 @@ float GetCoefficient(float* data1, float* data2, int num)
 		tmp += (float(data1[i]) - avg1)*(float(data2[i]) - avg2);
 	}
 	return tmp / 5.0f / dev1 / dev2;
+}
+float GetSSD(float* data1, float* data2, int num)
+{
+	float tmp = 0;
+	for (int i = 0; i < num; ++i)
+	{
+		tmp += (data1[i] - data2[i])*(data1[i] - data2[i]);
+	}
+	return sqrt(tmp);
 }
 //对数据进行采样
 void GetImgSample(unsigned char *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned char *pRegBuffer)
@@ -1134,7 +1143,10 @@ double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2)
 {
 	return sqrt((pnt1.dX - pnt2.dX)*(pnt1.dX - pnt2.dX) + (pnt1.dY - pnt2.dY)*(pnt1.dY - pnt2.dY) + (pnt1.dZ - pnt2.dZ)*(pnt1.dZ - pnt2.dZ));
 }
-
+double GetDisofPoints(CPOINT pnt1, CPOINT pnt2)
+{
+	return sqrt(double(pnt1.x - pnt2.x)*double(pnt1.x - pnt2.x) + double(pnt1.y - pnt2.y)*double(pnt1.y - pnt2.y));
+}
 //获取影像
 void GetImageList(const char* pathList, vector<string> &pszImage)
 {
@@ -1154,4 +1166,33 @@ void GetImageList(const char* pathList, vector<string> &pszImage)
 			pszImage.push_back(str);
 	} while (!fin.eof());
 	fin.close();
+}
+
+double MaxAvg(double data1, double data2, double data3)
+{
+	double m = data1;
+	if (data1>data2)
+		m = data2;
+	if (m>data3)
+		m = data3;
+	if (m == data1)
+		return (data2 + data3) / 2;
+	else if (m == data2)
+		return (data1 + data3) / 2;
+	else
+		return (data1 + data2) / 2;
+}
+double MinAvg(double data1, double data2, double data3)
+{
+	double m = data1;
+	if (data1<data2)
+		m = data2;
+	if (m<data3)
+		m = data3;
+	if (m == data1)
+		return (data2 + data3) / 2;
+	else if (m == data2)
+		return (data1 + data3) / 2;
+	else
+		return (data1 + data2) / 2;
 }

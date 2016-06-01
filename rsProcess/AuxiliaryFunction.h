@@ -23,7 +23,7 @@ void GetAveDev(float *pBuffer, int nSamples, int nLines, int nBand, float &fAver
 
 //获取相关系数
 float GetCoefficient(float* data1, float* data2, int num);
-
+float GetSSD(float* data1, float* data2, int num);
 //对数据进行采样
 /*
 	在几何校正后校正前数据和校正后数据并不是完全对应
@@ -45,6 +45,13 @@ void GetImgHistroMatch(unsigned char* img1, unsigned char*img2, int xsize1, int 
 
 //获取两点之间的距离
 double GetDisofPoints(THREEDPOINT pnt1, THREEDPOINT pnt2);
+double GetDisofPoints(CPOINT pnt1, CPOINT pnt2);
 
 //获取影像列表
 void GetImageList(const char* pathList, vector<string> &pszImage);
+
+//三个数中最大两个数的平均值
+double MaxAvg(double data1, double data2, double data3);
+//三个数中最小两个数的平均值
+double MinAvg(double data1, double data2, double data3);
+

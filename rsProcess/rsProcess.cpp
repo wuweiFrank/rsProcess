@@ -8,21 +8,22 @@
 #include"UAV\UAVGeoCorrection.h"
 #include"UAV\UAVMosaicFast.h"
 #include"AuxiliaryFunction.h"
-#include"machineLearning\CVMachineLearningTrain.h"
+#include"experiment\HyperRepair.h"
+#include"experiment\BSCB.h"
+#include"experiment\ExemplarBased.h"
+#include"FrequencyFunc\DCTTrans.h"
+#include"experiment\HyperSpectralRepair.h"
+
 float main()
 {
-
 	//UAVMosaicFast m_mosaic_fast;
 	//ImgFeaturesTools m_img_tools;
 	//vector<vector<Point2f>> m_pnts;
 	//vector<string> pszPath;
 	//int width, height;
-	////GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
-	////m_mosaic_fast.UAVMosaicFast_Mosaic(pszPath, "D:\\img.tif");
-	//float data1[5] = { (float)1,(float)4,(float)6,(float)2,(float)5 };
-	//float data2[5] = { (float)2,(float)8,(float)12,(float)4,(float)10 };
-	//float tmp=GetCoefficient(data1, data2,5);
-	//printf("%lf\n", tmp);
+	//GetImageList("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\test.txt", pszPath);
+	//m_mosaic_fast.UAVMosaicFast_Mosaic(pszPath, "D:\\img.tif");
+
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
 	//m_mosaic_fast.UAVMosaicFast_GetMosaicRange(pszPath,width, height);
 	//m_mosaic_fast.UAVMosaicFast_AffineTrans(pszPath);
@@ -52,18 +53,49 @@ float main()
 	//experiment_process();
 
 	//ImageInpaint m_inPaint;
-	//m_inPaint.ImageInpaint_Inpaint("C:\\Users\\Public\\Pictures\\Sample Pictures\\lena.jpg","test.jpg");
+	//m_inPaint.ImageInpaint_Inpaint("D:\\lena.jpg","D:\\test.bmp");
 	//UAVGeoCorrection m_uav_correct;
 	//m_uav_correct.UAVGeoCorrection_GeoCorrect("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF", "D:", "D:\\my_doc\\2015.12.18岳阳无人机数据\\新建文本文档.txt", NULL, 6, 0, 1, 0.035, 0.2, 0);
 
 	//PhotogrammetryToolsTest();
-	//mnistFile mnistImg;
-	//mnistImg.MnistToBmp("D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte\\t10k-images.idx3-ubyte", "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte",
-	//	"D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\t10k-labels.idx1-ubyte", "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\link.txt", 100);
-	
-	CVMachineLearningTrain mlLearn;
-	mlLearn.CV_ANN_BP_TrainMnist("D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte\\t10k-images.idx3-ubyte",
-		"D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte", "test.xml");
+
+	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
+	//
+	CPOINT pnt1, pnt2;
+	pnt1.x = 234; pnt1.y = 428;
+	pnt2.x = 300; pnt2.y = 496;
+	set_mask_region("D:\\111", "D:\\mf.tif", pnt1, pnt2);
+	set_mask_region("D:\\mask.bmp", "D:\\msk.tif", pnt1, pnt2);
+
+	//set_mask_region("D:\\my_doc\\2016-05-11测试数据\\TestData1", "D:\\test.tif", pnt1, pnt2);
+	//vector<Edge_Pixels> edgeinter;
+	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
+	//set_mask_region("D:\\img.tif", "D:\\m.tif", "D:\\imgA.tif");
+	//set_mask_region("D:\\img.tif", "D:\\mask.tif", "D:\\imgA.tif");
+	//ExemplarBased m_eb;
+	//m_eb.ExemplarBased_Inpaint("D:\\mf.tif", "D:\\msk.tif", "D:\\repair.tif");
+	//m_eb.ExemplarBased_Inpaint("D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulate", "D:\\my_doc\\2015.10.20数据\\hyper\\msk.bmp", "D:\\my_doc\\2015.10.20数据\\hyper\\repairtest.tif");
+	//m_eb.ExemplarBased_InpaintTexture("D:\\mf.tif", "D:\\msk.tif", "D:\\Repair.tif");
+	//BSCB m_BSCB;
+	//m_BSCB.BSCBImageInpaintingProcess("D:\\mf.tif", "D:\\msk.tif", "D:\\Repair.tif");
+
+	//ImgFeaturesTools imgFeature;
+	//char* pathImg1 = "D:\\ZY3_TEST\\ZY3_MUX_E126.1_N50.0_20150915.jpg";
+	//char* pathImg2 = "D:\\ZY3_TEST\\ZY3_NAD_E126.1_N50.0_20150915.jpg";
+	//char* pathPtsDat = "D:\\test.pts";
+	//vector<Point2f> pt1, pt2;
+	//imgFeature.ImgFeaturesTools_ExtractMatch(pathImg1, pt1, pathImg2, pt2, "AKAZE", "BruteForce-Hamming");
+	//imgFeature.ImgFeaturesTools_SaveENVIMatches(pathPtsDat, pathImg1, pathImg2, pt1, pt2);
+
+	//repair("D:\\mf.tif", "D:\\Repair.tif");
+
+	//float data1[8] = { 1,1,1,1,1,1,1,1 };
+	//float data2[8];
+	//float data3[8];
+	//DCT1D(data1, 8, data2);
+	//IDCT1D(data2, 8, data3);
+
+	HyperRepairFuncTest();
 
 	return 0;
 }

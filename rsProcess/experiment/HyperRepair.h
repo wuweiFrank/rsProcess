@@ -3,9 +3,10 @@
 #include"..\gdal\include\gdal_priv.h"
 #include<vector>
 using namespace std;
-
-#pragma comment(lib,"gdal_i.lib");
-
+#pragma comment(lib,"gdal_i.lib")
+/*
+	这个部分是实验性代码，代码并没有经过优化，代码结构也可能不合理，为了实现某个功能随意添加的代码
+*/
 
 //获取分割影像各个块，并得到各个块和数据缺失边
 //每个分割的边缘像素
@@ -32,6 +33,19 @@ void get_fit_interesction(vector<vector<CPOINT>> &fitpoints, vector<CPOINT> &fit
 
 //对于交点进行处理和整理，得到较好的结果
 void process_edge_fit_intersection(vector<CPOINT> &fitIntersect, vector<CPOINT> &edgeEntersect, vector<Edge_Pixels> &intersecEdge, int begLine, int endLine);
+
+//首先对非均匀现象要进行简单的校正
+void correct_non_nonhomogeneity(const char* pathImgIn, const char* pathImgOut);
+
+//设置掩膜区域
+void set_mask_region(const char* pathImgIn, const char* pathImgOut, CPOINT leftup, CPOINT rightdown);
+void set_mask_region(const char* pathImg1, const char* pathMsk, const char* pathDst);
+
+//获取分割区域周围一圈像素
+void get_mask_edge_region(float* imgData, vector<CPOINT> &outline, int xsize, int ysize);
+void repair_outline(float* imgData, vector<CPOINT> &outline,int xsize,int ysize);
+void repair(const char* pathImg, const char* pathDst);
+
 
 //实验处理函数
 void experiment_process();

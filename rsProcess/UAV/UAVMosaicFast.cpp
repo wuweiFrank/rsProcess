@@ -12,7 +12,7 @@ long UAVMosaicFast::UAVMosaicFast_AffineTrans(vector<string> pszImages)
 	for (int i = 0; i < pszImages.size() - 1; ++i)
 		matchpairs[i*pszImages.size() + i + 1] = true;
 	vector<vector<Point2f>> m_matches;
-	m_featureMatch.ImgFeaturesTools_ExtracMatches(pszImages, m_matches, matchpairs, "AKAZE", "BruteForce-Hamming");
+	m_featureMatch.ImgFeaturesTools_ExtracMatches(pszImages, m_matches, matchpairs, "ORB", "BruteForce-Hamming");
 
 	//仿射变换系数
 	vector<adfAffineTrans> affineTransParameters;
@@ -169,6 +169,10 @@ long UAVMosaicFast::UAVMosaicFast_SeamFillFast(int up, int left, unsigned char* 
 					data1[k] = imgMosaic[(j + up)*mosaicx + i + left + k];
 					data2[k] = imgBuffer[j*xsize + i + k];
 				}
+				if (data1[0] != 0 || data2[0] != 0)
+				{
+					int ttt = 0;
+				}
 				//如果存在像素为0则跳出
 				bool isBreak = false;
 				for (int k = 0; k < 5; ++k)
@@ -234,7 +238,8 @@ long UAVMosaicFast::UAVMosaicFast_SeamFillFast(int up, int left, unsigned char* 
 	{
 		if(edge[j].dX==0)
 		for (size_t i = 0; i < xsize; i++)
-			imgMosaic[(j + up)*mosaicx + i + left] = imgBuffer[j*xsize + i];
+			if(imgMosaic[(j + up)*mosaicx + i + left]==0)
+				imgMosaic[(j + up)*mosaicx + i + left] = imgBuffer[j*xsize + i];
 		else
 		{
 			for (size_t i = edge[j].dX; i < xsize; i++)
