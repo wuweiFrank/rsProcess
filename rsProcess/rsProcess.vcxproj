@@ -158,6 +158,7 @@
     <ClInclude Include="experiment\BSCB.h" />
     <ClInclude Include="experiment\ExemplarBased.h" />
     <ClInclude Include="experiment\HyperRepair.h" />
+    <ClInclude Include="experiment\HyperSpectralRepair.h" />
     <ClInclude Include="FrequencyFunc\DCTTrans.h" />
     <ClInclude Include="FrequencyFunc\waveletTrans.h" />
     <ClInclude Include="GDALTools.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="experiment\BSCB.cpp" />
     <ClCompile Include="experiment\ExemplarBased.cpp" />
     <ClCompile Include="experiment\HyperRepair.cpp" />
+    <ClCompile Include="experiment\HyperSpectralRepair.cpp" />
     <ClCompile Include="FrequencyFunc\DCTTrans.cpp" />
     <ClCompile Include="FrequencyFunc\waveletTrans.cpp" />
     <ClCompile Include="GDALTools.cpp" />

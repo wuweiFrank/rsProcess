@@ -14,7 +14,7 @@ void ExemplarBased::ExemplarBased_Inpaint(const char* pathImg, const char* pathM
 	int xsize = GDALGetRasterXSize(m_datasetMsk);
 	int ysize = GDALGetRasterYSize(m_datasetMsk);
 	int bands = GDALGetRasterCount(m_datasetMsk);
-	int regionsize = 5;
+	int regionsize = 11;
 
 	//数据申请
 	float* imgData = new float[xsize*ysize];
@@ -103,7 +103,7 @@ void ExemplarBased::ExemplarBased_InpaintLess(const char* pathImg, const char* p
 	int xsize = GDALGetRasterXSize(m_datasetMsk);
 	int ysize = GDALGetRasterYSize(m_datasetMsk);
 	int bands = GDALGetRasterCount(m_datasetMsk);
-	int regionsize = 13;
+	int regionsize = 11;
 
 	//数据申请
 	float* imgData = new float[xsize*ysize];

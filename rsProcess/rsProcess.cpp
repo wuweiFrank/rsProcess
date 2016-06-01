@@ -12,10 +12,10 @@
 #include"experiment\BSCB.h"
 #include"experiment\ExemplarBased.h"
 #include"FrequencyFunc\DCTTrans.h"
+#include"experiment\HyperSpectralRepair.h"
 
 float main()
 {
-
 	//UAVMosaicFast m_mosaic_fast;
 	//ImgFeaturesTools m_img_tools;
 	//vector<vector<Point2f>> m_pnts;
@@ -53,29 +53,31 @@ float main()
 	//experiment_process();
 
 	//ImageInpaint m_inPaint;
-	//m_inPaint.ImageInpaint_Inpaint("D:\\1.bmp","test.jpg");
+	//m_inPaint.ImageInpaint_Inpaint("D:\\lena.jpg","D:\\test.bmp");
 	//UAVGeoCorrection m_uav_correct;
 	//m_uav_correct.UAVGeoCorrection_GeoCorrect("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF", "D:", "D:\\my_doc\\2015.12.18岳阳无人机数据\\新建文本文档.txt", NULL, 6, 0, 1, 0.035, 0.2, 0);
 
 	//PhotogrammetryToolsTest();
 
 	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
-	
+	//
 	CPOINT pnt1, pnt2;
-	pnt1.x = 160; pnt1.y = 170;
-	pnt2.x = 190; pnt2.y = 200;
-	//set_mask_region("D:\\can_tmr.bmp", "D:\\mf.tif", pnt1, pnt2);
-	//set_mask_region("D:\\msk.bmp", "D:\\msk.tif", pnt1, pnt2);
+	pnt1.x = 234; pnt1.y = 428;
+	pnt2.x = 300; pnt2.y = 496;
+	set_mask_region("D:\\111", "D:\\mf.tif", pnt1, pnt2);
+	set_mask_region("D:\\mask.bmp", "D:\\msk.tif", pnt1, pnt2);
+
 	//set_mask_region("D:\\my_doc\\2016-05-11测试数据\\TestData1", "D:\\test.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
 	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
-	set_mask_region("D:\\img.tif", "D:\\m.tif", "D:\\imgA.tif");
-
-	ExemplarBased m_eb;
-	m_eb.ExemplarBased_Inpaint("D:\\imgA.tif", "D:\\m.tif", "D:\\Repair.tif");
+	//set_mask_region("D:\\img.tif", "D:\\m.tif", "D:\\imgA.tif");
+	//set_mask_region("D:\\img.tif", "D:\\mask.tif", "D:\\imgA.tif");
+	//ExemplarBased m_eb;
+	//m_eb.ExemplarBased_Inpaint("D:\\mf.tif", "D:\\msk.tif", "D:\\repair.tif");
+	//m_eb.ExemplarBased_Inpaint("D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulate", "D:\\my_doc\\2015.10.20数据\\hyper\\msk.bmp", "D:\\my_doc\\2015.10.20数据\\hyper\\repairtest.tif");
 	//m_eb.ExemplarBased_InpaintTexture("D:\\mf.tif", "D:\\msk.tif", "D:\\Repair.tif");
 	//BSCB m_BSCB;
-	//m_BSCB.BSCBImageInpaintingProcess("D:\\imgA.tif", "D:\\m.tif", "D:\\Repair.tif");
+	//m_BSCB.BSCBImageInpaintingProcess("D:\\mf.tif", "D:\\msk.tif", "D:\\Repair.tif");
 
 	//ImgFeaturesTools imgFeature;
 	//char* pathImg1 = "D:\\ZY3_TEST\\ZY3_MUX_E126.1_N50.0_20150915.jpg";
@@ -87,10 +89,13 @@ float main()
 
 	//repair("D:\\mf.tif", "D:\\Repair.tif");
 
-	float data1[8] = { 1,1,1,1,1,1,1,1 };
-	float data2[8];
-	float data3[8];
+	//float data1[8] = { 1,1,1,1,1,1,1,1 };
+	//float data2[8];
+	//float data3[8];
 	//DCT1D(data1, 8, data2);
 	//IDCT1D(data2, 8, data3);
+
+	HyperRepairFuncTest();
+
 	return 0;
 }
