@@ -13,6 +13,7 @@
 #include"experiment\ExemplarBased.h"
 #include"FrequencyFunc\DCTTrans.h"
 #include"experiment\HyperSpectralRepair.h"
+#include"rsImgProcess\KMeans.h"
 
 float main()
 {
@@ -89,13 +90,34 @@ float main()
 
 	//repair("D:\\mf.tif", "D:\\Repair.tif");
 
-	float data1[8] = { 1,1,1,1,1,1,1,1 };
-	float data2[8];
-	float data3[8];
-	DCT1D(data1, 8, data2);
-	IDCT1D(data2, 8, data3);
+	//float data1[64];
+	//float data2[64];
+	//float data3[64];
+	//for (int j = 0; j < 4; ++j)
+	//{
+	//	for (int i = 0; i < 16; ++i)
+	//	{
+	//		data1[j * 16 + i] = j + 1;
+	//	}
+	//}
+	//DCT3D(data1, 4, 4, 4, data2);
+	//IDCT3D(data2, 4, 4, 4, data3);
+
 
 	//HyperRepairFuncTest();
+	HyperRepairFunc hyrepair;
+	hyrepair.RepairFunc_GenerateTexture("D:\\lenaFilterH.tif",5,"D:\\lenaHyper.tif");
+	//KMeansClassify("D:\\alos.tif", "D:\\classify.tif", 7);
+	//ISODataClassify("D:\\alos.tif", "D:\\classify.tif", 3, 20, 1);
+	//float data1[16] = {1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4};
+	//float data2[16];
+	//float data3[16];
+	//DCT2D(data1, 4, 4, data2);
+	//IDCT2D(data2, 4, 4, data3);
 
+	//DCT3D("D:\\lenaMuti", "D:\\lenaDCT.tif");
+	//IDCT3D("D:\\lenaDCT.tif", "D:\\lenaIDCT.tif");
+	//IDCT2D("D:\\lenaDCT.tif", "D:\\lenaIDCT.tif", 1);
+	//DCTFliter2D("D:\\lena", "D:\\lenaFilterH.tif", 1, 100);
 	return 0;
 }

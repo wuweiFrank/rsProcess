@@ -204,6 +204,43 @@ void HyperRepairFunc::RepairFunc_Repair(int* dataImg, int posx, int posy, int xs
 	delete[]tmp;
 }
 
+void HyperRepairFunc::RepairFunc_GenerateTexture(const char* pathImg, int rangesize, const char* pathOut)
+{
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//中文路径
+	GDALDatasetH m_datasetImg = GDALOpen(pathImg, GA_ReadOnly);
+	int xsize = GDALGetRasterXSize(m_datasetImg);
+	int ysize = GDALGetRasterYSize(m_datasetImg);
+	float* dataImg = new float[xsize*ysize];
+	GDALRasterIO(GDALGetRasterBand(m_datasetImg, 1), GF_Read, 0, 0, xsize, ysize, dataImg, xsize, ysize, GDT_Float32, 0, 0);
+
+	GDALDatasetH m_datasetOut = GDALCreate(GDALGetDriverByName("GTiff"), pathOut, xsize - rangesize, ysize - rangesize, rangesize*rangesize,GDT_Float32,0);
+
+	float* dataOut = new float[(xsize - rangesize)*(ysize - rangesize)];
+	int bandidx = 1;;
+	for (int i = 0; i < rangesize; ++i)
+	{
+		for (int j = 0; j < rangesize; ++j)
+		{
+			//构建图像
+			for (int m = 0; m < xsize - rangesize; ++m)
+			{
+				for (int n = 0; n < ysize - rangesize; ++n)
+				{
+					dataOut[n*(xsize - rangesize) + m] = dataImg[(j + n)*xsize + i + m];
+				}
+			}
+			//输出
+			GDALRasterIO(GDALGetRasterBand(m_datasetOut, bandidx), GF_Write, 0, 0, xsize - rangesize, ysize - rangesize, dataOut, xsize-rangesize, ysize- rangesize, GDT_Float32, 0, 0);
+			bandidx++;
+		}
+	}
+	GDALClose(m_datasetImg);
+	GDALClose(m_datasetOut);
+	delete[]dataImg;
+	delete[]dataOut;
+}
+
 void HyperRepairFuncTest()
 {
 	char* pathImg = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertest";

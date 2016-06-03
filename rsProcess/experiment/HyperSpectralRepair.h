@@ -14,6 +14,9 @@ public:
 
 	//模拟退化影像
 	void RepairFunc_SimuliDegradImg(const char* pathImg, const char* pathDeImg, int st, int end, CPOINT lup, CPOINT rbottom);
+	
+	//构建纹理光谱
+	void RepairFunc_GenerateTexture(const char* pathImg, int rangesize, const char* pathOut);
 
 	//部分影像波段缺失的修复
 	void RepairFunc_RepairPartial(int* dataImg, int* dataMask,int xsize,int ysize,int bands);

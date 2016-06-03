@@ -6,6 +6,7 @@ category createcategory(int demension)
 	category m_categ;
 	m_categ.center = new float[demension];
 	m_categ.objdervation = new float[demension];
+	m_categ.demension = demension;
 	m_categ.objindex = NULL;
 	m_categ.objnumbers = 0;
 	return m_categ;

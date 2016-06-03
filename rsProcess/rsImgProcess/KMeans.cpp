@@ -52,7 +52,7 @@ void InitKMeans(float* dataImg, int xsize, int ysize, int bands, int classNum, c
 			pixelElement[j] = dataImg[j*xsize*ysize + i];
 
 		for (int j = 0; j<classNum; ++j)
-			centerdis[j] = GetSSD(pixelElement, m_categories[j].center + j*bands, bands);
+			centerdis[j] = GetSSD(pixelElement, m_categories[j].center, bands);
 
 		idx = 0;
 		for (int j = 1; j<classNum; ++j)
@@ -124,7 +124,7 @@ void IteratorKMeans(float* dataImg, int xsize, int ysize, int bands, int classNu
 			pixelElement[j] = dataImg[j*xsize*ysize + i];
 
 		for (int j = 0; j<classNum; ++j)
-			centerdis[j] = GetSSD(pixelElement, m_categories[j].center + j*bands, bands);
+			centerdis[j] = GetSSD(pixelElement, m_categories[j].center, bands);
 
 		idx = 0;
 		for (int j = 1; j<classNum; ++j)
@@ -181,14 +181,14 @@ void KMeansClassify(const char* pathImgIn, const char* pathImgOut, int classNum)
 		IteratorKMeans(dataimg, xsize, ysize, bands, classNum, m_categroies);
 		for (int i = 0; i < classNum; ++i)
 		{
-			memcpy(centersLast, centersPre, sizeof(float)*bands);
+			memcpy(centersLast + i*bands, m_categroies[i].center, sizeof(float)*bands);
 		}
 
 		//两次类中心误差
 		float disCenter = 0;
 		for (int i = 0; i<classNum*bands; ++i)
 			disCenter += fabs(centersLast[i] - centersPre[i]);
-		if (disCenter<20)
+		if (disCenter<1)
 			break;
 		else
 			memcpy(centersPre, centersLast, sizeof(float)*bands*classNum);
@@ -275,20 +275,20 @@ void ISODataClassify(const char* pathImgIn, const char* pathImgOut, int classNum
 			//迭代计算分类结果和类中心
 			IteratorKMeans(dataimg, xsize, ysize, bands, classNum, m_categroies);
 			for (int i = 0; i < classNum; ++i)
-				memcpy(centersLast, m_categroies[i].center, sizeof(float)*bands);
+				memcpy(centersLast+i*bands, m_categroies[i].center, sizeof(float)*bands);
 			for (int i = 0; i < classNum; ++i)
-				memcpy(tempdev, m_categroies[i].objdervation, sizeof(float)*bands);
+				memcpy(tempdev + i*bands, m_categroies[i].objdervation, sizeof(float)*bands);
 
 			//两次类中心误差
 			float disCenter = 0;
 			for (int i = 0; i<classNum*bands; ++i)
 				disCenter += fabs(centersLast[i] - centersPre[i]);
-			if (disCenter<20)
+			if (disCenter<1)
 				break;
 			else
 				memcpy(centersPre, centersLast, sizeof(float)*bands*classNum);
 			++iterator_i;
-		} while (iterator_i<30);
+		} while (iterator_i<100);
 		printf("\n");
 
 		//判断分裂之后的类的个数
@@ -325,15 +325,15 @@ void ISODataClassify(const char* pathImgIn, const char* pathImgOut, int classNum
 			{
 				float meandev = 0;
 				for (int j = 0; j < bands; ++j)
-					meandev += tempdev[j*classNum+j];
+					meandev += tempdev[i*bands+j];
 
 				//大于阈值则分裂
 				if (meandev / bands > maxDev)
 				{
 					for (int j = 0; j < bands; ++j)
 					{
-						m_categroies[lastcategoryidx].center[j] = centersLast[precategoryidx*bands + j]- tempdev[precategoryidx*bands + j];
-						m_categroies[lastcategoryidx+1].center[j] = centersLast[precategoryidx*bands + j]+ tempdev[precategoryidx*bands + j];
+						m_categroies[lastcategoryidx].center[j] = abs(centersLast[precategoryidx*bands + j]- 0.5*tempdev[precategoryidx*bands + j]);
+						m_categroies[lastcategoryidx+1].center[j] = abs(centersLast[precategoryidx*bands + j]+ 0.5*tempdev[precategoryidx*bands + j]);
 					}
 					lastcategoryidx += 2;
 					precategoryidx++;
