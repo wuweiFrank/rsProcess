@@ -1,7 +1,7 @@
 #include"DCTTrans.h"
 #include"..\Global.h"
 #include<math.h>
-
+#include<omp.h>
 #include "..\gdal/include/gdal_priv.h"
 #pragma comment(lib,"gdal_i.lib")
 
@@ -44,11 +44,15 @@ void DCT2D(float* dataIn, int xsize, int ysize, float* DCTData)
 		printf("input matrix is not a square！\n");
 	}
 	memset(DCTData, 0, sizeof(float)*xsize*ysize);
+	float *param = new float[xsize*xsize];
+	for (int i = 0; i < xsize; ++i)
+		for (int j = 0; j < xsize; ++j)
+			param[j*xsize + i] = cos(float(float((i + 0.5)*PI*j) / float(xsize)));
+#pragma omp parallel for
 	for (int i = 0; i < xsize; ++i)
 	{
 		for (int j = 0; j < ysize; ++j)
 		{
-
 			//内部循环
 			float tmp1, tmp2;
 			if (i == 0)
@@ -65,12 +69,14 @@ void DCT2D(float* dataIn, int xsize, int ysize, float* DCTData)
 			{
 				for (int n = 0; n < ysize; ++n)
 				{
-					tmp += float(dataIn[n*xsize + m]) * cos(float(float((m + 0.5)*i*PI) / float(xsize)))*cos(float(float((n + 0.5)*j*PI) / float(xsize)));
+					tmp += float(dataIn[n*xsize + m]) *param[i*xsize+m]*param[j*xsize+n];
 				}
 			}
 			DCTData[j*xsize + i] = tmp*tmp1*tmp2;
 		}
 	}
+	delete[]param;
+	param = NULL;
 }
 void IDCT2D(float* DCTData, int xsize, int ysize, float* IDCTData)
 {
@@ -79,6 +85,11 @@ void IDCT2D(float* DCTData, int xsize, int ysize, float* IDCTData)
 		printf("input matrix is not a square！\n");
 	}
 	memset(IDCTData, 0, sizeof(float)*xsize*ysize);
+	float *param = new float[xsize*xsize];
+	for (int i = 0; i < xsize; ++i)
+		for (int j = 0; j < xsize; ++j)
+			param[j*xsize + i] = cos(float(float((i + 0.5)*PI*j) / float(xsize)));
+#pragma omp parallel for
 	for (int i = 0; i < xsize; ++i)
 	{
 		for (int j = 0; j < ysize; ++j)
@@ -97,12 +108,14 @@ void IDCT2D(float* DCTData, int xsize, int ysize, float* IDCTData)
 						tmp2 = sqrt(float(1) / float(ysize));
 					else
 						tmp2 = sqrt(float(2) / float(ysize));
-					tmp += tmp1*tmp2*float(DCTData[n*xsize + m]) * cos(float(float((i+0.5)*PI*m) / float(xsize)))*cos(float(float((j+0.5)*PI*n) / float(xsize)));
+					tmp += tmp1*tmp2*float(DCTData[n*xsize + m]) *param[m*xsize + i] * param[n*xsize + j];
 				}
 			}
 			IDCTData[j*xsize + i] = tmp;
 		}
 	}
+	delete[]param;
+	param = NULL;
 }
 
 //3维离散DCT变换
@@ -283,4 +296,38 @@ void DCTFliter2D(const char* pathImgIn, const char* pathOut, int bandIdx, float 
 
 	remove("~temp.tif");
 }
-void DCTFliter3D(const char* pathImgIn, const char* pathOut, int bandIdx, float thresthod);
+void DCTFliter3D(const char* pathImgIn, const char* pathOut, float thresthod)
+{
+	DCT3D(pathImgIn, "~temp.tif");
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
+	GDALDatasetH m_datasetin = GDALOpen("~temp.tif", GA_ReadOnly);
+
+	int xsize = GDALGetRasterXSize(m_datasetin);
+	int ysize = GDALGetRasterYSize(m_datasetin);
+	int bands = GDALGetRasterCount(m_datasetin);
+
+	//内存申请会不会爆掉，不管了!!
+	float* dataDCT = new float[xsize*ysize*bands];
+	float* dataIDCT = new float[xsize*ysize*bands];
+	for (int i = 0; i < bands; ++i)
+	{
+		GDALRasterIO(GDALGetRasterBand(m_datasetin, i+1), GF_Read, 0, 0, xsize, ysize, dataDCT+i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+	}
+
+	for (int i = 0; i < xsize*ysize; ++i)
+	{
+		if (abs(dataDCT[i]) < thresthod)
+			dataDCT[i] = 0;
+	}
+	IDCT3D(dataDCT, xsize, ysize, bands, dataIDCT);
+	GDALDatasetH m_datasetout = GDALCreate(GDALGetDriverByName("GTiff"), pathOut, xsize, ysize, bands, GDT_Float32, NULL);
+	for (int i = 0; i < bands; ++i)
+	{
+		GDALRasterIO(GDALGetRasterBand(m_datasetout, i+1), GF_Write, 0, 0, xsize, ysize, dataIDCT + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+	}
+	GDALClose(m_datasetin);
+	GDALClose(m_datasetout);
+	delete[]dataDCT;
+	delete[]dataIDCT;
+}

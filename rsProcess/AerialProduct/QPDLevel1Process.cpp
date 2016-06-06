@@ -1281,7 +1281,7 @@ long QPDLevel1Process::Level1Proc_ColorMatch(unsigned short* imgBuffer1, unsigne
 	}
 	GetImgHistroMatch(overlap12, overlap21, over_x, ytemp - abs(err_y), over_x, ytemp - abs(err_y), minPixel, maxPixel, mapPixel);
 #pragma omp parallel for
-	for (size_t i = 0; i < xsize1*ysize1; i++)
+	for (int i = 0; i < xsize1*ysize1; i++)
 		imgBuffer1[i] = mapPixel[imgBuffer1[i]];
 
 	////是不是考虑再做一次校正

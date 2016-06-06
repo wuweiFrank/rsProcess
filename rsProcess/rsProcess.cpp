@@ -62,11 +62,11 @@ float main()
 
 	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
 	//
-	//CPOINT pnt1, pnt2;
-	//pnt1.x = 234; pnt1.y = 428;
-	//pnt2.x = 300; pnt2.y = 496;
-	//set_mask_region("D:\\111", "D:\\mf.tif", pnt1, pnt2);
-	//set_mask_region("D:\\mask.bmp", "D:\\msk.tif", pnt1, pnt2);
+	CPOINT pnt1, pnt2;
+	pnt1.x = 164; pnt1.y = 21;
+	pnt2.x = 181; pnt2.y = 37;
+	//set_mask_region("D:\\lena", "D:\\lenaMask.tif", pnt1, pnt2);
+	//set_mask_region("D:\\msk.bmp", "D:\\msk.tif", pnt1, pnt2);
 
 	//set_mask_region("D:\\my_doc\\2016-05-11测试数据\\TestData1", "D:\\test.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
@@ -74,7 +74,7 @@ float main()
 	//set_mask_region("D:\\img.tif", "D:\\m.tif", "D:\\imgA.tif");
 	//set_mask_region("D:\\img.tif", "D:\\mask.tif", "D:\\imgA.tif");
 	//ExemplarBased m_eb;
-	//m_eb.ExemplarBased_Inpaint("D:\\mf.tif", "D:\\msk.tif", "D:\\repair.tif");
+	//m_eb.ExemplarBased_Inpaint("D:\\lenaMask.tif", "D:\\msk.tif", "D:\\repair.tif");
 	//m_eb.ExemplarBased_Inpaint("D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulate", "D:\\my_doc\\2015.10.20数据\\hyper\\msk.bmp", "D:\\my_doc\\2015.10.20数据\\hyper\\repairtest.tif");
 	//m_eb.ExemplarBased_InpaintTexture("D:\\mf.tif", "D:\\msk.tif", "D:\\Repair.tif");
 	//BSCB m_BSCB;
@@ -105,8 +105,8 @@ float main()
 
 
 	//HyperRepairFuncTest();
-	HyperRepairFunc hyrepair;
-	hyrepair.RepairFunc_GenerateTexture("D:\\lenaFilterH.tif",5,"D:\\lenaHyper.tif");
+	//HyperRepairFunc hyrepair;
+	//hyrepair.RepairFunc_GenerateTexture("D:\\lenaFilterH.tif",5,"D:\\lenaHyper.tif");
 	//KMeansClassify("D:\\alos.tif", "D:\\classify.tif", 7);
 	//ISODataClassify("D:\\alos.tif", "D:\\classify.tif", 3, 20, 1);
 	//float data1[16] = {1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4};
@@ -115,9 +115,10 @@ float main()
 	//DCT2D(data1, 4, 4, data2);
 	//IDCT2D(data2, 4, 4, data3);
 
-	//DCT3D("D:\\lenaMuti", "D:\\lenaDCT.tif");
+	//DCT2D("D:\\lena", "D:\\lenaDCT.tif",1);
 	//IDCT3D("D:\\lenaDCT.tif", "D:\\lenaIDCT.tif");
 	//IDCT2D("D:\\lenaDCT.tif", "D:\\lenaIDCT.tif", 1);
 	//DCTFliter2D("D:\\lena", "D:\\lenaFilterH.tif", 1, 100);
+	//DCTFliter3D("D:\\lenaMuti", "D:\\lenaDCTFliter.tif", 100);
 	return 0;
 }

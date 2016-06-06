@@ -8,6 +8,10 @@ void IDCT1D(float* DCTData, int length, float* IDCTData);
 void DCT2D(float* dataIn, int xsize,int ysize, float* DCTData);
 void IDCT2D(float* DCTData, int xsize, int ysize, float* IDCTData);
 
+//¿ìËÙ±ä»»
+void FDCT2D(float* dataIn, int xsize, int ysize, float* DCTData);
+void IFDCT2D(float* DCTData, int xsize, int ysize, float* IDCTData);
+
 //3Î¬DCT±ä»» 
 void DCT3D(float* dataIn, int xsize, int ysize, int bands, float* DCTData);
 void IDCT3D(float* DCTData, int xsize, int ysize, int bands, float* IDCTData);
@@ -20,3 +24,4 @@ void IDCT3D(const char* pathImgIn, const char* pathOut);
 
 //Í¼ÏñÂË²¨
 void DCTFliter2D(const char* pathImgIn, const char* pathOut, int bandIdx, float thresthod);
+void DCTFliter3D(const char* pathImgIn, const char* pathOut, float thresthod);

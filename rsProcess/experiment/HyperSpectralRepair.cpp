@@ -244,15 +244,15 @@ void HyperRepairFunc::RepairFunc_GenerateTexture(const char* pathImg, int ranges
 void HyperRepairFuncTest()
 {
 	char* pathImg = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertest";
-	char* pathSimu = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulate";
+	char* pathSimu = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateAllNarrow";
 	char* pathRepair = "D:\\my_doc\\2015.10.20数据\\hyper\\repair.tif";
 	char* pathMaskImg = "D:\\my_doc\\2015.10.20数据\\hyper\\mask.bmp";
-	char* pathMaskDst = "D:\\my_doc\\2015.10.20数据\\hyper\\msk.bmp";
+	char* pathMaskDst = "D:\\my_doc\\2015.10.20数据\\hyper\\mskAllNarrow.bmp";
 	CPOINT pnt1, pnt2;
 	pnt1.x = 164; pnt1.y = 267;
-	pnt2.x = 225; pnt2.y = 307;
+	pnt2.x = 245; pnt2.y = 287;
 	HyperRepairFunc m_Repair;
 	set_mask_region(pathMaskImg, pathMaskDst,pnt1,pnt2);
-	m_Repair.RepairFunc_SimuliDegradImg(pathImg, pathSimu, 1, 20, pnt1, pnt2);
-	m_Repair.RepairFunc_Run(pathSimu, pathMaskDst, pathRepair, 1, 20);
+	//m_Repair.RepairFunc_SimuliDegradImg(pathImg, pathSimu, 1, 201, pnt1, pnt2);
+	//m_Repair.RepairFunc_Run(pathSimu, pathMaskDst, pathRepair, 1, 20);
 }
