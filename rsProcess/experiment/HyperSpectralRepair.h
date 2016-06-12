@@ -24,6 +24,9 @@ public:
 	//全部影像波段缺失的修复
 	void RepairFunc_RepairTotal(int* dataImg, int* dataMask, int xsize, int ysize, int bands);
 
+	//获取纹理基元
+	void RepairFunc_TextureElement(const char* pathEle, int rangesize, int num, const char* pathDist);
+
 private:
 	//设置影像修复的起始和终止波段
 	void RepairFunc_SetLossBands(int st, int end);

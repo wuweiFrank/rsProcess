@@ -14,6 +14,7 @@
 #include"FrequencyFunc\DCTTrans.h"
 #include"experiment\HyperSpectralRepair.h"
 #include"rsImgProcess\KMeans.h"
+#include"HyperSpectral\fusionfunc.h"
 
 float main()
 {
@@ -118,7 +119,11 @@ float main()
 	//DCT2D("D:\\lena", "D:\\lenaDCT.tif",1);
 	//IDCT3D("D:\\lenaDCT.tif", "D:\\lenaIDCT.tif");
 	//IDCT2D("D:\\lenaDCT.tif", "D:\\lenaIDCT.tif", 1);
-	//DCTFliter2D("D:\\lena", "D:\\lenaFilterH.tif", 1, 100);
+	//DCTFliter2D("D:\\lena", "D:\\lenaFilterH.tif", 1, 200);
 	//DCTFliter3D("D:\\lenaMuti", "D:\\lenaDCTFliter.tif", 100);
+	//HyperRepairFunc m_test;
+	//m_test.RepairFunc_TextureElement("D:\\end.txt", 5, 30, "D:\\ele.tif");
+	//sparse_GeneralizedInverseLES("D:\\end.txt", "D:\\lenaHyper.tif","D:\\red.tif", 30, 25);
+	endmember_recovery_image("D:\\red.tif", "D:\\end.txt", "D:\\lenaHyperrecovery.tif", 25);
 	return 0;
 }

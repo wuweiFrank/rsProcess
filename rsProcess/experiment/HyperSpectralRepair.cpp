@@ -1,5 +1,6 @@
 #include"HyperSpectralRepair.h"
 #include"..\AuxiliaryFunction.h"
+#include"..\HyperSpectral\fusionfunc.h"
 #include"HyperRepair.h"
 void HyperRepairFunc::RepairFunc_Run(const char* pathDeImg, const char* pathMaskImg, const char* pathReDst, int st, int end)
 {
@@ -239,6 +240,33 @@ void HyperRepairFunc::RepairFunc_GenerateTexture(const char* pathImg, int ranges
 	GDALClose(m_datasetOut);
 	delete[]dataImg;
 	delete[]dataOut;
+}
+
+void HyperRepairFunc::RepairFunc_TextureElement(const char* pathEle, int rangesize, int num, const char* pathDist)
+{
+	float* data = new float[rangesize*rangesize*num];
+	char* pc = new char[256];//足够长
+	strcpy(pc, pathEle);
+	data = get_endmenber_spectralf(pc,  rangesize*rangesize, num);
+
+	//数据转换
+	float* img = new float[rangesize*rangesize*num];
+	for (int i = 0; i < num; ++i)
+	{
+		for (int m = 0; m < rangesize; ++m)
+		{
+			for (int n = 0; n < rangesize; ++n)
+			{
+				img[(m*rangesize*num+n+i*rangesize)] = data[(m*rangesize+n)*num+i];
+			}
+		}
+	}
+	GDALAllRegister();
+	GDALDatasetH m_dataset = GDALCreate(GDALGetDriverByName("GTiff"), pathDist, rangesize, rangesize*num, 1, GDT_Float32,NULL);
+	GDALRasterIO(GDALGetRasterBand(m_dataset, 1), GF_Write, 0, 0, rangesize, rangesize*num, img, rangesize, rangesize*num, GDT_Float32, 0, 0);
+	GDALClose(m_dataset);
+	delete[]data;
+	delete[]img;
 }
 
 void HyperRepairFuncTest()

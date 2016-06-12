@@ -77,6 +77,9 @@ void sparse_represent_combine(int numsparse,int selsparse,int endnumber,int* sel
 //float* sparse_represent_fitness(float* endmemberdata,double* pixeldata,int* spareIdx,
 //											int numspare,int selsparse,int bands,int endnum);
 
+//广义逆的最小二乘
+void sparse_GeneralizedInverseLES(char* pathEnd,char* pathImg,char* pathRed,int endnumber,int bands);
+
 //稀疏最小二乘求解
 void sparse_represent_LES(char* pathEnd,char* pathImg,char* pathRed,int endnumbers,int sparsesel);
 

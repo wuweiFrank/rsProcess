@@ -144,6 +144,60 @@ void sparse_represent_fitness(float* endmemberdata,double* pixeldata,int* spareI
 	return ;
 
 }
+//广义逆的最小二乘
+void sparse_GeneralizedInverseLES(char* pathEnd, char* pathImg, char* pathRed, int endnumber, int bands)
+{
+	//读取端元
+	float* endMembers = new float[endnumber*bands];
+	float* endMemberT = new float[endnumber*bands];
+	float* endInverse = new float[endnumber*bands];
+	endMembers = get_endmenber_spectralf(pathEnd, bands, endnumber);
+
+	//广义逆
+	MatrixTrans(endMembers,  endnumber, bands, endMemberT);
+	Matrix_GenInverse(endMemberT, bands, endnumber, endInverse);
+
+	//获取图像
+	GDALAllRegister();
+	GDALDatasetH m_dataset = GDALOpen(pathImg, GA_ReadOnly);
+	int xsize = GDALGetRasterXSize(m_dataset);
+	int ysize = GDALGetRasterYSize(m_dataset);
+	//int bands = GDALGetRasterCount(m_dataset);
+
+	//这里内存申请要try一下的 懒得搞的......@_@
+	float* dataimg = new float[xsize*ysize*bands];
+	float* reduimg = new float[xsize*ysize*endnumber];
+	for (int i = 0; i < bands; ++i)
+		GDALRasterIO(GDALGetRasterBand(m_dataset, i + 1), GF_Read, 0, 0, xsize, ysize, dataimg + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+
+	//解混
+	float* tempdata1 = new float[bands];
+	float* tempdata2 = new float[endnumber];
+	for (int i = 0; i < xsize*ysize; ++i)
+	{
+		printf("process pixel %d\r", i + 1);
+		for (int j = 0; j < bands; ++j)
+			tempdata1[j] = dataimg[j*xsize*ysize + i];
+		MatrixMuti(endInverse, endnumber, bands, 1, tempdata1, tempdata2);
+		for (int j = 0; j < endnumber; ++j)
+			reduimg[j*xsize*ysize + i] = tempdata2[j];
+	}
+	printf("\n");
+	//输出图像
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathRed, xsize, ysize, endnumber, GDT_Float32, NULL);
+	for (int i = 0; i < endnumber; ++i)
+		GDALRasterIO(GDALGetRasterBand(m_datasetDst, i + 1), GF_Write, 0, 0, xsize, ysize, reduimg + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+	GDALClose(m_dataset);
+	GDALClose(m_datasetDst);
+
+	delete[]endMembers;
+	delete[]endMemberT;
+	delete[]endInverse;
+	delete[]dataimg;
+	delete[]reduimg;
+	delete[]tempdata1;
+	delete[]tempdata2;
+}
 
 //稀疏表示的影像最小二乘求解
 void sparse_represent_LES(char* pathEnd,char* pathImg,char* pathRed,int endnumbers,int sparsesel)
