@@ -100,7 +100,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -189,6 +189,29 @@
     <ClInclude Include="rsImgProcess\spFliter.h" />
     <ClInclude Include="RTree.h" />
     <ClInclude Include="RunObject.h" />
+    <ClInclude Include="siftGPU\CLTexImage.h" />
+    <ClInclude Include="siftGPU\CuTexImage.h" />
+    <ClInclude Include="siftGPU\FrameBufferObject.h" />
+    <ClInclude Include="siftGPU\GlobalUtil.h" />
+    <ClInclude Include="siftGPU\GLTexImage.h" />
+    <ClInclude Include="siftGPU\GL\glew.h" />
+    <ClInclude Include="siftGPU\GL\glut.h" />
+    <ClInclude Include="siftGPU\GL\wglew.h" />
+    <ClInclude Include="siftGPU\IL\il.h" />
+    <ClInclude Include="siftGPU\LiteWindow.h" />
+    <ClInclude Include="siftGPU\ProgramCG.h" />
+    <ClInclude Include="siftGPU\ProgramCL.h" />
+    <ClInclude Include="siftGPU\ProgramCU.h" />
+    <ClInclude Include="siftGPU\ProgramGLSL.h" />
+    <ClInclude Include="siftGPU\ProgramGPU.h" />
+    <ClInclude Include="siftGPU\PyramidCL.h" />
+    <ClInclude Include="siftGPU\PyramidCU.h" />
+    <ClInclude Include="siftGPU\PyramidGL.h" />
+    <ClInclude Include="siftGPU\ShaderMan.h" />
+    <ClInclude Include="siftGPU\SiftGPU.h" />
+    <ClInclude Include="siftGPU\SiftMatch.h" />
+    <ClInclude Include="siftGPU\SiftMatchCU.h" />
+    <ClInclude Include="siftGPU\SiftPyramid.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ThreadPool.h" />
@@ -237,6 +260,23 @@
     <ClCompile Include="rsImgProcess\SampleFunc.cpp" />
     <ClCompile Include="rsImgProcess\spFliter.cpp" />
     <ClCompile Include="rsProcess.cpp" />
+    <ClCompile Include="siftGPU\CLTexImage.cpp" />
+    <ClCompile Include="siftGPU\CuTexImage.cpp" />
+    <ClCompile Include="siftGPU\FrameBufferObject.cpp" />
+    <ClCompile Include="siftGPU\GlobalUtil.cpp" />
+    <ClCompile Include="siftGPU\GLTexImage.cpp" />
+    <ClCompile Include="siftGPU\ProgramCG.cpp" />
+    <ClCompile Include="siftGPU\ProgramCL.cpp" />
+    <ClCompile Include="siftGPU\ProgramGLSL.cpp" />
+    <ClCompile Include="siftGPU\ProgramGPU.cpp" />
+    <ClCompile Include="siftGPU\PyramidCL.cpp" />
+    <ClCompile Include="siftGPU\PyramidCU.cpp" />
+    <ClCompile Include="siftGPU\PyramidGL.cpp" />
+    <ClCompile Include="siftGPU\ShaderMan.cpp" />
+    <ClCompile Include="siftGPU\SiftGPU.cpp" />
+    <ClCompile Include="siftGPU\SiftMatch.cpp" />
+    <ClCompile Include="siftGPU\SiftMatchCU.cpp" />
+    <ClCompile Include="siftGPU\SiftPyramid.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -248,6 +288,9 @@
     <ClCompile Include="UAV\UAVGeoCorrection.cpp" />
     <ClCompile Include="UAV\UAVMosaicFast.cpp" />
     <ClCompile Include="UAV\UAVPhotogrammetry.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="siftGPU\ProgramCU.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

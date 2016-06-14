@@ -705,6 +705,92 @@ long MatrixLST(double*  dataSrc,double *dataDst,double *params,int variableNum,i
 	return 0;
 }
 
+/*--------------------------线性方程组的稀疏求解------------------------*/
+//MP方法进行求解
+long Matrix_Sparse_MatchPursuit(double** dictionary, double* data1, double* sparse, int size1, int size2)
+{
+	if (dictionary == NULL || data1 == NULL || sparse == NULL)
+		return -1;
+
+	//首先将字典归一化
+	double** normalDictionary = new double*[size1];
+	for (int i = 0; i < size1; ++i)
+		normalDictionary[i] = new double[size2];
+	for (int i = 0; i < size2; ++i)
+	{
+		double total = 0;
+		for (int j = 0; j < size1; ++j)
+			total += dictionary[j][i] * dictionary[j][i];
+		total = sqrt(total);
+		for (int j = 0; j < size1; ++j)
+			normalDictionary[j][i] = dictionary[j][i] / total;
+	}
+	//然后计算目标向量与字典各个元素的内积
+	memset(sparse, 0, sizeof(double)*size2);
+	double *leftResidual = new double[size1];
+	double *projection = new double[size2];
+	memcpy(leftResidual, data1, sizeof(double)*size1);
+	double totalData = 0;
+	for (int i = 0; i < size1; ++i)
+		totalData += data1[i];
+	do
+	{
+		for (int i = 0; i < size2; ++i)
+		{
+			projection[i] = 0;
+			for (int j = 0; j < size1; ++j)
+				projection[i] += normalDictionary[j][i] * leftResidual[j];
+			//projection[i] = abs(projection[i]);
+		}
+
+		//获取内积最大的元素的投影长度和下标
+		double maxele = -9999;
+		int maxindex = 0;
+		for (int i = 0; i < size2; ++i)
+		{
+			if (abs(projection[i]) > maxele)
+			{
+				maxele = abs(projection[i]);
+				maxindex = i;
+			}
+		}
+
+		//获取残差
+		for (int i = 0; i < size1; ++i)
+			leftResidual[i] = leftResidual[i] - projection[i] * normalDictionary[i][maxindex];
+
+		//计算残差和
+		double totalResidual = 0;
+		for (int i = 0; i < size1; ++i)
+			totalResidual += leftResidual[i];
+		if (totalResidual < totalData / 100.0f)
+			break;
+
+	} while (true);
+
+	//清理内存空间
+	for (int i = 0; i < size1; ++i)
+		delete[]normalDictionary[i];
+	delete[]normalDictionary; normalDictionary = NULL;
+	delete[]leftResidual; leftResidual = NULL;
+	delete[]projection; projection = NULL;
+	return 0;
+
+}
+long Matrix_Sparse_MatchPursuit(double* dictionary, double* data1, double* sparse, int size1, int size2)
+{
+	long lError = 0;
+	double** dict2d = new double*[size1];
+	for (int i = 0; i < size1; ++i)
+		dict2d[i] = new double[size2];
+	lError = Matrix_Sparse_MatchPursuit(dict2d, data1, sparse, size1, size2);
+
+	for (int i = 0; i < size1; ++i)
+		delete[]dict2d[i];
+	delete[]dict2d; dict2d = NULL;
+	return lError;
+}
+
 /*----------------------------特征值和特征向量--------------------------*/
 //雅可比法是求对称矩阵的特征值和特征向量
 long   MatrixEigen_value_vec_Jccob(double **dataIn,double *eignValue,int size,double **mat)
@@ -3086,7 +3172,19 @@ long Matrix_Sparse_MatchPursuit(float** dictionary, float* data1, float* sparse,
 	return 0;
 
 }
+long Matrix_Sparse_MatchPursuit(float* dictionary, float* data1, float* sparse, int size1, int size2)
+{
+	long lError = 0;
+	float** dict2d = new float*[size1];
+	for (int i = 0; i < size1; ++i)
+		dict2d[i] = new float[size2];
+	lError = Matrix_Sparse_MatchPursuit(dict2d, data1, sparse, size1, size2);
 
+	for (int i = 0; i < size1; ++i)
+		delete[]dict2d[i];
+	delete[]dict2d; dict2d = NULL;
+	return lError;
+}
 
 /*----------------------------特征值和特征向量--------------------------*/
 //雅可比法是求对称矩阵的特征值和特征向量

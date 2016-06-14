@@ -39,7 +39,6 @@ void spatial_spread_function(char* pathImg,char* pathSample);
 //计算光谱角和绝对值残差
 void residual_spAngle(char* pathrecovery,char* pathOri,char* pathresidual);
 
-
 //基于解混的影像融合 不考虑端元提取方法 直接获取得到的端元
 
 //根据端元光谱进行最小二乘影像解混 
@@ -62,7 +61,6 @@ void endmember_recovery_image(char* pathred,char* pathmodend,char* pathout,int h
 //计算恢复的影像和原始影像之间的残差和光谱角
 //第一个波段为计算的光谱角 第二个波段为计算的影像值的差值
 void endmember_residual_spAngle(char* pathrecovery,char* pathOri,char* pathresidual);
-
 
 //直接迭代求解影像的值 根据成像原理
 //效率太低 没有合适的衡量手段 不太适合

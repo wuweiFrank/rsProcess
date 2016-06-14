@@ -183,6 +183,75 @@
     <ClInclude Include="rsImgProcess\KMeans.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="siftGPU\CLTexImage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\CuTexImage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\FrameBufferObject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\GlobalUtil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\GLTexImage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\LiteWindow.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\ProgramCG.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\ProgramCL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\ProgramCU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\ProgramGLSL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\ProgramGPU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\PyramidCL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\PyramidCU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\PyramidGL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\ShaderMan.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\SiftGPU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\SiftMatch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\SiftMatchCU.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\SiftPyramid.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\GL\glew.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\GL\glut.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\GL\wglew.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="siftGPU\IL\il.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -317,5 +386,59 @@
     <ClCompile Include="rsImgProcess\KMeans.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="siftGPU\CLTexImage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\CuTexImage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\FrameBufferObject.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\GlobalUtil.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\GLTexImage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\ProgramCG.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\ProgramCL.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\ProgramGLSL.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\ProgramGPU.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\PyramidCL.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\PyramidCU.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\PyramidGL.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\ShaderMan.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\SiftGPU.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\SiftMatch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\SiftMatchCU.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="siftGPU\SiftPyramid.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="siftGPU\ProgramCU.cu" />
   </ItemGroup>
 </Project>

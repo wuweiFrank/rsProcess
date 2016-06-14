@@ -63,9 +63,9 @@ float main()
 
 	//correct_non_nonhomogeneity("C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralRGB.tif","C:\\Users\\Public\\Pictures\\Sample Pictures\\hyperspectralCorrectRGB.tif");
 	//
-	CPOINT pnt1, pnt2;
-	pnt1.x = 164; pnt1.y = 21;
-	pnt2.x = 181; pnt2.y = 37;
+	//CPOINT pnt1, pnt2;
+	//pnt1.x = 164; pnt1.y = 21;
+	//pnt2.x = 181; pnt2.y = 37;
 	//set_mask_region("D:\\lena", "D:\\lenaMask.tif", pnt1, pnt2);
 	//set_mask_region("D:\\msk.bmp", "D:\\msk.tif", pnt1, pnt2);
 
@@ -125,5 +125,12 @@ float main()
 	//m_test.RepairFunc_TextureElement("D:\\end.txt", 5, 30, "D:\\ele.tif");
 	//sparse_GeneralizedInverseLES("D:\\end.txt", "D:\\lenaHyper.tif","D:\\red.tif", 30, 25);
 	//endmember_recovery_image("D:\\red.tif", "D:\\end.txt", "D:\\lenaHyperrecovery.tif", 25);
+
+	ImgFeaturesTools featureaTools;
+	vector<Point2f> pnt1, pnt2;
+	char* path1 = "D:\\my_doc\\2015.09.28无人机影像\\UAV\\IMG_0036.JPG";
+	char* path2 = "D:\\my_doc\\2015.09.28无人机影像\\UAV\\IMG_0037.JPG";
+	featureaTools.ImgFeaturesTools_ExtractMatch(path1, pnt1, path2, pnt2, "SIFTGPU", "");
+	featureaTools.ImgFeaturesTools_SaveENVIMatches("D:\\pts.pts", path1, path2, pnt1, pnt2);
 	return 0;
 }

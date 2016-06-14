@@ -1,5 +1,6 @@
 #include"OPENCVTools.h"
 #include"AuxiliaryFunction.h"
+#include<set>
 #include<fstream>
 #include<iomanip>
 #include<iostream>
@@ -218,6 +219,7 @@ descriptor method
 	("AKAZE");							  // see http://docs.opencv.org/trunk/d8/d30/classcv_1_1AKAZE.html
 	("ORB");							  // see http://docs.opencv.org/trunk/de/dbf/classcv_1_1BRISK.html
 	("BRISK");							  // see http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html
+	("SIFTGPU")							  // SIFT算法
 match algorithm
 	see http://docs.opencv.org/trunk/db/d39/classcv_1_1DescriptorMatcher.html#ab5dc5036569ecc8d47565007fa518257
 	("BruteForce");
@@ -228,6 +230,10 @@ match algorithm
 */
 long ImgFeaturesTools::ImgFeaturesTools_ExtractMatch(const char* pathImage1, vector<Point2f> &pts1, const char* pathImage2, vector<Point2f> &pts2,string descriptorMethod, string matchMethod)
 {
+	if (descriptorMethod == "SIFTGPU")
+	{
+		return ImgFeaturesTools_EctractMatchSiftGPU(pathImage1, pts1, pathImage2, pts2);
+	}
 	Mat img1 = imread(pathImage1, 1);
 	cvtColor(img1, img1, CV_RGB2GRAY);
 	Mat img2 = imread(pathImage2, 1);
@@ -365,6 +371,49 @@ long ImgFeaturesTools::ImgFeaturesTools_ExtracMatches(vector<string> pathList, v
 	return 0;
 }
 
+long ImgFeaturesTools::ImgFeaturesTools_ExtracMatchesSiftGPU(const char* imgList, vector<vector<Point2f>> &pts, bool* ismatchpair)
+{
+	vector<vector<float>> descriptors;
+	vector<vector<SiftGPU::SiftKeypoint>> keypoints;
+
+	//SiftGPU提取特征点匹配
+	ImgFeaturesTools_EctractFeaturesSiftGPU(imgList, descriptors, keypoints);
+	int imgNumbers = descriptors.size();
+	SiftMatchGPU* matcher = new SiftMatchGPU();
+	matcher->VerifyContextGL();
+
+	//找到特征点匹配
+	for (int i = 0; i < imgNumbers; ++i)
+	{
+		for (int j = i; j < imgNumbers; ++j)
+		{
+			if (ismatchpair[j*imgNumbers+i])
+			{
+				matcher->SetDescriptors(0, keypoints[i].size(), &descriptors[i][0]);
+				matcher->SetDescriptors(0, keypoints[j].size(), &descriptors[j][0]);
+				int(*match_buf)[2] = new int[keypoints[i].size()][2];
+				//use the default thresholds. Check the declaration in SiftGPU.h
+				int num_match = matcher->GetSiftMatch(keypoints[i].size(), match_buf);
+
+				//输出为OpenCV格式方便写入ENVI文件查看
+				vector<Point2f> pnts1, pnts2;
+				for (int k = 0; k < num_match; ++k)
+				{
+					SiftGPU::SiftKeypoint & key1 = keypoints[i][match_buf[i][0]];
+					SiftGPU::SiftKeypoint & key2 = keypoints[j][match_buf[i][1]];
+					pnts1.push_back(Point2f(key1.x, key1.y));
+					pnts2.push_back(Point2f(key2.x, key2.y));
+				}
+				pts.push_back(pnts1);
+				pts.push_back(pnts2);
+				delete[]match_buf;
+			}
+		}
+	}
+
+	return 0;
+}
+
 long ImgFeaturesTools::ImgFeatruesTools_ExtractFeatures(const char* pathImage, Mat& descriptor, vector<Point2f> &keypoints, string descriptorMethod)
 {
 	Mat img1 = imread(pathImage, IMREAD_LOAD_GDAL);
@@ -411,6 +460,88 @@ long ImgFeaturesTools::ImgFeatruesTools_ExtractFeatures(const char* pathImage, M
 
 }
 
+long ImgFeaturesTools::ImgFeaturesTools_EctractFeaturesSiftGPU(const char* imgList, vector<vector<float>>& descriptors, vector<vector<SiftGPU::SiftKeypoint>> &keypoints)
+{
+	//这样首先是要初始化特征点提取算子
+	SiftGPU* siftFeatures=new SiftGPU();
+	if (siftFeatures->CreateContextGL() != SiftGPU::SIFTGPU_FULL_SUPPORTED) 
+		return 0;
+	siftFeatures->LoadImageList(imgList);
+	int image_num = siftFeatures->GetImageCount();
+	for (int i = 0; i < image_num; ++i)
+	{
+		siftFeatures->RunSIFT(i);
+		int num = siftFeatures->GetFeatureNum();
+		vector<float> descriptor(128 * num);
+		vector<SiftGPU::SiftKeypoint> points(num);
+		siftFeatures->GetFeatureVector(&points[0], &descriptor[0]);
+
+		//转换为OpenCV格式的数据
+		descriptors.push_back(descriptor);
+		keypoints.push_back(points);
+	}
+}
+
+long ImgFeaturesTools::ImgFeaturesTools_EctractMatchSiftGPU(const char* pathImage1, vector<Point2f> &pts1, const char* pathImage2, vector<Point2f> &pts2)
+{
+	//这样首先是要初始化特征点提取算子
+	SiftGPU* siftFeatures = new SiftGPU();
+	SiftMatchGPU* matcher = new SiftMatchGPU();
+
+	if (siftFeatures->CreateContextGL() != SiftGPU::SIFTGPU_FULL_SUPPORTED)
+		return -1;
+	vector<float > descriptors1(1), descriptors2(1);
+	vector<SiftGPU::SiftKeypoint> keys1(1), keys2(1);
+	int num1 = 0, num2 = 0;
+
+	//特征点提取
+	if (siftFeatures->RunSIFT(pathImage1))
+	{
+		num1 = siftFeatures->GetFeatureNum();
+		keys1.resize(num1);    descriptors1.resize(128 * num1);
+		siftFeatures->GetFeatureVector(&keys1[0], &descriptors1[0]);
+	}
+	//You can have at most one OpenGL-based SiftGPU (per process).
+	//Normally, you should just create one, and reuse on all images. 
+	if (siftFeatures->RunSIFT(pathImage2))
+	{
+		num2 = siftFeatures->GetFeatureNum();
+		keys2.resize(num2);    descriptors2.resize(128 * num2);
+		siftFeatures->GetFeatureVector(&keys2[0], &descriptors2[0]);
+	}
+
+	//特征点匹配
+	matcher->VerifyContextGL();//must call once
+	matcher->SetDescriptors(0, num1, &descriptors1[0]); //image 1
+	matcher->SetDescriptors(1, num2, &descriptors2[0]); //image 2
+	int(*match_buf)[2] = new int[num1][2];
+	//use the default thresholds. Check the declaration in SiftGPU.h
+	int num_match = matcher->GetSiftMatch(num1, match_buf);
+	for (int i = 0; i < num_match; ++i)
+	{
+		//How to get the feature matches: 
+		SiftGPU::SiftKeypoint & key1 = keys1[match_buf[i][0]];
+		SiftGPU::SiftKeypoint & key2 = keys2[match_buf[i][1]];
+
+		//居然会有重复的点，关于这一点我很奇怪
+		bool isPush = false;
+		Point2f pnt1(key1.x, key1.y), pnt2(key2.x, key2.y);
+		for (int j = 0; j < pts1.size(); ++j)
+		{
+			if (pnt1 == pts1[j] || pnt2 == pts2[j])
+				isPush = true;
+		}
+		if (!isPush)
+		{
+			pts1.push_back(pnt1);
+			pts2.push_back(pnt2);
+		}
+	}
+	ImgFeaturesTools_MatchOptimize(pts1, pts2);
+	delete[]match_buf;
+	return 0;
+}
+
 long ImgFeaturesTools::ImgFeaturesTools_MatchOptimize(vector<Point2f> &pts1, vector<Point2f> &pts2)
 {
 	if (pts1.size() < 3 || pts2.size() < 3)
@@ -418,6 +549,7 @@ long ImgFeaturesTools::ImgFeaturesTools_MatchOptimize(vector<Point2f> &pts1, vec
 		printf("match points too little\n");
 		exit(-1);
 	}
+
 	Mat homography = findHomography(pts1, pts2, CV_RANSAC);
 	vector<Point2f> pts2Homography(pts1.size());
 	perspectiveTransform(pts1, pts2Homography, homography);
@@ -448,9 +580,9 @@ long ImgFeaturesTools::ImgFeaturesTools_MatchOptimize(vector<Point2f> &pts1, vec
 			ptsOpt2.push_back(pts2[i]);
 		}
 	}
-
 	pts1.clear();
 	pts2.clear();
+
 	pts1.insert(pts1.begin(), ptsOpt1.begin(), ptsOpt1.end());
 	pts2.insert(pts2.begin(), ptsOpt2.begin(), ptsOpt2.end());
 

@@ -2,6 +2,7 @@
 #include<vector>
 #include<string>
 #include<Windows.h>
+#include"siftGPU\SiftGPU.h"
 using namespace std;
 
 #include"ThreadPool.h"
@@ -53,9 +54,11 @@ public:
 	//3.解算SURF匹配特征点<对于单个图像>
 	long ImgFeaturesTools_ExtractMatch(const char* pathImage1, vector<Point2f> &pts1, const char* pathImage2, vector<Point2f> &pts2, string descriptorMethod, string matchMethod);
 	static long ImgFeaturesTools_ExtractMatchThread(ImgFeaturesThreadSt &featureExtractThreadParam);
-
+	
 	//4.解算SURF匹配算子<对于序列图像>
 	long ImgFeaturesTools_ExtracMatches(vector<string> pathList, vector<vector<Point2f>> &pts, bool* ismatchpair, string descriptorMethod, string matchMethod);
+	//SiftGPU特征点提取和匹配
+	long ImgFeaturesTools_ExtracMatchesSiftGPU(const char* imgList, vector<vector<Point2f>> &pts, bool* ismatchpair);
 
 	//5.将匹配点写成ENVI格式
 	long ImgFeaturesTools_WriteENVIMatches(const char* pathDir, vector<string> pathList, vector<vector<Point2f>> &pts);
@@ -63,6 +66,10 @@ public:
 private:
 	//5.获取SURF匹配特征点和特征描述
 	long ImgFeatruesTools_ExtractFeatures(const char* pathImage, Mat& descriptor, vector<Point2f> &keypoints,string descriptorMethod);
+	//使用GPU加速的特征点和特征描述方法 因为CreateContext需要比较长的时间，所以尽量一次创建多次使用
+	long ImgFeaturesTools_EctractFeaturesSiftGPU(const char* imgList,vector<vector<float>>& descriptors, vector<vector<SiftGPU::SiftKeypoint>> &keypoints);
+	//实用GPU加速获取影像的特征点
+	long ImgFeaturesTools_EctractMatchSiftGPU(const char* pathImage1, vector<Point2f> &pts1, const char* pathImage2, vector<Point2f> &pts2);
 
 	//6.匹配特征点优化
 	long ImgFeaturesTools_MatchOptimize(vector<Point2f> &pts1, vector<Point2f> &pts2);
