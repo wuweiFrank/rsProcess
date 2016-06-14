@@ -131,6 +131,9 @@ long   MatrixRotate(float *dataIn, float phia, float omega, float kappa);
 long MatrixLST(float** dataSrc, float *dataDst, float *params, int variableNum, int equationNum, bool isConstant = true);
 long MatrixLST(float*  dataSrc, float *dataDst, float *params, int variableNum, int equationNum, bool isConstant = true);
 
+/*--------------------------线性方程组的稀疏求解------------------------*/
+//MP方法进行求解
+long Matrix_Sparse_MatchPursuit(float** dictionary, float* data1, float* sparse, int size1, int size2);
 
 /*----------------------------特征值和特征向量--------------------------*/
 //雅可比法是求对称矩阵的特征值和特征向量

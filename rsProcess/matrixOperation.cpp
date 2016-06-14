@@ -32,7 +32,8 @@ using namespace std;
 //  [4/7/2015 wuwei just you]
 //1.将矩阵运算基本代码和部分矩阵分解算法使用openMP并行
 //  [8/28/2015 Administrator]
-
+//1.增加了矩阵的过完备字典的稀疏求解方法，包括BP算法、MP算法和OMP算法
+//  [6/13/2016 Administrator]
 /********************************************************************************************************/
 /*								    矩阵基本运算                                                        */
 /********************************************************************************************************/
@@ -3012,6 +3013,80 @@ long MatrixLST(float*  dataSrc, float *dataDst, float *params, int variableNum, 
 	}
 	return 0;
 }
+
+/*--------------------------线性方程组的稀疏求解------------------------*/
+//MP方法进行求解
+long Matrix_Sparse_MatchPursuit(float** dictionary, float* data1, float* sparse, int size1, int size2)
+{
+	if (dictionary == NULL || data1 == NULL || sparse == NULL)
+		return -1;
+	
+	//首先将字典归一化
+	float** normalDictionary = new float*[size1];
+	for (int i = 0; i < size1; ++i)
+		normalDictionary[i] = new float[size2];
+	for (int i = 0; i < size2; ++i)
+	{
+		double total=0;
+		for (int j = 0; j < size1; ++j)
+			total += dictionary[j][i]* dictionary[j][i];
+		total = sqrt(total);
+		for (int j = 0; j < size1; ++j)
+			normalDictionary[j][i] = dictionary[j][i] / total;
+	}
+	//然后计算目标向量与字典各个元素的内积
+	memset(sparse, 0, sizeof(float)*size2);
+	float *leftResidual = new float[size1];
+	float *projection   = new float[size2];
+	memcpy(leftResidual, data1, sizeof(float)*size1);
+	float totalData = 0;
+	for (int i = 0; i < size1; ++i)
+		totalData += data1[i];
+	do
+	{
+		for (int i = 0; i < size2; ++i)
+		{
+			projection[i] = 0;
+			for (int j = 0; j < size1; ++j)
+				projection[i] += normalDictionary[j][i]* leftResidual[j];
+			//projection[i] = abs(projection[i]);
+		}
+
+		//获取内积最大的元素的投影长度和下标
+		float maxele = -9999;
+		int maxindex = 0;
+		for (int i = 0; i < size2; ++i)
+		{
+			if (abs(projection[i]) > maxele)
+			{
+				maxele = abs(projection[i]);
+				maxindex = i;
+			}
+		}
+
+		//获取残差
+		for (int i = 0; i < size1; ++i)
+			leftResidual[i] = leftResidual[i]- projection[i] * normalDictionary[i][maxindex];
+
+		//计算残差和
+		float totalResidual = 0;
+		for (int i = 0; i < size1; ++i)
+			totalResidual += leftResidual[i];
+		if (totalResidual < totalData / 100.0f)
+			break;
+
+	} while (true);
+	
+	//清理内存空间
+	for (int i = 0; i < size1; ++i)
+		delete[]normalDictionary[i];
+	delete[]normalDictionary; normalDictionary = NULL;
+	delete[]leftResidual; leftResidual = NULL;
+	delete[]projection; projection = NULL;
+	return 0;
+
+}
+
 
 /*----------------------------特征值和特征向量--------------------------*/
 //雅可比法是求对称矩阵的特征值和特征向量

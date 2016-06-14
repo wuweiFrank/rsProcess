@@ -124,6 +124,6 @@ float main()
 	//HyperRepairFunc m_test;
 	//m_test.RepairFunc_TextureElement("D:\\end.txt", 5, 30, "D:\\ele.tif");
 	//sparse_GeneralizedInverseLES("D:\\end.txt", "D:\\lenaHyper.tif","D:\\red.tif", 30, 25);
-	endmember_recovery_image("D:\\red.tif", "D:\\end.txt", "D:\\lenaHyperrecovery.tif", 25);
+	//endmember_recovery_image("D:\\red.tif", "D:\\end.txt", "D:\\lenaHyperrecovery.tif", 25);
 	return 0;
 }
