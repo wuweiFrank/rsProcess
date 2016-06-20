@@ -5,6 +5,7 @@
 #include <fstream>
 #include<stdlib.h>
 #include<cmath>
+#include<set>
 
 using namespace std;
 /*
@@ -34,6 +35,9 @@ using namespace std;
 //  [8/28/2015 Administrator]
 //1.增加了矩阵的过完备字典的稀疏求解方法，包括BP算法、MP算法和OMP算法
 //  [6/13/2016 Administrator]
+//TODO:对于小规模（小于100阶的矩阵）运算能够有比较良好的效果；
+//     但是对于大规模的矩阵运算效率比较低（目前来看比不上Matlab）
+//	   如果有机会，希望能够做成GPU加速的算法，CUDA加速或者用OpenGL、OpenCL算法，类似SiftGPU算法
 /********************************************************************************************************/
 /*								    矩阵基本运算                                                        */
 /********************************************************************************************************/
@@ -784,6 +788,124 @@ long Matrix_Sparse_MatchPursuit(double* dictionary, double* data1, double* spars
 	for (int i = 0; i < size1; ++i)
 		dict2d[i] = new double[size2];
 	lError = Matrix_Sparse_MatchPursuit(dict2d, data1, sparse, size1, size2);
+
+	for (int i = 0; i < size1; ++i)
+		delete[]dict2d[i];
+	delete[]dict2d; dict2d = NULL;
+	return lError;
+}
+
+//OMP方法进行求解
+long Matrix_Sparse_OrthoMatchPursuit(double** dictionary, double* data1, double* sparse, int size1, int size2)
+{
+	//首先将字典归一化
+	double** normalDictionary = new double*[size1];
+	for (int i = 0; i < size1; ++i)
+		normalDictionary[i] = new double[size2];
+	for (int i = 0; i < size2; ++i)
+	{
+		double total = 0;
+		for (int j = 0; j < size1; ++j)
+			total += dictionary[j][i] * dictionary[j][i];
+		total = sqrt(total);
+		for (int j = 0; j < size1; ++j)
+			normalDictionary[j][i] = dictionary[j][i] / total;
+	}
+	//然后计算目标向量与字典各个元素的内积
+	memset(sparse, 0, sizeof(double)*size2);
+	//初始化残差为data1
+	double *leftResidual = new double[size1];
+	memcpy(leftResidual, data1, sizeof(double)*size1);
+	double *projection = new double[size2];
+	double totalData = 0;
+	for (int i = 0; i < size1; ++i)
+		totalData += data1[i];
+	set<int> index;
+	do
+	{
+		memset(sparse, 0, sizeof(double)*size2);
+		for (int i = 0; i < size2; ++i)
+		{
+			projection[i] = 0;
+			for (int j = 0; j < size1; ++j)
+				projection[i] += normalDictionary[j][i] * leftResidual[j];
+		}
+
+		//获取内积最大的元素的投影长度和下标
+		double maxele = -9999;
+		int maxindex = 0;
+		for (int i = 0; i < size2; ++i)
+		{
+			if (abs(projection[i]) > maxele)
+			{
+				maxele = abs(projection[i]);
+				maxindex = i;
+			}
+		}
+		index.insert(maxindex);
+		int size = index.size();
+
+		if (size > size1)
+			break;
+
+		double* tmpDic = new double[size1*size];
+		set<int>::iterator it;
+		for (it = index.begin(); it != index.end(); it++)
+		{
+			int iidx = *it;
+			for (int i = 0; i < size1; ++i)
+			{
+				tmpDic[iidx*size + i] = normalDictionary[i][iidx];
+			}
+		}
+
+		//最小二乘求解
+		//求广义逆
+		double* tmpDicPinv = new double[size1*size];
+		double* result = new double[size];
+		Matrix_GenInverse(tmpDic, size1, size, tmpDicPinv);
+		MatrixMuti(tmpDicPinv, size, size1, 1, data1, result);
+
+		//更新残差值
+		for (int i = 0; i < size1; ++i)
+			MatrixMuti(tmpDic, size1, size, 1, result, leftResidual);
+
+		int account_param = 0;
+		for (it = index.begin(); it != index.end(); it++)
+		{
+			int iidx = *it;
+			sparse[iidx] = result[account_param];
+			account_param++;
+		}
+
+		//内存清空
+		delete[]tmpDic; tmpDic = NULL;
+		delete[]tmpDicPinv; tmpDicPinv = NULL;
+		delete[]result; result = NULL;
+
+		//判断重建误差是否确定
+		double totalResidual = 0;
+		for (int i = 0; i < size1; ++i)
+			totalResidual += leftResidual[i];
+		if (totalResidual < totalData / 100.0f)
+			break;
+
+	} while (true);
+
+	delete[]leftResidual; leftResidual = NULL;
+	delete[]projection; projection = NULL;
+	for (int i = 0; i < size1; ++i)
+		delete[]normalDictionary[i];
+	delete[]normalDictionary; normalDictionary = NULL;
+	return 0;
+}
+long Matrix_Sparse_OrthoMatchPursuit(double* dictionary, double* data1, double* sparse, int size1, int size2)
+{
+	long lError = 0;
+	double** dict2d = new double*[size1];
+	for (int i = 0; i < size1; ++i)
+		dict2d[i] = new double[size2];
+	lError = Matrix_Sparse_OrthoMatchPursuit(dict2d, data1, sparse, size1, size2);
 
 	for (int i = 0; i < size1; ++i)
 		delete[]dict2d[i];
@@ -3179,6 +3301,124 @@ long Matrix_Sparse_MatchPursuit(float* dictionary, float* data1, float* sparse, 
 	for (int i = 0; i < size1; ++i)
 		dict2d[i] = new float[size2];
 	lError = Matrix_Sparse_MatchPursuit(dict2d, data1, sparse, size1, size2);
+
+	for (int i = 0; i < size1; ++i)
+		delete[]dict2d[i];
+	delete[]dict2d; dict2d = NULL;
+	return lError;
+}
+
+//OMP方法进行求解
+long Matrix_Sparse_OrthoMatchPursuit(float** dictionary, float* data1, float* sparse, int size1, int size2)
+{
+	//首先将字典归一化
+	float** normalDictionary = new float*[size1];
+	for (int i = 0; i < size1; ++i)
+		normalDictionary[i] = new float[size2];
+	for (int i = 0; i < size2; ++i)
+	{
+		double total = 0;
+		for (int j = 0; j < size1; ++j)
+			total += dictionary[j][i] * dictionary[j][i];
+		total = sqrt(total);
+		for (int j = 0; j < size1; ++j)
+			normalDictionary[j][i] = dictionary[j][i] / total;
+	}
+	//然后计算目标向量与字典各个元素的内积
+	memset(sparse, 0, sizeof(float)*size2);
+	//初始化残差为data1
+	float *leftResidual = new float[size1];
+	memcpy(leftResidual, data1, sizeof(float)*size1);
+	float *projection = new float[size2];
+	float totalData = 0;
+	for (int i = 0; i < size1; ++i)
+		totalData += data1[i];
+	set<int> index;
+	do
+	{
+		memset(sparse, 0, sizeof(float)*size2);
+		for (int i = 0; i < size2; ++i)
+		{
+			projection[i] = 0;
+			for (int j = 0; j < size1; ++j)
+				projection[i] += normalDictionary[j][i] * leftResidual[j];
+		}
+
+		//获取内积最大的元素的投影长度和下标
+		float maxele = -9999;
+		int maxindex = 0;
+		for (int i = 0; i < size2; ++i)
+		{
+			if (abs(projection[i]) > maxele)
+			{
+				maxele = abs(projection[i]);
+				maxindex = i;
+			}
+		}
+		index.insert(maxindex);
+		int size = index.size();
+		
+		if (size > size1)
+			break;
+
+		float* tmpDic = new float[size1*size];
+		set<int>::iterator it;
+		for (it = index.begin(); it != index.end(); it++)
+		{
+			int iidx = *it;
+			for (int i = 0; i < size1; ++i)
+			{
+				tmpDic[iidx*size + i] = normalDictionary[i][iidx];
+			}
+		}
+
+		//最小二乘求解
+		//求广义逆
+		float* tmpDicPinv = new float[size1*size];
+		float* result = new float[size];
+		Matrix_GenInverse(tmpDic, size1, size, tmpDicPinv);
+		MatrixMuti(tmpDicPinv, size, size1, 1, data1, result);
+		
+		//更新残差值
+		for (int i = 0; i < size1; ++i)
+			MatrixMuti(tmpDic, size1, size, 1, result, leftResidual);
+
+		int account_param = 0;
+		for (it = index.begin(); it != index.end(); it++)
+		{
+			int iidx = *it;
+			sparse[iidx] = result[account_param];
+			account_param++;
+		}
+
+		//内存清空
+		delete[]tmpDic; tmpDic = NULL;
+		delete[]tmpDicPinv; tmpDicPinv = NULL;
+		delete[]result; result = NULL;
+
+		//判断重建误差是否确定
+		float totalResidual = 0;
+		for (int i = 0; i < size1; ++i)
+			totalResidual += leftResidual[i];
+		if (totalResidual < totalData / 100.0f)
+			break;
+
+	} while (true);
+
+	delete[]leftResidual; leftResidual = NULL;
+	delete[]projection; projection = NULL;
+	for (int i = 0; i < size1; ++i)
+		delete[]normalDictionary[i];
+	delete[]normalDictionary; normalDictionary = NULL;
+	return 0;
+}
+long Matrix_Sparse_OrthoMatchPursuit(float* dictionary, float* data1, float* sparse, int size1, int size2)
+{
+	long lError = 0;
+	float** dict2d = new float*[size1];
+	for (int i = 0; i < size1; ++i)
+		dict2d[i] = new float[size2];
+	lError = Matrix_Sparse_OrthoMatchPursuit(dict2d, data1, sparse, size1, size2);
 
 	for (int i = 0; i < size1; ++i)
 		delete[]dict2d[i];

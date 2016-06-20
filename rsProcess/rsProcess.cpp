@@ -2,20 +2,11 @@
 //
 
 #include "stdafx.h"
-#include"lidar\LidarAlgorithm.h"
-#include"lidar\LidarReader.h"
-#include"RenderProcess.h"
-#include"UAV\UAVGeoCorrection.h"
-#include"UAV\UAVMosaicFast.h"
-#include"AuxiliaryFunction.h"
-#include"experiment\HyperRepair.h"
-#include"experiment\BSCB.h"
-#include"experiment\ExemplarBased.h"
-#include"FrequencyFunc\DCTTrans.h"
 #include"experiment\HyperSpectralRepair.h"
-#include"rsImgProcess\KMeans.h"
-#include"HyperSpectral\fusionfunc.h"
-
+//#include"OPENCVTools.h"
+#include<iostream>
+#include<string>
+using namespace std;
 float main()
 {
 	//UAVMosaicFast m_mosaic_fast;
@@ -106,6 +97,9 @@ float main()
 
 
 	//HyperRepairFuncTest();
+	//HyperRepairFunc m_Repair;
+	//m_Repair.RepairFunc_GenerateTexture("D:\\my_doc\\2015.10.20数据\\hyper\\hypertest",12,"D:\\my_doc\\2015.10.20数据\\hyper\\hypertestGenTexture.tif");
+	//m_Repair.RepairFunc_TextureElement("D:\\my_doc\\2015.10.20数据\\hyper\\speclib.txt",12,100, "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestGenTextureSpeclib.tif");
 	//HyperRepairFunc hyrepair;
 	//hyrepair.RepairFunc_GenerateTexture("D:\\lenaFilterH.tif",5,"D:\\lenaHyper.tif");
 	//KMeansClassify("D:\\alos.tif", "D:\\classify.tif", 7);
@@ -126,11 +120,10 @@ float main()
 	//sparse_GeneralizedInverseLES("D:\\end.txt", "D:\\lenaHyper.tif","D:\\red.tif", 30, 25);
 	//endmember_recovery_image("D:\\red.tif", "D:\\end.txt", "D:\\lenaHyperrecovery.tif", 25);
 
-	ImgFeaturesTools featureaTools;
-	vector<Point2f> pnt1, pnt2;
-	char* path1 = "D:\\my_doc\\2015.09.28无人机影像\\UAV\\IMG_0036.JPG";
-	char* path2 = "D:\\my_doc\\2015.09.28无人机影像\\UAV\\IMG_0037.JPG";
-	featureaTools.ImgFeaturesTools_ExtractMatch(path1, pnt1, path2, pnt2, "SIFTGPU", "");
-	featureaTools.ImgFeaturesTools_SaveENVIMatches("D:\\pts.pts", path1, path2, pnt1, pnt2);
+	
+	//ImgFeaturesTools m_tools;
+	//vector<Point2f> pnt1, pnt2;
+	//m_tools.ImgFeaturesTools_ExtractMatch("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\DSC00004.JPG", pnt1, "D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\DSC00005.JPG", pnt2, "SIFTGPU", "");
+	//m_tools.ImgFeaturesTools_SaveENVIMatches("D:\\test.pts", "D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\DSC00004.JPG", "D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\DSC00005.JPG", pnt1, pnt2);
 	return 0;
 }

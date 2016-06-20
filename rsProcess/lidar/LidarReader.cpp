@@ -641,3 +641,4 @@ long XYZLidarReader::LidarReader_WriteXYZ(const char* pathLidar)
 	}
 	fclose(fLasOut);
 }
+//===================================================================================================

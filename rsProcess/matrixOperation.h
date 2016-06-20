@@ -140,6 +140,11 @@ long MatrixLST(float*  dataSrc, float *dataDst, float *params, int variableNum, 
 long Matrix_Sparse_MatchPursuit(float** dictionary, float* data1, float* sparse, int size1, int size2);
 long Matrix_Sparse_MatchPursuit(float* dictionary, float* data1, float* sparse, int size1, int size2);
 
+//使用OMP方法进行求解
+long Matrix_Sparse_OrthoMatchPursuit(float** dictionary, float* data1, float* sparse, int size1, int size2);
+long Matrix_Sparse_OrthoMatchPursuit(float*  dictionary, float* data1, float* sparse, int size1, int size2);
+
+
 /*----------------------------特征值和特征向量--------------------------*/
 //雅可比法是求对称矩阵的特征值和特征向量
 long   MatrixEigen_value_vec_Jccob(float **dataIn, float *eignValue, int size, float **mat);

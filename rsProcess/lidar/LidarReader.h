@@ -1,6 +1,7 @@
 #pragma once
 #include"LidarDefs.h"
 #include"..\GDALProgress.h"
+
 /*读写lidar文件基类*/
 class LidarReader
 {

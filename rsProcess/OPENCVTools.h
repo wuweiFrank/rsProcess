@@ -71,6 +71,7 @@ private:
 	//实用GPU加速获取影像的特征点
 	long ImgFeaturesTools_EctractMatchSiftGPU(const char* pathImage1, vector<Point2f> &pts1, const char* pathImage2, vector<Point2f> &pts2);
 
+public:
 	//6.匹配特征点优化
 	long ImgFeaturesTools_MatchOptimize(vector<Point2f> &pts1, vector<Point2f> &pts2);
 };

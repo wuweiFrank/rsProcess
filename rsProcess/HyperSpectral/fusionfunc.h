@@ -78,6 +78,9 @@ void sparse_represent_combine(int numsparse,int selsparse,int endnumber,int* sel
 //广义逆的最小二乘
 void sparse_GeneralizedInverseLES(char* pathEnd,char* pathImg,char* pathRed,int endnumber,int bands);
 
+//影像稀疏解混
+void sparse_unmix(char* pathEnd,char* pathImg,char* pathRed,int endnumber,int bands);
+
 //稀疏最小二乘求解
 void sparse_represent_LES(char* pathEnd,char* pathImg,char* pathRed,int endnumbers,int sparsesel);
 

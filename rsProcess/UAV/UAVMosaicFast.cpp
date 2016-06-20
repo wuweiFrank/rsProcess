@@ -2,69 +2,94 @@
 #include"..\matrixOperation.h"
 #include"..\AuxiliaryFunction.h"
 #include"..\gdal\include\gdal_priv.h"
-#pragma comment(lib,"gdal_i.lib")
+#include<omp.h>
 
+#pragma comment(lib,"gdal_i.lib")
 long UAVMosaicFast::UAVMosaicFast_AffineTrans(vector<string> pszImages)
 {
-	ImgFeaturesTools m_featureMatch;
-	bool* matchpairs = new bool[pszImages.size()*pszImages.size()];
-	memset(matchpairs, 0, sizeof(bool)*pszImages.size()*pszImages.size());
-	for (int i = 0; i < pszImages.size() - 1; ++i)
-		matchpairs[i*pszImages.size() + i + 1] = true;
-	vector<vector<Point2f>> m_matches;
-	m_featureMatch.ImgFeaturesTools_ExtracMatches(pszImages, m_matches, matchpairs, "ORB", "BruteForce-Hamming");
+	int image_num = pszImages.size();
+	//这样首先是要初始化特征点提取算子
+	SiftGPU* siftFeatures = new SiftGPU();
+	SiftMatchGPU* matcher = new SiftMatchGPU();
 
-	//仿射变换系数
-	vector<adfAffineTrans> affineTransParameters;
-	adfAffineTrans transparameters;
-	for (int i = 0; i < m_matches.size() / 2; ++i)
+	if (siftFeatures->CreateContextGL() != SiftGPU::SIFTGPU_FULL_SUPPORTED)
+		return -1;
+
+	vector<float > descriptors1(1), descriptors2(1);
+	vector<SiftGPU::SiftKeypoint> keys1(1), keys2(1);
+	vector<Point2f> pts1, pts2;
+	int num1 = 0, num2 = 0;
+	ImgFeaturesTools featureTools;
+	vector<Mat> tmpHomo;
+
+	//影像数目
+	for (int i = 0; i < image_num - 1; ++i)
 	{
-		Mat warp_mat;
-		//以后一张图像为标准
-		Point2f *point1 = new Point2f[m_matches[2 * i + 0].size()];
-		Point2f *point2 = new Point2f[m_matches[2 * i + 0].size()];
-		for (int j = 0; j < m_matches[2 * i + 0].size(); ++j)
+		//特征点提取
+		if (siftFeatures->RunSIFT(pszImages[i].c_str()))
 		{
-			point1[j] = m_matches[2 * i + 0][j];
-			point2[j] = m_matches[2 * i + 1][j];
+			num1 = siftFeatures->GetFeatureNum();
+			keys1.resize(num1);    descriptors1.resize(128 * num1);
+			siftFeatures->GetFeatureVector(&keys1[0], &descriptors1[0]);
+		}
+		//You can have at most one OpenGL-based SiftGPU (per process).
+		//Normally, you should just create one, and reuse on all images. 
+		if (siftFeatures->RunSIFT(pszImages[i+1].c_str()))
+		{
+			num2 = siftFeatures->GetFeatureNum();
+			keys2.resize(num2);    descriptors2.resize(128 * num2);
+			siftFeatures->GetFeatureVector(&keys2[0], &descriptors2[0]);
 		}
 
-		warp_mat = getAffineTransform(point1, point2);
-		//cout << warp_mat << endl;
-		transparameters.m_affineTransParameters[0] = warp_mat.at<double>(0, 0);
-		transparameters.m_affineTransParameters[1] = warp_mat.at<double>(0, 1);
-		transparameters.m_affineTransParameters[2] = warp_mat.at<double>(0, 2);
-		transparameters.m_affineTransParameters[3] = warp_mat.at<double>(1, 0);
-		transparameters.m_affineTransParameters[4] = warp_mat.at<double>(1, 1);
-		transparameters.m_affineTransParameters[5] = warp_mat.at<double>(1, 2);
-		affineTransParameters.push_back(transparameters);
-		delete[]point1;
-		delete[]point2;
-	}
-
-	//连续仿射变换系数
-	for (int i = affineTransParameters.size() - 1; i >=0 ; i--)
-	{
-		double continueAffine[6];
-		memcpy(continueAffine, affineTransParameters[i].m_affineTransParameters, sizeof(double) * 6);
-
-		double pnt1[4] = { continueAffine[0],continueAffine[1],continueAffine[3],continueAffine[4] };
-		double pnt2[4];
-		for (int j = i-1; j >= 0; j--)
+		//特征点匹配
+		matcher->VerifyContextGL();//must call once
+		matcher->SetDescriptors(0, num1, &descriptors1[0]); //image 1
+		matcher->SetDescriptors(1, num2, &descriptors2[0]); //image 2
+		int(*match_buf)[2] = new int[num1][2];
+		//use the default thresholds. Check the declaration in SiftGPU.h
+		int num_match = matcher->GetSiftMatch(num1, match_buf);
+		for (int i = 0; i < num_match; ++i)
 		{
-			double pnt3[4] = { affineTransParameters[j].m_affineTransParameters[0] ,affineTransParameters[j].m_affineTransParameters[1],
-								affineTransParameters[j].m_affineTransParameters[3],affineTransParameters[j].m_affineTransParameters[4] };
-			MatrixMuti(pnt1, 2, 2, 2, pnt3, pnt2);
-			memcpy(pnt1, pnt2, sizeof(double) * 4);
-			continueAffine[2] += affineTransParameters[j].m_affineTransParameters[2];
-			continueAffine[5] += affineTransParameters[j].m_affineTransParameters[5];
+			//How to get the feature matches: 
+			SiftGPU::SiftKeypoint & key1 = keys1[match_buf[i][0]];
+			SiftGPU::SiftKeypoint & key2 = keys2[match_buf[i][1]];
+
+			//居然会有重复的点，关于这一点我很奇怪
+			bool isPush = false;
+			Point2f pnt1(key1.x, key1.y), pnt2(key2.x, key2.y);
+			for (int j = 0; j < pts1.size(); ++j)
+			{
+				if (pnt1 == pts1[j] || pnt2 == pts2[j])
+					isPush = true;
+			}
+			if (!isPush)
+			{
+				pts1.push_back(pnt1);
+				pts2.push_back(pnt2);
+			}
 		}
-		continueAffine[0] = pnt1[0];		continueAffine[1] = pnt1[1];
-		continueAffine[3] = pnt1[2];		continueAffine[4] = pnt1[3];
-		memcpy(transparameters.m_affineTransParameters, continueAffine, sizeof(double) * 6);
-		m_affineTransParameters.push_back(transparameters);
+		featureTools.ImgFeaturesTools_MatchOptimize(pts1, pts2);
+		delete[]match_buf;
+		Mat homo=findHomography(pts1, pts2);
+		tmpHomo.push_back(homo);
+
+		//清空所有空间
+		descriptors1.clear(); descriptors2.clear();
+		keys1.clear(); keys2.clear();
+		pts1.clear(); pts2.clear();
 	}
-	delete[]matchpairs;
+	m_Homography.resize(tmpHomo.size());
+	for (int i = 0; i < tmpHomo.size(); ++i)
+	{
+		Mat tmpMat= tmpHomo[i];
+		for (int j = i + 1; j < tmpHomo.size(); ++j)
+			tmpMat = tmpMat*tmpHomo[j];
+		m_Homography[tmpHomo.size() - i - 1] = tmpMat;
+		double* trans = (double*)tmpMat.data;
+		for (int i = 0; i < 9; ++i)
+			printf("%lf   ", trans[i]);
+		printf("\n");
+	}
 	return 0;
 }
 
@@ -79,18 +104,21 @@ long UAVMosaicFast::UAVMosaicFast_GetMosaicRange(vector<string> pszImages, int& 
 		GDALDatasetH m_dataset = GDALOpen(pszImages[i].c_str(), GA_ReadOnly);
 		int width = GDALGetRasterXSize(m_dataset);
 		int heigh = GDALGetRasterYSize(m_dataset);
-		double pnt1[3] = { 0,0,1 },pnt1t[2];
-		double pnt2[3] = { width,0,1 }, pnt2t[2];
-		double pnt3[3] = { 0,heigh,1 }, pnt3t[2];
-		double pnt4[3] = { width,heigh,1 }, pnt4t[2];
-		MatrixMuti(m_affineTransParameters[i].m_affineTransParameters, 2, 3, 1, pnt1, pnt1t);
-		MatrixMuti(m_affineTransParameters[i].m_affineTransParameters, 2, 3, 1, pnt2, pnt2t);
-		MatrixMuti(m_affineTransParameters[i].m_affineTransParameters, 2, 3, 1, pnt3, pnt3t);
-		MatrixMuti(m_affineTransParameters[i].m_affineTransParameters, 2, 3, 1, pnt4, pnt4t);
-		minx = min(min(min(pnt1t[0], pnt2t[0]), min(pnt3t[0], pnt4t[0])), minx);
-		maxx = max(max(max(pnt1t[0], pnt2t[0]), max(pnt3t[0], pnt4t[0])), maxx);
-		miny = min(min(min(pnt1t[1], pnt2t[1]), min(pnt3t[1], pnt4t[1])), miny);
-		maxy = max(max(max(pnt1t[1], pnt2t[1]), max(pnt3t[1], pnt4t[1])), maxy);
+		double pnt1[3] = { 0,0,1 },pnt1t[3];
+		double pnt2[3] = { width,0,1 }, pnt2t[3];
+		double pnt3[3] = { 0,heigh,1 }, pnt3t[3];
+		double pnt4[3] = { width,heigh,1 }, pnt4t[3];
+		double* mat = (double*)m_Homography[i].data;
+
+		MatrixMuti(mat, 3, 3, 1, pnt1, pnt1t);
+		MatrixMuti(mat, 3, 3, 1, pnt2, pnt2t);
+		MatrixMuti(mat, 3, 3, 1, pnt3, pnt3t);
+		MatrixMuti(mat, 3, 3, 1, pnt4, pnt4t);
+
+		minx = min(min(min(pnt1t[0] / pnt1t[2], pnt2t[0] / pnt2t[2]), min(pnt3t[0] / pnt3t[2], pnt4t[0] / pnt4t[2])), minx);
+		maxx = max(max(max(pnt1t[0] / pnt1t[2], pnt2t[0] / pnt2t[2]), max(pnt3t[0] / pnt3t[2], pnt4t[0] / pnt4t[2])), maxx);
+		miny = min(min(min(pnt1t[1] / pnt1t[2], pnt2t[1] / pnt2t[2]), min(pnt3t[1] / pnt3t[2], pnt4t[1] / pnt4t[2])), miny);
+		maxy = max(max(max(pnt1t[1] / pnt1t[2], pnt2t[1] / pnt2t[2]), max(pnt3t[1] / pnt3t[2], pnt4t[1] / pnt4t[2])), maxy);
 		GDALClose(m_dataset);
 	}
 
@@ -102,7 +130,6 @@ long UAVMosaicFast::UAVMosaicFast_GetMosaicRange(vector<string> pszImages, int& 
 	miny = min(0, miny);
 	maxy = max(heigh, maxy);
 	GDALClose(m_dataset);
-
 
 	mosaic_width = maxx - minx;
 	mosaic_height = maxy - miny;
@@ -121,132 +148,49 @@ long UAVMosaicFast::UAVMosaicFast_HistroMatch(unsigned char* imgBuffer1, unsigne
 	return 0;
 }
 
-long UAVMosaicFast::UAVMosaicFast_AffineTrans(adfAffineTrans& affineTransParam, unsigned char* imgBuffer, int xsize, int ysize, unsigned char* imgMosaic, int mosaicx, int mosaicy)
+long UAVMosaicFast::UAVMosaicFast_AffineTrans(Mat homo, unsigned char* imgBuffer, int xsize, int ysize, unsigned char* imgMosaic, int mosaicx, int mosaicy)
 {
 	//只要牺牲内存换代码的简洁了......
-	DPOINT *pPositions = new DPOINT[xsize*ysize];
-	memset(pPositions, 0, sizeof(DPOINT)*xsize*ysize);
+	//感觉这么做效率也很低，现在看着什么都想用GPU加速，这是疯了么！！！
 	int maxx = -9999999, minx = 9999999, maxy = -9999999, miny = 9999999;
-	for (size_t i = 0; i < xsize; i++)
-	{
-		for (size_t j = 0; j < ysize; j++)
-		{
-			int tmpx = (int)(affineTransParam.m_affineTransParameters[0] * i + affineTransParam.m_affineTransParameters[1] * j + affineTransParam.m_affineTransParameters[2]);
-			int tmpy = (int)(affineTransParam.m_affineTransParameters[3] * i + affineTransParam.m_affineTransParameters[4] * j + affineTransParam.m_affineTransParameters[5]);
-			pPositions[j*xsize + i].dX = tmpx;
-			pPositions[j*xsize + i].dY = tmpy;
+	double pnt1[3] = { 0,0,1 }, pnt1t[3];
+	double pnt2[3] = { xsize,0,1 }, pnt2t[3];
+	double pnt3[3] = { 0,ysize,1 }, pnt3t[3];
+	double pnt4[3] = { xsize,ysize,1 }, pnt4t[3];
+	double* mat = (double*)homo.data;
 
-			maxx = max(tmpx, maxx);
-			minx = min(tmpx, minx);
-			maxy = max(tmpy, maxy);
-			miny = min(tmpy, miny);
+	MatrixMuti(mat, 3, 3, 1, pnt1, pnt1t);
+	MatrixMuti(mat, 3, 3, 1, pnt2, pnt2t);
+	MatrixMuti(mat, 3, 3, 1, pnt3, pnt3t);
+	MatrixMuti(mat, 3, 3, 1, pnt4, pnt4t);
+
+	minx = min(min(min(pnt1t[0] / pnt1t[2], pnt2t[0] / pnt2t[2]), min(pnt3t[0] / pnt3t[2], pnt4t[0] / pnt4t[2])), minx);
+	maxx = max(max(max(pnt1t[0] / pnt1t[2], pnt2t[0] / pnt2t[2]), max(pnt3t[0] / pnt3t[2], pnt4t[0] / pnt4t[2])), maxx);
+	miny = min(min(min(pnt1t[1] / pnt1t[2], pnt2t[1] / pnt2t[2]), min(pnt3t[1] / pnt3t[2], pnt4t[1] / pnt4t[2])), miny);
+	maxy = max(max(max(pnt1t[1] / pnt1t[2], pnt2t[1] / pnt2t[2]), max(pnt3t[1] / pnt3t[2], pnt4t[1] / pnt4t[2])), maxy);
+	//逆过来求解算了-好象不对 囧
+	//Mat homoInv = homo.inv();
+	//mat = (double*)homoInv.data;
+
+//#pragma omp parallel for
+	for (int i = 0; i < xsize; ++i)
+	{
+		for (int j = 0; j < ysize; ++j)
+		{
+			double pnt[3] = { i,j,1 }, pntt[3];
+			MatrixMuti(mat, 3, 3, 1, pnt, pntt);
+			int tmpx = pntt[0] / pntt[2];
+			int tmpy = pntt[1] / pntt[2];
+			imgMosaic[tmpy*mosaicx + tmpx] = imgBuffer[j*xsize + i];
 		}
 	}
-	int transx = maxx - minx;
-	int transy = maxy - miny;
-	unsigned char* transImgBuffer = new unsigned char[transx*transy];
-	GetImgSample(imgBuffer, pPositions, xsize, ysize, transx, transy, transImgBuffer);
-	UAVMosaicFast_SeamFillFast(miny, minx, imgMosaic, mosaicx, mosaicy, transImgBuffer, transx, transy);
-	delete[]pPositions;
-	delete[]transImgBuffer;
 	return 0;
 }
 
 long UAVMosaicFast::UAVMosaicFast_SeamFillFast(int up, int left, unsigned char* imgMosaic, int mosaicx, int mosaicy, unsigned char* imgBuffer, int xsize, int ysize)
 {
-	vector<DPOINT> edge;
-	int maxrelation = -1.1; int posx = 0, posy = 0;
-	for (int j = 0; j < ysize; ++j)
-	{
-		if (posx == 0)
-		{
-			for (int i = 0; i < xsize - 5; ++i)
-			{
-				//获取一行的5个像素
-				float data1[5], data2[5];
-				for (int k = 0; k < 5; ++k)
-				{
-					data1[k] = imgMosaic[(j + up)*mosaicx + i + left + k];
-					data2[k] = imgBuffer[j*xsize + i + k];
-				}
-				if (data1[0] != 0 || data2[0] != 0)
-				{
-					int ttt = 0;
-				}
-				//如果存在像素为0则跳出
-				bool isBreak = false;
-				for (int k = 0; k < 5; ++k)
-				{
-					if (data1[k] == 0 || data2[k] == 0)
-					{
-						isBreak = true;
-						break;
-					}
-				}
-				if (isBreak)
-					continue;
-
-				//求取这一行5个像素的相关性
-				double corr = GetCoefficient(data1, data2, 5);
-				maxrelation = max(corr, maxrelation);
-				if (maxrelation == corr)
-					posx++;
-			}
-			DPOINT tmp; tmp.dX = posx; tmp.dY = posy;
-			edge.push_back(tmp);
-		}
-		else  //在前后5个相邻位置中选取
-		{
-			int startxpos = posx - 5 > 0 ? posx - 5 : 0;
-			int endxpos = startxpos + 15 < xsize ? startxpos + 15 : xsize;
-			posx = startxpos;
-			for (int i = startxpos; i < endxpos - 5; ++i)
-			{
-				//获取一行的5个像素
-				float data1[5], data2[5];
-				for (int k = 0; k < 5; ++k)
-				{
-					data1[k] = imgMosaic[(j + up)*mosaicx + i + left + k];
-					data2[k] = imgBuffer[j*xsize + i + k];
-				}
-				//如果存在像素为0则跳出
-				bool isBreak = false;
-				for (int k = 0; k < 5; ++k)
-				{
-					if (data1[k] == 0 || data2[k] == 0)
-					{
-						isBreak = true;
-						break;
-					}
-				}
-				if (isBreak)
-					continue;
-
-				//求取这一行5个像素的相关性
-				double corr = GetCoefficient(data1, data2, 5);
-				maxrelation = max(corr, maxrelation);
-				if (maxrelation == corr)
-					posx++;
-			}
-			DPOINT tmp; tmp.dX = posx; tmp.dY = posy;
-			edge.push_back(tmp);
-		}
-	}
-	//根据拼接边填数据
-
-	for (size_t j = 0; j < ysize; j++)
-	{
-		if(edge[j].dX==0)
-		for (size_t i = 0; i < xsize; i++)
-			if(imgMosaic[(j + up)*mosaicx + i + left]==0)
-				imgMosaic[(j + up)*mosaicx + i + left] = imgBuffer[j*xsize + i];
-		else
-		{
-			for (size_t i = edge[j].dX; i < xsize; i++)
-				imgMosaic[(j + up)*mosaicx + i + left] = imgBuffer[j*xsize + i];
-		}
-	}
-
+	//上面代码还有问题，懒得调了，
+	//不做最佳拼接线直接填充数据是不是应该调色，算了.......
 
 	return 0;
 
@@ -276,7 +220,7 @@ long UAVMosaicFast::UAVMosaicFast_Mosaic(vector<string> pszImages, const char* p
 			int heigh = GDALGetRasterYSize(m_dataset);
 			unsigned char* data = new unsigned char[width*heigh];
 			GDALRasterIO(GDALGetRasterBand(m_dataset, j+1), GF_Read, 0, 0, width, heigh, data, width, heigh, GDT_Byte, 0, 0);
-			UAVMosaicFast_AffineTrans(m_affineTransParameters[i], data,width,heigh,imgMosaic, mosaic_width, mosaic_height);
+			UAVMosaicFast_AffineTrans(m_Homography[i], data,width,heigh,imgMosaic, mosaic_width, mosaic_height);
 			delete[]data;
 			GDALClose(m_dataset);
 		}
@@ -285,19 +229,14 @@ long UAVMosaicFast::UAVMosaicFast_Mosaic(vector<string> pszImages, const char* p
 		int heigh = GDALGetRasterYSize(m_dataset);
 		unsigned char* data = new unsigned char[width*heigh];
 		GDALRasterIO(GDALGetRasterBand(m_dataset, j+1), GF_Read, 0, 0, width, heigh, data, width, heigh, GDT_Byte, 0, 0);
-		adfAffineTrans tmp;
-		memset(&tmp, 0, sizeof(adfAffineTrans));
-		tmp.m_affineTransParameters[0] = 1;
-		tmp.m_affineTransParameters[4] = 1;
-		UAVMosaicFast_AffineTrans(tmp, data, width, heigh, imgMosaic, mosaic_width, mosaic_height);
+		UAVMosaicFast_AffineTrans(Mat::eye(3,3,CV_64F), data, width, heigh, imgMosaic, mosaic_width, mosaic_height);
 		delete[]data;
 		GDALClose(m_dataset);
 
 		//重采样
 		GDALRasterIO(GDALGetRasterBand(m_dstdataset, j+1), GF_Write, 0, 0, mosaic_width, mosaic_height, imgMosaic, mosaic_width, mosaic_height, GDT_Byte, 0, 0);
 	}
-
-
+	GDALClose(m_dstdataset);
 	delete[]imgMosaic;
 	return 0;
 }

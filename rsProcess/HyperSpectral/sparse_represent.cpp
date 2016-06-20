@@ -199,6 +199,17 @@ void sparse_GeneralizedInverseLES(char* pathEnd, char* pathImg, char* pathRed, i
 	delete[]tempdata2;
 }
 
+//稀疏表示的影像解混方法
+void sparse_unmix(char* pathEnd, char* pathImg, char* pathRed, int endnumber, int bands)
+{
+	//获取影像端元矩阵
+	float* dictionary = new float[endnumber*bands];
+	dictionary=get_endmenber_spectralf(pathEnd, bands, endnumber);
+
+	//
+
+}
+
 //稀疏表示的影像最小二乘求解
 void sparse_represent_LES(char* pathEnd,char* pathImg,char* pathRed,int endnumbers,int sparsesel)
 {

@@ -1,5 +1,7 @@
 #pragma once
 
+//朴素DCT变换效率极低，最好能够通过蝶形变换加速！！
+
 //1维DCT变换
 void DCT1D(float* dataIn, int length, float* DCTData);
 void IDCT1D(float* DCTData, int length, float* IDCTData);

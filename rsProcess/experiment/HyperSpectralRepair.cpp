@@ -35,7 +35,7 @@ void HyperRepairFunc::RepairFunc_Run(const char* pathDeImg, const char* pathMask
 
 
 	//缺失波段必须在百分之70以下，否则效果不好。可能百分比需要进行调整?
-	if (lossbands<int(0.3*bands))
+	if (lossbands<int(0.7*bands))
 		RepairFunc_RepairPartial(dataImg, dataMsk,xsize,ysize,bands);
 	else
 		RepairFunc_RepairTotal(dataImg, dataMsk, xsize, ysize, bands);
@@ -262,6 +262,7 @@ void HyperRepairFunc::RepairFunc_TextureElement(const char* pathEle, int rangesi
 		}
 	}
 	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//中文路径
 	GDALDatasetH m_dataset = GDALCreate(GDALGetDriverByName("GTiff"), pathDist, rangesize, rangesize*num, 1, GDT_Float32,NULL);
 	GDALRasterIO(GDALGetRasterBand(m_dataset, 1), GF_Write, 0, 0, rangesize, rangesize*num, img, rangesize, rangesize*num, GDT_Float32, 0, 0);
 	GDALClose(m_dataset);
@@ -272,15 +273,15 @@ void HyperRepairFunc::RepairFunc_TextureElement(const char* pathEle, int rangesi
 void HyperRepairFuncTest()
 {
 	char* pathImg = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertest";
-	char* pathSimu = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateAllNarrow";
-	char* pathRepair = "D:\\my_doc\\2015.10.20数据\\hyper\\repair.tif";
-	char* pathMaskImg = "D:\\my_doc\\2015.10.20数据\\hyper\\mask.bmp";
+	char* pathSimu = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateMore";
+	char* pathRepair = "D:\\my_doc\\2015.10.20数据\\hyper\\repairMore.tif";
+	char* pathMaskImg = "D:\\my_doc\\2015.10.20数据\\hyper\\msk.bmp";
 	char* pathMaskDst = "D:\\my_doc\\2015.10.20数据\\hyper\\mskAllNarrow.bmp";
 	CPOINT pnt1, pnt2;
 	pnt1.x = 164; pnt1.y = 267;
 	pnt2.x = 245; pnt2.y = 287;
 	HyperRepairFunc m_Repair;
-	set_mask_region(pathMaskImg, pathMaskDst,pnt1,pnt2);
+	//set_mask_region(pathMaskImg, pathMaskDst,pnt1,pnt2);
 	//m_Repair.RepairFunc_SimuliDegradImg(pathImg, pathSimu, 1, 201, pnt1, pnt2);
-	//m_Repair.RepairFunc_Run(pathSimu, pathMaskDst, pathRepair, 1, 20);
+	m_Repair.RepairFunc_Run(pathSimu, pathMaskImg, pathRepair, 2, 90);
 }

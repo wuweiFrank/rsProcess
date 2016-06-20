@@ -7,6 +7,9 @@ using namespace std;
 #include"..\gdal\include\gdal_alg.h"
 #include"..\Global.h"
 
+//我对这个代码结构特别不满意，我觉得想修改为类似于GDAL那种格式的通过注册驱动来获取数据
+//(┬＿┬///)
+
 //定义读取数据的最大内存量为512MB
 #define LargestMemoryToRead 536870912
 #define BlockPointNumbers 2048

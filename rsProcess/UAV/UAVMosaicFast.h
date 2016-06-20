@@ -11,7 +11,7 @@ struct adfAffineTrans
 
 class UAVMosaicFast
 {
-private:
+public:
 	//根据影像获取仿射变换系数 这样的校正是以最后一张影像为基准的
 	long UAVMosaicFast_AffineTrans(vector<string> pszImages);
 
@@ -22,7 +22,7 @@ private:
 	long UAVMosaicFast_HistroMatch(unsigned char* imgBuffer1, unsigned char* imgBuffer2, int xsize1, int ysize1, int xsize2, int ysize2 );
 
 	//通过仿射变换向数据域中填入数据
-	long UAVMosaicFast_AffineTrans(adfAffineTrans& affineTransParam, unsigned char* imgBuffer, int xsize, int ysize, unsigned char* imgMosaic,int mosaicx,int mosaicy);
+	long UAVMosaicFast_AffineTrans(Mat homo, unsigned char* imgBuffer, int xsize, int ysize, unsigned char* imgMosaic,int mosaicx,int mosaicy);
 
 	//通过影像最佳拼接线进行填写
 	long UAVMosaicFast_SeamFillFast(int up, int left, unsigned char* imgMosaic, int mosaicx, int mosaicy, unsigned char* imgBuffer, int xsize, int ysize);
@@ -33,4 +33,5 @@ public:
 
 private:
 	vector<adfAffineTrans> m_affineTransParameters;
+	vector<Mat>            m_Homography;
 };
