@@ -206,8 +206,47 @@ void sparse_unmix(char* pathEnd, char* pathImg, char* pathRed, int endnumber, in
 	float* dictionary = new float[endnumber*bands];
 	dictionary=get_endmenber_spectralf(pathEnd, bands, endnumber);
 
-	//
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
+	GDALDatasetH m_dataset = GDALOpen(pathImg, GA_ReadOnly);
+	int xsize = GDALGetRasterXSize(m_dataset);
+	int ysize = GDALGetRasterYSize(m_dataset);
+	//int bands = GDALGetRasterCount(m_dataset);
 
+	//影像稀疏度
+	float* sparse = new float[endnumber*xsize*ysize];
+	memset(sparse, 0, sizeof(float)*endnumber*xsize*ysize);
+	//影像数据空间
+	float* img = new float[bands*xsize*ysize];
+	for (int i = 0; i < bands; ++i)
+		GDALRasterIO(GDALGetRasterBand(m_dataset, i + 1), GF_Read, 0, 0, xsize, ysize, img + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+	
+	//求解(像这样频繁的调用应该效率比较低)
+	float* sparse_per = new float[endnumber];
+	float* image_per = new float[bands];
+
+	for (int i = 0; i < xsize*ysize; ++i)
+	{
+		printf("process pixel %d\r", i + 1);
+		for (int j = 0; j < bands; ++j)
+			image_per[j] = img[j*xsize*ysize + i];
+		Matrix_Sparse_MatchPursuit(dictionary, image_per, sparse_per, bands, endnumber);
+		for (int j = 0; j < endnumber; ++j)
+			sparse[j*xsize*ysize + i] = sparse_per[j];
+	}
+	printf("\n");
+	//数据输出
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathRed, xsize, ysize, endnumber,GDT_Float32,NULL);
+	for (int i = 0; i < endnumber; ++i)
+		GDALRasterIO(GDALGetRasterBand(m_datasetDst, i + 1), GF_Write, 0, 0, xsize, ysize, sparse + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+
+	GDALClose(m_datasetDst);
+	GDALClose(m_dataset);
+	delete[]sparse; sparse = NULL;
+	delete[]img; img = NULL;
+	delete[]image_per; image_per = NULL;
+	delete[]sparse_per; sparse_per = NULL;
+	delete[]dictionary; dictionary = NULL;
 }
 
 //稀疏表示的影像最小二乘求解
