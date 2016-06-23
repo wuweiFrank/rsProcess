@@ -3248,7 +3248,7 @@ long Matrix_Sparse_MatchPursuit(float** dictionary, float* data1, float* sparse,
 	float *projection   = new float[size2];
 	memcpy(leftResidual, data1, sizeof(float)*size1);
 	float totalData = 0;
-	for (int i = 0; i < size1; ++i)
+	for (int i = 0; i < size1; ++i )
 		totalData += data1[i];
 	do
 	{
@@ -3257,7 +3257,6 @@ long Matrix_Sparse_MatchPursuit(float** dictionary, float* data1, float* sparse,
 			projection[i] = 0;
 			for (int j = 0; j < size1; ++j)
 				projection[i] += normalDictionary[j][i]* leftResidual[j];
-			//projection[i] = abs(projection[i]);
 		}
 
 		//获取内积最大的元素的投影长度和下标
@@ -3271,7 +3270,7 @@ long Matrix_Sparse_MatchPursuit(float** dictionary, float* data1, float* sparse,
 				maxindex = i;
 			}
 		}
-
+		sparse[maxindex] = projection[maxindex];
 		//获取残差
 		for (int i = 0; i < size1; ++i)
 			leftResidual[i] = leftResidual[i]- projection[i] * normalDictionary[i][maxindex];
@@ -3284,7 +3283,16 @@ long Matrix_Sparse_MatchPursuit(float** dictionary, float* data1, float* sparse,
 			break;
 
 	} while (true);
-	
+	//归一化
+	float normalParam = 0;
+	for (int i = 0; i < size2; ++i)
+		normalParam += sparse[i];
+	if (abs(normalParam) > 0.001)
+	{
+		for (int i = 0; i < size2;++i)
+			sparse[i] /= normalParam;
+	}
+
 	//清理内存空间
 	for (int i = 0; i < size1; ++i)
 		delete[]normalDictionary[i];
@@ -3299,7 +3307,10 @@ long Matrix_Sparse_MatchPursuit(float* dictionary, float* data1, float* sparse, 
 	long lError = 0;
 	float** dict2d = new float*[size1];
 	for (int i = 0; i < size1; ++i)
+	{
 		dict2d[i] = new float[size2];
+		memcpy(dict2d[i], dictionary + i*size2, sizeof(float)*size2);
+	}
 	lError = Matrix_Sparse_MatchPursuit(dict2d, data1, sparse, size1, size2);
 
 	for (int i = 0; i < size1; ++i)
@@ -3417,7 +3428,10 @@ long Matrix_Sparse_OrthoMatchPursuit(float* dictionary, float* data1, float* spa
 	long lError = 0;
 	float** dict2d = new float*[size1];
 	for (int i = 0; i < size1; ++i)
+	{
 		dict2d[i] = new float[size2];
+		memcpy(dict2d[i], dictionary + i*size2, sizeof(float)*size2);
+	}
 	lError = Matrix_Sparse_OrthoMatchPursuit(dict2d, data1, sparse, size1, size2);
 
 	for (int i = 0; i < size1; ++i)

@@ -55,7 +55,7 @@ public:
 	//TODO:5.光束法平差
 	long UAVPhotogrammetryTools_BundlerAdj();
 
-	//8.将测试函数声明为友元函数方便获取
+	//将测试函数声明为友元函数方便获取
 	friend void PhotogrammetryToolsTest();
 
 private:

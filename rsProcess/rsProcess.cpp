@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include"experiment\HyperSpectralRepair.h"
-//#include"OPENCVTools.h"
+#include"machineLearning\CVMachineLearning.h"
+#include"UAV\UAVGeoCorrection.h"
 #include<iostream>
 #include<string>
 using namespace std;
@@ -125,5 +125,28 @@ float main()
 	//vector<Point2f> pnt1, pnt2;
 	//m_tools.ImgFeaturesTools_ExtractMatch("D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\DSC00004.JPG", pnt1, "D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\DSC00005.JPG", pnt2, "SIFTGPU", "");
 	//m_tools.ImgFeaturesTools_SaveENVIMatches("D:\\test.pts", "D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\DSC00004.JPG", "D:\\my_doc\\2015.12.18岳阳无人机数据\\DCIM\\100MSDCF\\DSC00005.JPG", pnt1, pnt2);
+
+	//char* pathEnd = "D:\\my_doc\\2015.10.20数据\\hyper\\speclib.txt";
+	//char* pathImg = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestGenTexture.tif";
+	//char* pathRed = "D:\\my_doc\\2015.10.20数据\\hyper\\sparseAbundacne.tif";
+	//sparse_unmix(pathEnd, pathImg, pathRed, 100, 144);
+	CVMachineLearningTrain ml;
+	char* pathMnist = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\train-images-idx3-ubyte\\train-images.idx3-ubyte";
+	char* pathLabel = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\train-labels-idx1-ubyte\\train-labels.idx1-ubyte";
+	char* pathBPNet = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\BPNet.xml";
+	ml.CV_ANN_BP_TrainMnist(pathMnist, pathLabel, pathBPNet);
+	char* pathPredict = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte\\t10k-images.idx3-ubyte";
+	ml.CV_ANN_BP_TrainPredict(pathPredict, pathBPNet);
+
+	//UAVGeoCorrection m_geo;
+	//char* pathSrc = "D:\\第二组(无人机像对)\\第二组(无人机像对)\\IMG_0183.jpg";
+	//char* pathDst = "D:\\第二组(无人机像对)\\第二组(无人机像对)\\2.tif";
+	//
+	//	
+	//double rotParam[3] = { 0.054792    ,    0.084261    ,    0.003354 };
+	//double transParam[3] = { 241693.5550  ,   3362627.8108      ,   551.2075 };
+	//double iMat[4] = { 1,0,0,1 };
+	//DPOINT center; center.dX = 1872.00; center.dY = 2808.00;
+	//m_geo.UAVGeoCorrection_GeoCorrect(pathSrc, pathDst, rotParam,transParam, iMat, center, 35.4904, 0.0064,49,0);
 	return 0;
 }

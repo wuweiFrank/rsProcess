@@ -808,7 +808,6 @@ long UAVGeoCorrection::UAVGeoCorrection_GeoPntsAccu(double dB, double dL, double
 
 long UAVGeoCorrection::UAVGeoCorrection_ExifTime(const char* pathDir, int begImgNum, int imageNumbers, const char* pathTime)
 {
-
 	FILE* fout = NULL;
 	if (fopen_s(&fout, pathTime, "w") != 0)
 	{
@@ -835,4 +834,87 @@ long UAVGeoCorrection::UAVGeoCorrection_ExifTime(const char* pathDir, int begImg
 	}
 	fclose(fout);
 	return 0;
+}
+
+long UAVGeoCorrection::UAVGeoCorrection_GeoCorrect(const char* pathSrc, const char* pathDst, double* rotationParam, double* transParam,double* iMat,DPOINT center, double fLen, double pixelSize, int zone, double AvgHeight)
+{
+	double rotationMat[9];
+	MatrixRotate(rotationMat, rotationParam[0], rotationParam[1], rotationParam[2]);
+
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");
+	GDALDataset *poDataset = (GDALDataset *)GDALOpen(pathSrc, GA_ReadOnly);
+	if (poDataset == NULL)
+		return -2;
+
+	int nBandCount = poDataset->GetRasterCount();
+	int ImageWidth = poDataset->GetRasterXSize();
+	int ImageHeight = poDataset->GetRasterYSize();
+
+	DPOINT imgpnt[5];
+	imgpnt[0].dX = 0; imgpnt[0].dY = 0;
+	imgpnt[1].dX = ImageWidth ; imgpnt[1].dY =  0;
+	imgpnt[2].dX = ImageWidth; imgpnt[2].dY =  ImageHeight;
+	imgpnt[3].dX = 0 ; imgpnt[3].dY =  ImageHeight;
+	imgpnt[4].dX = center.dX; imgpnt[4].dY = center.dY;
+
+	DPOINT pnt[5];
+	pnt[0].dX = 0 - center.dX; pnt[0].dY = 0 + center.dY;
+	pnt[1].dX = ImageWidth - center.dX; pnt[1].dY = center.dY - 0;
+	pnt[2].dX = ImageWidth - center.dX; pnt[2].dY = center.dY - ImageHeight;
+	pnt[3].dX = 0 - center.dX; pnt[3].dY = center.dY - ImageHeight;
+	pnt[4].dX = 0; pnt[4].dY = 0;
+
+	//内定向
+	DPOINT ipnt[5];
+	for (int i = 0; i < 5; ++i)
+	{
+		ipnt[i].dX = (pnt[i].dX*iMat[0] + pnt[i].dY*iMat[2])*pixelSize;
+		ipnt[i].dY = (pnt[i].dX*iMat[1] + pnt[i].dY*iMat[3])*pixelSize;
+	}
+
+	//计算相应点的地理坐标
+	THREEDPOINT pGoundPnt[5];
+	for (int i = 0; i < 5; ++i)
+		pGoundPnt[i].dZ = AvgHeight;
+
+
+	for (int i = 0; i<5; i++)
+	{
+
+		double dPhotoPt[3];
+		double dModelPt[3];
+		//像平面坐标系转到像空间坐标系
+		dPhotoPt[0] = ipnt[i].dX;
+		dPhotoPt[1] = ipnt[i].dY;
+		dPhotoPt[2] = -fLen;					//单位是m
+		MatrixMuti(rotationMat, 3, 3, 1, dPhotoPt, dModelPt);
+		pGoundPnt[i].dX = transParam[0] + (pGoundPnt[i].dZ - transParam[2])*dModelPt[0] / dModelPt[2];
+		pGoundPnt[i].dY = transParam[1] + (pGoundPnt[i].dZ - transParam[2])*dModelPt[1] / dModelPt[2];
+	}
+
+	
+	double* pdfGCPs = new double[5 * 4];
+	for (int i = 0; i<5; i++)
+	{
+		pdfGCPs[4 * i + 0] = imgpnt[i].dX;
+		pdfGCPs[4 * i + 1] = imgpnt[i].dY;
+		pdfGCPs[4 * i + 2] = pGoundPnt[i].dX;
+		pdfGCPs[4 * i + 3] = pGoundPnt[i].dY;
+	}
+	double fGSD = abs(pGoundPnt[0].dX - pGoundPnt[1].dX) / double(ImageWidth);
+	OGRSpatialReference  oSRS;
+	char *pszSRS_WKT = NULL;
+	oSRS.SetUTM(zone, TRUE);
+	oSRS.SetWellKnownGeogCS("WGS84");
+	oSRS.exportToWkt(&pszSRS_WKT);
+	double dGroundSize[2] = { fGSD,-fGSD };
+	GeoGCPProcess m_GcpProc;
+	//lError=m_GcpProc.GeoProc_GCPWarpTPS(pathSrc,pathDst,pszSRS_WKT,dGroundSize,GRA_Bilinear,pdfGCPs,64);
+	long lError = m_GcpProc.GeoProc_GCPWarpOrder(pathSrc, pathDst, 1, TRUE, pszSRS_WKT, dGroundSize, pdfGCPs, 5);
+	if (lError != 0)
+		return lError;
+	CPLFree(pszSRS_WKT);
+	delete[]pdfGCPs;
+
 }

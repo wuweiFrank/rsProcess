@@ -162,9 +162,6 @@
     <ClInclude Include="machineLearning\mnistFile.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="machineLearning\CVMachineLearningTrain.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="experiment\BSCB.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -250,6 +247,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="siftGPU\IL\il.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\CVMachineLearning.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -365,9 +365,6 @@
     <ClCompile Include="machineLearning\mnistFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="machineLearning\CVMachineLearningTrain.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="experiment\BSCB.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -435,6 +432,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="siftGPU\SiftPyramid.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\CVMachineLearning.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
