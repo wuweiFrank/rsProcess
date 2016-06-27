@@ -169,6 +169,43 @@ void GetAveDev(float *pBuffer, int nSamples, int nLines, int nBand, float &fAver
 	fDeviate = (float)sqrt(dMul);
 	return;
 }
+
+void NormalizeData(float* pBuffer, int length, float* pNormalBuffer)
+{
+	float* tmpData = new float[length];
+	memcpy(tmpData, pBuffer, sizeof(float)*length);
+	float fAvg, fDev;
+	GetAveDev(tmpData, 1, length, 0, fAvg, fDev);
+	if (fabs(fDev)< 0.0000001)
+	{
+		for (int i = 0; i < length; ++i)
+			pNormalBuffer[i] = pBuffer[i] - fAvg;
+	}
+	else
+	{
+		for (int i = 0; i < length; ++i)
+			pNormalBuffer[i] =( pBuffer[i] - fAvg)/fDev;
+	}
+	delete[]tmpData;
+}
+void NormalizeData(double* pBuffer, int length, double* pNormalBuffer)
+{
+	float* tmpData = new float[length];
+	memcpy(tmpData, pBuffer, sizeof(float)*length);
+	float fAvg, fDev;
+	GetAveDev(tmpData, 1, length, 0, fAvg, fDev);
+	if (fabs(fDev)< 0.0000001)
+	{
+		for (int i = 0; i < length; ++i)
+			pNormalBuffer[i] = pBuffer[i] - fAvg;
+	}
+	else
+	{
+		for (int i = 0; i < length; ++i)
+			pNormalBuffer[i] = (pBuffer[i] - fAvg) / fDev;
+	}
+	delete[]tmpData;
+}
 float GetCoefficient(float* data1, float* data2, int num)
 {
 	float avg1, avg2;

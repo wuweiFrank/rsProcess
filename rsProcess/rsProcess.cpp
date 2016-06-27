@@ -3,11 +3,12 @@
 
 #include "stdafx.h"
 #include"machineLearning\CVMachineLearning.h"
+#include"opencv\opencv2\imgproc.hpp"
 #include"UAV\UAVGeoCorrection.h"
 #include<iostream>
 #include<string>
 using namespace std;
-float main()
+int main()
 {
 	//UAVMosaicFast m_mosaic_fast;
 	//ImgFeaturesTools m_img_tools;
@@ -130,13 +131,19 @@ float main()
 	//char* pathImg = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestGenTexture.tif";
 	//char* pathRed = "D:\\my_doc\\2015.10.20数据\\hyper\\sparseAbundacne.tif";
 	//sparse_unmix(pathEnd, pathImg, pathRed, 100, 144);
-	CVMachineLearningTrain ml;
+	CVMachineLearningTrain mlt;
 	char* pathMnist = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\train-images-idx3-ubyte\\train-images.idx3-ubyte";
 	char* pathLabel = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\train-labels-idx1-ubyte\\train-labels.idx1-ubyte";
-	char* pathBPNet = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\BPNet.xml";
-	ml.CV_ANN_BP_TrainMnist(pathMnist, pathLabel, pathBPNet);
+	char* pathBPNet = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\LR.xml";
+	//mlt.CV_ANN_BP_Train(pathMnist, pathLabel, pathBPNet, DATASET_MNIST);
+	//mlt.CV_SVM_Train(pathMnist, 0.5, pathLabel, pathBPNet, DATASET_MNIST);
+	//mlt.CV_LogisticRegression_Train(pathMnist, pathLabel, pathBPNet, DATASET_MNIST);
 	char* pathPredict = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-images-idx3-ubyte\\t10k-images.idx3-ubyte";
-	ml.CV_ANN_BP_TrainPredict(pathPredict, pathBPNet);
+	char* pathPredictLabel = "D:\\my_doc\\2015.10.20数据\\rsProcess-演示\\mnist\\t10k-labels-idx1-ubyte\\t10k-labels.idx1-ubyte";
+	CVMachineLearningPredict mlp;
+	//mlp.CV_SVM_PredictMnist(pathPredict, pathBPNet, pathPredictLabel);
+	//mlp.CV_ANN_BP_PredictMnist(pathPredict, pathBPNet, pathPredictLabel);
+	//mlp.CV_LogisticRegression_PredictMnist(pathPredict, pathBPNet, pathPredictLabel);
 
 	//UAVGeoCorrection m_geo;
 	//char* pathSrc = "D:\\第二组(无人机像对)\\第二组(无人机像对)\\IMG_0183.jpg";
@@ -148,5 +155,126 @@ float main()
 	//double iMat[4] = { 1,0,0,1 };
 	//DPOINT center; center.dX = 1872.00; center.dY = 2808.00;
 	//m_geo.UAVGeoCorrection_GeoCorrect(pathSrc, pathDst, rotParam,transParam, iMat, center, 35.4904, 0.0064,49,0);
+	//BPNetMnist bpMnist;
+	//bpMnist.bp_train(pathMnist, pathLabel);
+	//bpMnist.bp_load(pathBPNet);
+	//bpMnist.bp_predict(pathMnist, pathLabel);
+
 	return 0;
 }
+//static void showImage(const Mat &data, int columns, const String &name)
+//{
+//	Mat bigImage;
+//	for (int i = 0; i < data.rows; ++i)
+//	{
+//		bigImage.push_back(data.row(i).reshape(0, columns));
+//	}
+//	imshow(name, bigImage.t());
+//}
+//
+//static float calculateAccuracyPercent(const Mat &original, const Mat &predicted)
+//{
+//	return 100 * (float)countNonZero(original == predicted) / predicted.rows;
+//}
+//
+//int main()
+//{
+//	const String filename = "D:\\cache\\opencv\\sources\\samples\\data\\data01.xml";
+//	cout << "**********************************************************************" << endl;
+//	cout << filename
+//		<< " contains digits 0 and 1 of 20 samples each, collected on an Android device" << endl;
+//	cout << "Each of the collected images are of size 28 x 28 re-arranged to 1 x 784 matrix"
+//		<< endl;
+//	cout << "**********************************************************************" << endl;
+//
+//	Mat data, labels;
+//	{
+//		cout << "loading the dataset...";
+//		FileStorage f;
+//		if (f.open(filename, FileStorage::READ))
+//		{
+//			f["datamat"] >> data;
+//			f["labelsmat"] >> labels;
+//			f.release();
+//		}
+//		else
+//		{
+//			cerr << "file can not be opened: " << filename << endl;
+//			return 1;
+//		}
+//		data.convertTo(data, CV_32F);
+//		labels.convertTo(labels, CV_32F);
+//		cout << "read " << data.rows << " rows of data" << endl;
+//	}
+//
+//	Mat data_train, data_test;
+//	Mat labels_train, labels_test;
+//	for (int i = 0; i < data.rows; i++)
+//	{
+//		if (i % 2 == 0)
+//		{
+//			data_train.push_back(data.row(i));
+//			labels_train.push_back(labels.row(i));
+//		}
+//		else
+//		{
+//			data_test.push_back(data.row(i));
+//			labels_test.push_back(labels.row(i));
+//		}
+//	}
+//	cout << "training/testing samples count: " << data_train.rows << "/" << data_test.rows << endl;
+//
+//	// display sample image
+//	showImage(data_train, 28, "train data");
+//	showImage(data_test, 28, "test data");
+//
+//	// simple case with batch gradient
+//	cout << "training...";
+//	//! [init]
+//	Ptr<LogisticRegression> lr1 = LogisticRegression::create();
+//	lr1->setLearningRate(0.001);
+//	lr1->setIterations(10);
+//	lr1->setRegularization(LogisticRegression::REG_L2);
+//	lr1->setTrainMethod(LogisticRegression::BATCH);
+//	lr1->setMiniBatchSize(1);
+//	//! [init]
+//	//cout << labels_train << endl;
+//
+//	lr1->train(data_train, ROW_SAMPLE, labels_train);
+//	cout << "done!" << endl;
+//
+//	cout << "predicting...";
+//	Mat responses;
+//	lr1->predict(data_test, responses);
+//	cout << "done!" << endl;
+//
+//	// show prediction report
+//	cout << "original vs predicted:" << endl;
+//	labels_test.convertTo(labels_test, CV_32S);
+//	cout << labels_test.t() << endl;
+//	cout << responses.t() << endl;
+//	cout << "accuracy: " << calculateAccuracyPercent(labels_test, responses) << "%" << endl;
+//
+//	// save the classfier
+//	const String saveFilename = "NewLR_Trained.xml";
+//	cout << "saving the classifier to " << saveFilename << endl;
+//	lr1->save(saveFilename);
+//
+//	// load the classifier onto new object
+//	cout << "loading a new classifier from " << saveFilename << endl;
+//	Ptr<LogisticRegression> lr2 = StatModel::load<LogisticRegression>(saveFilename);
+//
+//	// predict using loaded classifier
+//	cout << "predicting the dataset using the loaded classfier...";
+//	Mat responses2;
+//	lr2->predict(data_test, responses2);
+//	cout << "done!" << endl;
+//
+//	// calculate accuracy
+//	cout << labels_test.t() << endl;
+//	cout << responses2.t() << endl;
+//	cout << "accuracy: " << calculateAccuracyPercent(labels_test, responses2) << "%" << endl;
+//
+//	waitKey(0);
+//	return 0;
+//}

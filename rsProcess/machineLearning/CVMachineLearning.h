@@ -1,6 +1,7 @@
 #pragma once
 #include"../opencv/opencv2/ml.hpp"
 #include "../opencv/opencv2/core/core.hpp"
+#include"../opencv\opencv2\imgproc.hpp"
 #include "../opencv/opencv2/highgui/highgui.hpp"
 
 using namespace std;
@@ -38,10 +39,7 @@ class CVMachineLearningPredict
 {
 public:
 	//各种算法对Mnist数据进行预测
-	void CV_ANN_BP_PredictMnist(const char* pathPredict, const char* pathNet);
-	void CV_SVM_PredictMnist(const char* pathPredict, const char* pathSVM);
-	void CV_LogisticRegression_PredictMnist(const char* pathPredict, const char* pathLogisticRegression);
-
-private:
-
+	void CV_ANN_BP_PredictMnist(const char* pathPredict, const char* pathNet, const char* pathLabel = NULL);
+	void CV_SVM_PredictMnist(const char* pathPredict, const char* pathSVM,const char* pathLabel=NULL);
+	void CV_LogisticRegression_PredictMnist(const char* pathPredict, const char* pathLogisticRegression, const char* pathLabel = NULL);
 };

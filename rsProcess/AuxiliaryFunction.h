@@ -21,6 +21,9 @@ void GetAveDev(unsigned char *pBuffer, int nSamples, int nLines, int nBand, floa
 void GetAveDev(unsigned short *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate);
 void GetAveDev(float *pBuffer, int nSamples, int nLines, int nBand, float &fAverage, float &fDeviate);
 
+//数据归一化
+void NormalizeData(float* pBuffer,int length,float* pNormalBuffer);
+void NormalizeData(double* pBuffer, int length, double* pNormalBuffer);
 //获取相关系数
 float GetCoefficient(float* data1, float* data2, int num);
 float GetSSD(float* data1, float* data2, int num);
