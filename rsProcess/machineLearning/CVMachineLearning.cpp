@@ -108,7 +108,6 @@ void CVMachineLearningTrain::CV_GetMnistTrainData(const char* pathMnist, const c
 	memcpy(&count, ccount, sizeof(count));
 	memcpy(&rows, crows, sizeof(rows));
 	memcpy(&cols, ccols, sizeof(cols));
-	//count = 5000;
 
 	ifstream lab_ifs(pathLabel, ios_base::binary);
 	lab_ifs.read(magicNum, sizeof(char) * 4);
@@ -119,8 +118,6 @@ void CVMachineLearningTrain::CV_GetMnistTrainData(const char* pathMnist, const c
 	tmp.swapBuffer(ccount);
 	memcpy(&intmagicNum, magicNum, sizeof(magicNum));
 	memcpy(&ccountint, ccount, sizeof(ccount));
-	//ccountint = 5000;
-
 
 	unsigned char* imgData = new unsigned char[rows*cols];
 	float* imgDataf = new float[rows*cols];

@@ -169,7 +169,87 @@ void IDCT3D(float* DCTData, int xsize, int ysize, int bands, float* IDCTData)
 	delete[]dataIDCT;
 }	 
 
+//===================================================================================================
 //图像离散DCT变换
+//所有像素进行1维DCT变换
+void DCT1D(const char* pathImgIn, const char* pathOut)
+{
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
+	GDALDatasetH m_datasetin = GDALOpen(pathImgIn, GA_ReadOnly);
+
+	int xsize = GDALGetRasterXSize(m_datasetin);
+	int ysize = GDALGetRasterYSize(m_datasetin);
+	int bands = GDALGetRasterCount(m_datasetin);
+
+	//空间申请应该先try一下，算球了以后再说
+	float* data = new float[xsize*ysize*bands];
+	for (int i = 0; i < bands; ++i)
+		GDALRasterIO(GDALGetRasterBand(m_datasetin, i + 1), GF_Read, 0, 0, xsize, ysize, data + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+
+	//每个波段
+	float* pixels = new float[bands];
+	float* pixeldct = new float[bands];
+	for (int i = 0; i < xsize; ++i)
+	{
+		for (int j = 0; j < ysize; ++j)
+		{
+			printf("process pixel%d\r", j*xsize + i);
+			for (int k = 0; k < bands; ++k)
+				pixels[k] = data[k*xsize*ysize + j*xsize + i];
+			DCT1D(pixels, bands, pixeldct);
+			for (int k = 0; k < bands; ++k)
+				data[k*xsize*ysize + j*xsize + i]= pixeldct[k];
+		}
+	}
+	printf("\n");
+	GDALDatasetH m_datasetout = GDALCreate(GDALGetDriverByName("GTiff"), pathOut, xsize, ysize, bands, GDT_Float32, NULL);
+	for (int i = 0; i < bands; ++i)
+		GDALRasterIO(GDALGetRasterBand(m_datasetout, i + 1), GF_Write, 0, 0, xsize, ysize, data + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+	GDALClose(m_datasetin);
+	GDALClose(m_datasetout);
+	delete[]data;
+	delete[]pixels;
+	delete[]pixeldct;
+}
+void IDCT1D(const char* pathImgIn, const char* pathOut)
+{
+	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");	//中文路径
+	GDALDatasetH m_datasetin = GDALOpen(pathImgIn, GA_ReadOnly);
+
+	int xsize = GDALGetRasterXSize(m_datasetin);
+	int ysize = GDALGetRasterYSize(m_datasetin);
+	int bands = GDALGetRasterCount(m_datasetin);
+
+	//空间申请应该先try一下，算球了以后再说
+	float* data = new float[xsize*ysize*bands];
+	for (int i = 0; i < bands; ++i)
+		GDALRasterIO(GDALGetRasterBand(m_datasetin, i + 1), GF_Read, 0, 0, xsize, ysize, data + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+
+	//每个波段
+	float* pixels = new float[bands];
+	float* pixeldct = new float[bands];
+	for (int i = 0; i < xsize; ++i)
+	{
+		for (int j = 0; j < ysize; ++j)
+		{
+			for (int k = 0; k < bands; ++k)
+				pixels[k] = data[k*xsize*ysize + j*xsize + i];
+			IDCT1D(pixels, bands, pixeldct);
+			for (int k = 0; k < bands; ++k)
+				data[k*xsize*ysize + j*xsize + i] = pixeldct[k];
+		}
+	}
+	GDALDatasetH m_datasetout = GDALCreate(GDALGetDriverByName("GTiff"), pathOut, xsize, ysize, bands, GDT_Float32, NULL);
+	for (int i = 0; i < bands; ++i)
+		GDALRasterIO(GDALGetRasterBand(m_datasetout, i + 1), GF_Write, 0, 0, xsize, ysize, data + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
+	GDALClose(m_datasetin);
+	GDALClose(m_datasetout);
+	delete[]data;
+	delete[]pixels;
+	delete[]pixeldct;
+}
 //某一个波段
 void DCT2D(const char* pathImgIn, const char* pathOut, int bandIdx)
 {
@@ -215,6 +295,7 @@ void IDCT2D(const char* pathImgIn, const char* pathOut, int bandIdx)
 	delete[]dataDCT;
 	delete[]dataIDCT;
 }
+
 //所有波段
 void DCT3D(const char* pathImgIn, const char* pathOut)
 {

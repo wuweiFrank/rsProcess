@@ -19,6 +19,8 @@ void DCT3D(float* dataIn, int xsize, int ysize, int bands, float* DCTData);
 void IDCT3D(float* DCTData, int xsize, int ysize, int bands, float* IDCTData);
 
 //图像DCT变换
+void DCT1D(const char* pathImgIn, const char* pathOut);	//所有像素进行1维DCT变换
+void IDCT1D(const char* pathImgIn, const char* pathOut);
 void DCT2D(const char* pathImgIn, const char* pathOut, int bandIdx);
 void IDCT2D(const char* pathImgIn, const char* pathOut, int bandIdx);
 void DCT3D(const char* pathImgIn, const char* pathOut);

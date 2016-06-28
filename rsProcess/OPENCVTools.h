@@ -249,3 +249,29 @@ private:
 public:
 	void ImageInpaint_Inpaint(const char* pathImg,const char* pathDst);
 };
+
+
+//视频追踪
+class VideoTrack {
+public:
+	//打开视频数据
+	void OpenVideo(const char* pathVideo);
+	void AnalysisVideo(const char* pathVideo);
+
+	//获取影像帧
+	Mat GetViderFrame(int frame);
+	Mat GetNextFrame();
+	Mat GetPrevFrame();
+
+private:
+	//变化信息
+	Mat GetChangeFrame(Mat frameLast,Mat framePre);
+	void GetMinBox(Mat changeFrame,Mat& imgFrame);
+
+private:
+	int m_cur_frame;
+	int m_total_frame;
+	int m_width_frame;
+	int m_height_frame;
+	VideoCapture capture;
+};

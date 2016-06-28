@@ -4,6 +4,7 @@
 #include<fstream>
 #include<iomanip>
 #include<iostream>
+#include<vector>
 using namespace std;
 
 #pragma warning(disable : 4996)
@@ -966,3 +967,111 @@ void ImageInpaint::ImageInpaint_Inpaint(const char* pathImg, const char* pathDst
 	}
 }
 
+
+//================================================================================================================================================================================
+void VideoTrack::OpenVideo(const char* pathVideo)
+{
+	capture.open(pathVideo);
+	if (!capture.isOpened())
+	{
+		printf("can not open file");
+		exit(-1);
+	}
+	m_total_frame = capture.get(CV_CAP_PROP_FRAME_COUNT);
+	m_width_frame = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+	m_height_frame = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+	m_cur_frame = 0;
+}
+void VideoTrack::AnalysisVideo(const char* pathVideo)
+{
+	OpenVideo(pathVideo);
+	double rate = capture.get(CV_CAP_PROP_FPS);
+	bool stop(false);
+	int delay = 1000 / rate;
+
+	//Mat frame = GetViderFrame(0);
+	
+	while (!stop)
+	{
+		Mat pre, last,change;
+		if (!capture.read(pre))
+			break;
+		if (!capture.read(last))
+			break;
+		change = GetChangeFrame(last, pre);
+		GetMinBox(change, last);
+		imshow("Canny Video", last);
+		waitKey(delay);
+	}
+}
+
+Mat VideoTrack::GetViderFrame(int frame)
+{
+	if (frame > 0 && frame < m_total_frame - 1)
+	{
+		m_cur_frame = frame;
+		capture.set(CV_CAP_PROP_POS_FRAMES, m_cur_frame);
+		Mat frameMat;
+		if (!capture.read(frameMat))
+			exit(-1);
+		m_cur_frame++;
+		return frameMat;
+	}
+	else
+		exit(-1);
+}
+
+Mat VideoTrack::GetNextFrame()
+{
+	capture.set(CV_CAP_PROP_POS_FRAMES, m_cur_frame);
+	Mat frameMat;
+	if (!capture.read(frameMat))
+		exit(-1);
+	m_cur_frame++;
+	return frameMat;
+}
+
+Mat VideoTrack::GetPrevFrame()
+{
+	if (m_cur_frame > 0)
+		m_cur_frame--;
+	else
+		m_cur_frame = 0;
+	capture.set(CV_CAP_PROP_POS_FRAMES, m_cur_frame);
+	Mat frameMat;
+	if (!capture.read(frameMat))
+		exit(-1);
+	if (m_cur_frame < m_total_frame-1)
+		m_cur_frame++;
+	else
+		m_cur_frame = m_total_frame-1;
+
+	return frameMat;
+}
+
+Mat VideoTrack::GetChangeFrame(Mat frameLast, Mat framePre)
+{
+	Mat frameChange = abs(Mat(frameLast - framePre));
+	Mat gray;
+	cvtColor(frameChange, gray, CV_BGR2GRAY);
+	Mat ThresMat;
+	threshold(gray, ThresMat, 6,255, THRESH_BINARY);
+	erode(ThresMat, ThresMat, Mat(2, 2, CV_8U), Point(-1, -1), 2);
+	dilate(ThresMat, ThresMat, Mat(5, 5, CV_8U), Point(-1, -1), 2);
+	//imshow("test", ThresMat);
+	//waitKey(0);
+	return ThresMat;
+}
+
+void VideoTrack::GetMinBox(Mat changeFrame, Mat& imgFrame)
+{
+	Mat img;
+	Mat imgt = Mat::zeros(changeFrame.size(), CV_8UC1);
+	vector<Mat> mv;
+	mv.push_back(imgt);
+	mv.push_back(imgt);
+	mv.push_back(changeFrame);
+	merge(mv, img);
+
+	addWeighted(img, 0.3, imgFrame, 0.7, 0.0, imgFrame);
+}
