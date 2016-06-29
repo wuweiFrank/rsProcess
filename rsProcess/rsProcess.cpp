@@ -3,7 +3,8 @@
 
 #include "stdafx.h"
 #include"FrequencyFunc\DCTTrans.h"
-#include"OPENCVTools.h"
+#include"experiment\ExemplarBased.h"
+#include"MailModel\CSendMail.h"
 #include<iostream>
 #include<string>
 using namespace std;
@@ -60,15 +61,21 @@ int main()
 	//set_mask_region("D:\\lena", "D:\\lenaMask.tif", pnt1, pnt2);
 	//set_mask_region("D:\\msk.bmp", "D:\\msk.tif", pnt1, pnt2);
 
-	//char* path1 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateLess";
-	//char* path2 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateLessDCT1D.tif";
-	//DCT1D(path1, path2);
+	//char* path1 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateAll";
+	//char* path2 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateAllDCT1D.tif";
+	//char* path3 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateAllIDCT1D.tif";
+	//char* pathm = "D:\\my_doc\\2015.10.20数据\\hyper\\msk.bmp";
+	//char* pathRepair= "D:\\my_doc\\2015.10.20数据\\hyper\\AllRepair.tif";
+	//ExemplarBased m_eb;
+	//m_eb.ExemplarBased_Inpaint(path2, pathm, pathRepair);
+	//IDCT1D(pathRepair, path3);
+
 	//set_mask_region("D:\\my_doc\\2016-05-11测试数据\\TestData1", "D:\\test.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
 	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
 	//set_mask_region("D:\\img.tif", "D:\\m.tif", "D:\\imgA.tif");
 	//set_mask_region("D:\\img.tif", "D:\\mask.tif", "D:\\imgA.tif");
-	//ExemplarBased m_eb;
+	
 	//m_eb.ExemplarBased_Inpaint("D:\\lenaMask.tif", "D:\\msk.tif", "D:\\repair.tif");
 	//m_eb.ExemplarBased_Inpaint("D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulate", "D:\\my_doc\\2015.10.20数据\\hyper\\msk.bmp", "D:\\my_doc\\2015.10.20数据\\hyper\\repairtest.tif");
 	//m_eb.ExemplarBased_InpaintTexture("D:\\mf.tif", "D:\\msk.tif", "D:\\Repair.tif");

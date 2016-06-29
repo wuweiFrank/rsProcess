@@ -255,6 +255,9 @@
     <ClInclude Include="experiment\SegmentBased.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MailModel\CSendMail.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -441,6 +444,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="experiment\SegmentBased.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MailModel\CSendMail.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

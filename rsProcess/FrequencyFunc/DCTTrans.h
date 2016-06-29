@@ -21,9 +21,9 @@ void IDCT3D(float* DCTData, int xsize, int ysize, int bands, float* IDCTData);
 //图像DCT变换
 void DCT1D(const char* pathImgIn, const char* pathOut);	//所有像素进行1维DCT变换
 void IDCT1D(const char* pathImgIn, const char* pathOut);
-void DCT2D(const char* pathImgIn, const char* pathOut, int bandIdx);
+void DCT2D(const char* pathImgIn, const char* pathOut, int bandIdx);//对影像进行DCT变换
 void IDCT2D(const char* pathImgIn, const char* pathOut, int bandIdx);
-void DCT3D(const char* pathImgIn, const char* pathOut);
+void DCT3D(const char* pathImgIn, const char* pathOut); //先对影像做DCT变换，然后对像素进行DCT变换
 void IDCT3D(const char* pathImgIn, const char* pathOut);
 
 //图像滤波

@@ -15,7 +15,7 @@ private:
 	void ExemplarBased_GetPriority(float* imgData, int xsize, int ysize, vector<CPOINT> edge,CPOINT &pos);
 
 	//对最优先修复位置进行修复
-	void ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, float* imgData, float* mskData, int xsize, int ysize);
+	void ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, float* imgData, float* mskData, float* tmpMsk,int xsize, int ysize);
 
 	//每次只考虑修复少量缺失
 	void ExemplarBased_PriorityInpaintLess(CPOINT pos, int regionSize, float* imgData, float* mskData, int xsize, int ysize);

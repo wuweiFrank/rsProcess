@@ -13,30 +13,35 @@ void ExemplarBased::ExemplarBased_Inpaint(const char* pathImg, const char* pathM
 
 	int xsize = GDALGetRasterXSize(m_datasetMsk);
 	int ysize = GDALGetRasterYSize(m_datasetMsk);
-	int bands = GDALGetRasterCount(m_datasetMsk);
-	int regionsize = 11;
+	int bands = GDALGetRasterCount(m_datasetImg);
+	int regionsize = 7;
 
 	//数据申请
 	float* imgData = new float[xsize*ysize];
 	float* mskData = new float[xsize*ysize];
 	float* tmpMskData = new float[xsize*ysize];
 
-	GDALRasterIO(GDALGetRasterBand(m_datasetImg, 1), GF_Read, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
+	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDst, xsize, ysize, bands, GDT_Float32, NULL);
 	GDALRasterIO(GDALGetRasterBand(m_datasetMsk, 1), GF_Read, 0, 0, xsize, ysize, mskData, xsize, ysize, GDT_Float32, 0, 0);
-
-	vector<CPOINT> edges;
-	ExemplarBased_UpdateEdge(mskData, xsize, ysize, edges);
-	memcpy(tmpMskData, mskData, sizeof(float)*xsize*ysize);
-	while (edges.size() != 0)
+	for (int i = 1; i < bands; ++i)
 	{
-		CPOINT pos;
-		ExemplarBased_GetPriority(imgData, xsize, ysize, edges, pos);
-		ExemplarBased_PriorityInpaint(pos, regionsize, imgData, mskData, xsize, ysize);
-		ExemplarBased_UpdateMask(imgData, tmpMskData, xsize, ysize);
-		ExemplarBased_UpdateEdge(tmpMskData, xsize, ysize, edges);
+		GDALRasterIO(GDALGetRasterBand(m_datasetImg, i), GF_Read, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
+
+		vector<CPOINT> edges;
+		ExemplarBased_UpdateEdge(mskData, xsize, ysize, edges);
+		memcpy(tmpMskData, mskData, sizeof(float)*xsize*ysize);
+		while (edges.size() != 0)
+		{
+			CPOINT pos;
+			ExemplarBased_GetPriority(imgData, xsize, ysize, edges, pos);
+			ExemplarBased_PriorityInpaint(pos, regionsize, imgData, mskData, tmpMskData, xsize, ysize);
+			//ExemplarBased_UpdateMask(imgData, tmpMskData, xsize, ysize);
+			//memcpy(tmpMskData, mskData, sizeof(float)*xsize*ysize);
+			ExemplarBased_UpdateEdge(tmpMskData, xsize, ysize, edges);
+		}
+		GDALRasterIO(GDALGetRasterBand(m_datasetDst, 1), GF_Write, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
+		GDALRasterIO(GDALGetRasterBand(m_datasetDst, i), GF_Write, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
 	}
-	GDALDatasetH m_datasetDst = GDALCreate(GDALGetDriverByName("GTiff"), pathDst, xsize, ysize, 1, GDT_Float32, NULL);
-	GDALRasterIO(GDALGetRasterBand(m_datasetDst, 1), GF_Write, 0, 0, xsize, ysize, imgData, xsize, ysize, GDT_Float32, 0, 0);
 	GDALClose(m_datasetDst);
 	//数据输出
 	GDALClose(m_datasetImg);
@@ -212,20 +217,92 @@ void ExemplarBased::ExemplarBased_GetPriority(float* imgData, int xsize, int ysi
 	delete[]priority;
 }
 
-void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, float* imgData, float* mskData, int xsize, int ysize)
+void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, float* imgData, float* mskData,  float* tmpMsk, int xsize, int ysize)
 {
 	float *regionmask=new float[(2* regionSize +1)*(2* regionSize + 1)];
 	memset(regionmask, 0, sizeof(float) * (2 * regionSize + 1)*(2 * regionSize + 1));
+
+	int RegionPos = 1; int num1 = 0, num2 = 0;
+	//如果像素在角点位置则判断是不是比较好的角点
+	//为区域的左上角点，则整个区域待修复像素个数为：
+	for (int i = 0; i < 2 * regionSize + 1; ++i)
+	{
+		for (int j = 0; j < 2 * regionSize + 1; ++j)
+		{
+			if (abs(mskData[(pos.y + j)*xsize + pos.x + i] + 1) < 0.00001)
+				num1++;
+		}
+	}
+	//为区域的右上角点，则整个区域待修复像素个数为：
+	for (int i = 0; i < 2 * regionSize + 1; ++i)
+	{
+		for (int j = 0; j < 2 * regionSize + 1; ++j)
+		{
+			if (abs(mskData[(pos.y + j)*xsize + pos.x - i] + 1) < 0.00001)
+				num2++;
+		}
+	}
+	if (num1 > num2)
+	{
+		num1 = num2;
+		RegionPos = 2;
+	}
+	//为区域的左下角点, 则整个区域待修复像素个数为：
+	for (int i = 0; i < 2 * regionSize + 1; ++i)
+	{
+		for (int j = 0; j < 2 * regionSize + 1; ++j)
+		{
+			if (abs(mskData[(pos.y - j)*xsize + pos.x + i] + 1) < 0.00001)
+				num2++;
+		}
+	}
+	if (num1 > num2)
+	{
+		num1 = num2;
+		RegionPos = 3;
+	}
+	//为区域的右下角点, 则整个区域待修复像素个数为：
+	for (int i = 0; i < 2 * regionSize + 1; ++i)
+	{
+		for (int j = 0; j < 2 * regionSize + 1; ++j)
+		{
+			if (abs(mskData[(pos.y - j)*xsize + pos.x - i] + 1) < 0.00001)
+				num2++;
+		}
+	}
+	if (num1 > num2)
+	{
+		num1 = num2;
+		RegionPos = 4;
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int num = 0,lastnum;
 	float raio = 0.2;
 	CPOINT tmpPos;
-	tmpPos.x = pos.x; tmpPos.y = pos.y;
+	if (RegionPos == 1)
+	{
+		tmpPos.x = pos.x + regionSize; tmpPos.y = pos.y + regionSize;
+	}
+	if (RegionPos == 2)
+	{
+		tmpPos.x = pos.x - regionSize; tmpPos.y = pos.y + regionSize;
+	}
+	if (RegionPos == 3)
+	{
+		tmpPos.x = pos.x + regionSize; tmpPos.y = pos.y +regionSize;
+	}
+	if (RegionPos == 4)
+	{
+		tmpPos.x = pos.x - regionSize; tmpPos.y = pos.y - regionSize;
+	}
+
 	num = 0;
 	for (int i = tmpPos.x - regionSize; i <= tmpPos.x + regionSize; ++i)
 	{
 		for (int j = tmpPos.y - regionSize; j <= tmpPos.y + regionSize; ++j)
 		{
-			if (imgData[j * xsize + i] != -1)
+			if (tmpMsk[j * xsize + i] != -1)
 			{
 				regionmask[(j - (tmpPos.y - regionSize))*(2 * regionSize + 1) + i - (tmpPos.x - regionSize)] = 1;
 				num++;
@@ -243,7 +320,7 @@ void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, fl
 	{
 		for (int j = tmpPos.y - regionSize; j <= tmpPos.y + regionSize; ++j)
 		{
-			if (imgData[j * xsize + i] != -1)
+			if (tmpMsk[j * xsize + i] != -1)
 			{
 				data1[num] = imgData[j * xsize + i];
 				num++;
@@ -301,7 +378,8 @@ void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, fl
 	//	}
 	//}
 	//只修复中心像素
-	imgData[(regionSize + tmpPos.y - regionSize)* xsize + regionSize + tmpPos.x - regionSize] = imgData[(regionSize + maxidy)* xsize + regionSize + maxidx];
+	imgData[(pos.y)* xsize + pos.x] = imgData[(regionSize + maxidy)* xsize + regionSize + maxidx];
+	tmpMsk[(pos.y )* xsize + pos.x] = 255;
 	delete[]regionmask;
 	delete[]data1;
 	delete[]data2;

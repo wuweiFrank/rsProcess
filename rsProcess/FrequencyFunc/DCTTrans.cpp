@@ -190,16 +190,18 @@ void DCT1D(const char* pathImgIn, const char* pathOut)
 	//每个波段
 	float* pixels = new float[bands];
 	float* pixeldct = new float[bands];
+	int num = 0;
 	for (int i = 0; i < xsize; ++i)
 	{
 		for (int j = 0; j < ysize; ++j)
 		{
-			printf("process pixel%d\r", j*xsize + i);
+			printf("process pixel：%d     \r", num);
 			for (int k = 0; k < bands; ++k)
 				pixels[k] = data[k*xsize*ysize + j*xsize + i];
 			DCT1D(pixels, bands, pixeldct);
 			for (int k = 0; k < bands; ++k)
 				data[k*xsize*ysize + j*xsize + i]= pixeldct[k];
+			num++;
 		}
 	}
 	printf("\n");
@@ -230,17 +232,21 @@ void IDCT1D(const char* pathImgIn, const char* pathOut)
 	//每个波段
 	float* pixels = new float[bands];
 	float* pixeldct = new float[bands];
+	int num = 0;
 	for (int i = 0; i < xsize; ++i)
 	{
 		for (int j = 0; j < ysize; ++j)
 		{
+			printf("process pixel:%d     \r", num);
 			for (int k = 0; k < bands; ++k)
 				pixels[k] = data[k*xsize*ysize + j*xsize + i];
 			IDCT1D(pixels, bands, pixeldct);
 			for (int k = 0; k < bands; ++k)
 				data[k*xsize*ysize + j*xsize + i] = pixeldct[k];
+			num++;
 		}
 	}
+	printf("\n");
 	GDALDatasetH m_datasetout = GDALCreate(GDALGetDriverByName("GTiff"), pathOut, xsize, ysize, bands, GDT_Float32, NULL);
 	for (int i = 0; i < bands; ++i)
 		GDALRasterIO(GDALGetRasterBand(m_datasetout, i + 1), GF_Write, 0, 0, xsize, ysize, data + i*xsize*ysize, xsize, ysize, GDT_Float32, 0, 0);
@@ -250,6 +256,7 @@ void IDCT1D(const char* pathImgIn, const char* pathOut)
 	delete[]pixels;
 	delete[]pixeldct;
 }
+
 //某一个波段
 void DCT2D(const char* pathImgIn, const char* pathOut, int bandIdx)
 {

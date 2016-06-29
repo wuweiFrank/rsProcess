@@ -177,6 +177,7 @@
     <ClInclude Include="lidar\LidarFliter.h" />
     <ClInclude Include="lidar\LidarReader.h" />
     <ClInclude Include="machineLearning\CVMachineLearning.h" />
+    <ClInclude Include="MailModel\CSendMail.h" />
     <ClInclude Include="matrixOperation.h" />
     <ClInclude Include="machineLearning\mnistFile.h" />
     <ClInclude Include="OPENCVTools.h" />
@@ -254,6 +255,7 @@
     <ClCompile Include="lidar\LidarDefs.cpp" />
     <ClCompile Include="lidar\LidarReader.cpp" />
     <ClCompile Include="machineLearning\CVMachineLearning.cpp" />
+    <ClCompile Include="MailModel\CSendMail.cpp" />
     <ClCompile Include="matrixOperation.cpp" />
     <ClCompile Include="machineLearning\mnistFile.cpp" />
     <ClCompile Include="OPENCVTools.cpp" />
