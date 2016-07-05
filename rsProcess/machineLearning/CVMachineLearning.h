@@ -3,7 +3,7 @@
 #include "../opencv/opencv2/core/core.hpp"
 #include"../opencv/opencv2/imgproc.hpp"
 #include "../opencv/opencv2/highgui/highgui.hpp"
-
+#include"../opencv/opencv2/objdetect.hpp"
 using namespace std;
 //using namespace cv;
 using namespace cv::ml;
@@ -35,6 +35,8 @@ public:
 public:
 	//获取训练数据集
 	void CV_GetMnistTrainData(const char* pathMnist,const char* pathLabel, cv::Mat &trianMat, cv::Mat &labelMat);
+	//获取车辆识别数据集
+	void CV_GetVehicleTrainData(const char* pathDataset, cv::Mat &trainMat, cv::Mat &label);
 	//获取训练数据集
 	//生成正样本描述
 	void CV_HaarSampleDescriptor(const char* pathPosSampleList,const char* pathOutVec, int width, int height,int num );
@@ -49,4 +51,7 @@ public:
 	void CV_ANN_BP_PredictMnist(const char* pathPredict, const char* pathNet, const char* pathLabel = NULL);
 	void CV_SVM_PredictMnist(const char* pathPredict, const char* pathSVM,const char* pathLabel=NULL);
 	void CV_LogisticRegression_PredictMnist(const char* pathPredict, const char* pathLogisticRegression, const char* pathLabel = NULL);
+
+	//svm对车辆数据集进行识别
+	void CV_SVM_PredictVehicle(const char* pathPredictImg, const char* pathSVM);
 };

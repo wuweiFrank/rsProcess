@@ -181,13 +181,75 @@ void CVMachineLearningTrain::CV_GetMnistTrainData(const char* pathMnist, const c
 	
 	trianMat = tmp1.clone();
 	labelMat = labelsMat.clone();
-	float* p = (float*)labelsMat.data;
 	lab_ifs.close();
 	ifs.close();
 
 	delete[]imgData; imgData = NULL;
 	delete[]label; label = NULL;
 	delete[]imgDataf; imgDataf = NULL;
+}
+
+void CVMachineLearningTrain::CV_GetVehicleTrainData(const char* pathDataset, cv::Mat &trainMat, cv::Mat &label)
+{
+	ifstream ifs(pathDataset, ios_base::in);
+	if (!ifs.is_open())
+		return;
+	char datasetPos[256], datasetNeg[256];
+	ifs.getline(datasetPos, 256);
+	ifs.getline(datasetNeg, 256);
+	ifs.close();
+
+	//获取图像路径
+	vector<string> m_pos_list, m_neg_list;
+	GetImageList(datasetPos, m_pos_list);
+	GetImageList(datasetNeg, m_neg_list);
+
+	int num_pos = m_pos_list.size();
+	int num_neg = m_neg_list.size();
+	cv::HOGDescriptor hog(cv::Size(64, 64), cv::Size(16, 16), cv::Size(8, 8), cv::Size(8, 8), 9);
+	cv::Mat img = cv::imread(m_pos_list[0].c_str());
+	if (img.data == NULL)
+		return;
+	vector<float> featureVec;
+	hog.compute(img, featureVec, cv::Size(8, 8));
+	int featureSize = featureVec.size();
+
+	float* trainData = new float[(num_pos+num_neg)*featureSize];
+	float* labelData = new float[(num_pos+num_neg)*2];
+	memset(trainData, 0, sizeof(float)*(num_pos+num_neg)*featureSize);
+	memset(labelData, 0, sizeof(float)*(num_pos+num_neg)*2);
+	
+	printf("处理正样本....\n");
+	for (int i = 0; i < num_pos; ++i)
+	{
+		img = cv::imread(m_pos_list[i].c_str());
+		if (img.data == NULL)
+			return;
+		featureVec.clear();
+		hog.compute(img, featureVec, cv::Size(8, 8));
+		for (int j = 0; j < featureSize; ++j)
+			trainData[i*featureSize + j] = featureVec[j];
+		labelData[2 * i + 0] = 1;
+	}
+
+	printf("处理负样本...\n");
+	for (int i = 0; i < num_neg; ++i)
+	{
+		img = cv::imread(m_neg_list[i].c_str());
+		if (img.data == NULL)
+			return;
+		featureVec.clear();
+		hog.compute(img, featureVec, cv::Size(8, 8));
+		for (int j = 0; j < featureSize; ++j)
+			trainData[(i+num_pos)*featureSize + j] = featureVec[j];
+		labelData[2 * (i+ num_pos) + 1] = 1;
+	}
+	
+	cv::Mat tmpTrainMat((num_pos + num_neg), featureSize, CV_32FC1, trainData);
+	cv::Mat tmpLabelMat((num_pos + num_neg), 2, CV_32FC1, labelData);
+	delete[]trainData; delete[]labelData;
+	trainMat = tmpTrainMat.clone();
+	label    = tmpLabelMat.clone();
 }
 
 void CVMachineLearningTrain::CV_HaarSampleDescriptor(const char* pathPosSampleList, const char* pathOutVec, int width, int height, int num)
@@ -422,4 +484,60 @@ void CVMachineLearningPredict::CV_LogisticRegression_PredictMnist(const char* pa
 	delete[]imgData;
 	delete[]imgDataf;
 	ifs.close();
+}
+
+void CVMachineLearningPredict::CV_SVM_PredictVehicle(const char* pathPredictImg, const char* pathSVM)
+{
+	cv::Ptr<SVM> svm = cv::Algorithm::load<SVM>(pathSVM);
+	cv::Mat supportVector = svm->getSupportVectors();//
+
+												 //获取alpha和rho
+	cv::Mat alpha;//每个支持向量对应的参数α(拉格朗日乘子)，默认alpha是float64的
+	cv::Mat svIndex;//支持向量所在的索引
+	float rho = svm->getDecisionFunction(0, alpha, svIndex);
+
+	//转换类型:这里一定要注意，需要转换为32的
+	cv::Mat alpha2;
+	alpha.convertTo(alpha2, CV_32FC1);
+	cv::Mat result = alpha2*supportVector;
+	int num = result.rows;
+	vector<float> m_hog_classifier;
+	for (int i = 0; i < num; ++i)
+	{
+		float t=result.at<float>(0, i) *= -1;
+		m_hog_classifier.push_back(t);
+	}
+	cv::Mat img = cv::imread(pathPredictImg, ios_base::in);
+	vector<cv::Rect> detectRect,detectFliterRect;
+	cv::HOGDescriptor hog(cv::Size(64, 64), cv::Size(16, 16), cv::Size(8, 8), cv::Size(8, 8), 9);
+	hog.setSVMDetector(m_hog_classifier);
+	hog.detectMultiScale(img, detectRect, 0, cv::Size(8, 8), cv::Size(64, 64), 1.05, 2);
+
+
+	for (int i = 0; i < detectRect.size(); i++)
+	{
+		cv::Rect r = detectRect[i];
+		int j;
+		for (j = 0; j < detectRect.size(); j++)
+			if (j != i && (r & detectRect[j]) == r)
+				break;
+		if (j == detectRect.size())
+			detectFliterRect.push_back(r);
+	}
+
+	// 适当缩小矩形
+	for (int i = 0; i < detectFliterRect.size(); i++)
+	{
+		cv::Rect r = detectFliterRect[i];
+		// the HOG detector returns slightly larger rectangles than the real objects.
+		// so we slightly shrink the rectangles to get a nicer output.
+		r.x += cvRound(r.width*0.1);
+		r.width = cvRound(r.width*0.8);
+		r.y += cvRound(r.height*0.07);
+		r.height = cvRound(r.height*0.8);
+		rectangle(img, r.tl(), r.br(), cv::Scalar(0, 255, 0), 3);
+	}
+
+	imshow("people detector", img);
+	cv::waitKey(0);
 }
