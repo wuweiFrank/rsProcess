@@ -1005,6 +1005,30 @@ void VideoTrack::AnalysisVideo(const char* pathVideo)
 	}
 }
 
+void VideoTrack::FrameToImage(const char* pathVideo, const char* pathDstDir)
+{
+	OpenVideo(pathVideo);
+	double rate = capture.get(CV_CAP_PROP_FPS);
+	bool stop(false);
+	int delay = 1000 / rate;
+
+	//Mat frame = GetViderFrame(0);
+	int num = 1;
+	while (!stop)
+	{
+		char pathDst[256];
+		strcpy(pathDst, pathDstDir);
+		char name[10];
+		sprintf(name, "\\%d.bmp", num);
+		strcat(pathDst, name);
+		Mat img;
+		if (!capture.read(img))
+			break;
+		imwrite(pathDst, img);
+		num++;
+	}
+}
+
 Mat VideoTrack::GetViderFrame(int frame)
 {
 	if (frame > 0 && frame < m_total_frame - 1)
@@ -1020,7 +1044,6 @@ Mat VideoTrack::GetViderFrame(int frame)
 	else
 		exit(-1);
 }
-
 Mat VideoTrack::GetNextFrame()
 {
 	capture.set(CV_CAP_PROP_POS_FRAMES, m_cur_frame);
@@ -1030,7 +1053,6 @@ Mat VideoTrack::GetNextFrame()
 	m_cur_frame++;
 	return frameMat;
 }
-
 Mat VideoTrack::GetPrevFrame()
 {
 	if (m_cur_frame > 0)
@@ -1048,7 +1070,6 @@ Mat VideoTrack::GetPrevFrame()
 
 	return frameMat;
 }
-
 Mat VideoTrack::GetChangeFrame(Mat frameLast, Mat framePre)
 {
 	Mat frameChange = abs(Mat(frameLast - framePre));
@@ -1062,7 +1083,6 @@ Mat VideoTrack::GetChangeFrame(Mat frameLast, Mat framePre)
 	//waitKey(0);
 	return ThresMat;
 }
-
 void VideoTrack::GetMinBox(Mat changeFrame, Mat& imgFrame)
 {
 	Mat img;
@@ -1074,4 +1094,23 @@ void VideoTrack::GetMinBox(Mat changeFrame, Mat& imgFrame)
 	merge(mv, img);
 
 	addWeighted(img, 0.3, imgFrame, 0.7, 0.0, imgFrame);
+}
+void VideoTrack::ImageNormalize(const char* pathList, const char* pathDir, int width, int height)
+{
+	vector<string> m_list;
+	GetImageList(pathList, m_list);
+	int num = m_list.size();
+
+	for (int i = 0; i < num; ++i)
+	{
+		printf("normalize image %d\n", i + 1);
+		char pathPath[256];
+		sprintf(pathPath, "%s\\%d.bmp", pathDir, i + 1);
+		Mat img = imread(m_list[i].c_str());
+		if (img.empty())
+			continue;
+		Mat normal;
+		resize(img, normal, Size(width, height));
+		imwrite(pathPath, normal);
+	}
 }

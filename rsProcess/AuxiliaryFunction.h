@@ -52,7 +52,7 @@ double GetDisofPoints(CPOINT pnt1, CPOINT pnt2);
 
 //获取影像列表
 void GetImageList(const char* pathList, vector<string> &pszImage);
-
+void SetFileList(const char* pathDir, const char* pathList);
 //三个数中最大两个数的平均值
 double MaxAvg(double data1, double data2, double data3);
 //三个数中最小两个数的平均值

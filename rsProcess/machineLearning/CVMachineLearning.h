@@ -1,19 +1,19 @@
 #pragma once
 #include"../opencv/opencv2/ml.hpp"
 #include "../opencv/opencv2/core/core.hpp"
-#include"../opencv\opencv2\imgproc.hpp"
+#include"../opencv/opencv2/imgproc.hpp"
 #include "../opencv/opencv2/highgui/highgui.hpp"
 
 using namespace std;
-using namespace cv;
-using namespace ml;
+//using namespace cv;
+using namespace cv::ml;
 
 //数据集类型
 enum DatasetTypes
 {
 	DATASET_MNIST = 0,
-	ENVI_IMAGEROI = 1
-	
+	ENVI_IMAGEROI = 1,
+	IMAGE_LIST	  = 3
 };
 
 //机器学习训练算法
@@ -29,9 +29,16 @@ public:
 	//logistic regression逻辑回归训练库
 	void CV_LogisticRegression_Train(const char* pathDataset, const char* pathLabelSet, const char* pathLogisticRegression, DatasetTypes datasetType);
 
-private:
+	//AdaBoost算法
+	void CV_AdaBoostTrain(const char* pathPosVec, const char* pathNegList, const char* pathAdaboost,int posNum,int negNum);
+	
+public:
 	//获取训练数据集
-	void CV_GetMnistTrainData(const char* pathMnist,const char* pathLabel,Mat &trianMat, Mat &labelMat);
+	void CV_GetMnistTrainData(const char* pathMnist,const char* pathLabel, cv::Mat &trianMat, cv::Mat &labelMat);
+	//获取训练数据集
+	//生成正样本描述
+	void CV_HaarSampleDescriptor(const char* pathPosSampleList,const char* pathOutVec, int width, int height,int num );
+
 };
 
 //机器学习预测算法

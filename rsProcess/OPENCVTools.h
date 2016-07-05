@@ -257,6 +257,8 @@ public:
 	//打开视频数据
 	void OpenVideo(const char* pathVideo);
 	void AnalysisVideo(const char* pathVideo);
+	void FrameToImage(const char* pathVideo, const char* pathDstDir);
+	void ImageNormalize(const char* pathList,const char* pathDir,int width,int height);
 
 	//获取影像帧
 	Mat GetViderFrame(int frame);
@@ -267,6 +269,7 @@ private:
 	//变化信息
 	Mat GetChangeFrame(Mat frameLast,Mat framePre);
 	void GetMinBox(Mat changeFrame,Mat& imgFrame);
+
 
 private:
 	int m_cur_frame;

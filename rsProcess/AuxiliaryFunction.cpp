@@ -1,6 +1,9 @@
 #include"stdafx.h"
 #include"AuxiliaryFunction.h"
 #include<fstream>
+#include<iostream>  
+#include<io.h>  
+#include <fstream>
 using namespace std;
 //写ENVI头文件到文件中
 void WriteENVIHeader(const char* pathHeader, ENVIHeader mImgHeader)
@@ -1204,7 +1207,31 @@ void GetImageList(const char* pathList, vector<string> &pszImage)
 	} while (!fin.eof());
 	fin.close();
 }
-
+void SetFileList(const char* pathDir, const char* pathList)
+{
+	ofstream ofs;
+	ofs.open(pathList);
+	if (!ofs.is_open())
+		return ;
+	_finddata_t file;
+	long lf;
+	char szTmp[300];
+	sprintf(szTmp, "%s\\*.*", pathDir);
+	//输入文件夹路径  
+	if ((lf = _findfirst(szTmp, &file)) == -1)
+		printf("not found\n");
+	else
+	{
+		//输出文件名  
+		if (file.name != "."&&file.name != "..")
+			ofs << pathDir << "\\" << file.name;
+		while (_findnext(lf, &file) == 0)
+		{
+			ofs << endl << pathDir << "\\" << file.name;
+		}
+	}
+	_findclose(lf);
+}
 double MaxAvg(double data1, double data2, double data3)
 {
 	double m = data1;

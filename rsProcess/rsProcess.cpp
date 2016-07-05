@@ -3,9 +3,13 @@
 
 #include "stdafx.h"
 #include"FrequencyFunc\DCTTrans.h"
-#include"experiment\ExemplarBased.h"
-#include"MailModel\CSendMail.h"
+#include"AuxiliaryFunction.h"
+//#include"experiment\ExemplarBased.h"
+//#include"MailModel\CSendMail.h"
+#include"machineLearning\CVMachineLearning.h"
+#include"OPENCVTools.h"
 #include<iostream>
+#include<fstream>
 #include<string>
 using namespace std;
 int main()
@@ -36,8 +40,9 @@ int main()
 	//QPDLevel2ProcessUnitTestFunc();
 	//
 	//UAVGeoCorrectionTest();
-
-	//ImageSegmentTools tools;
+	//ImageSegmentTools m_seg;
+	//m_seg.ImgSegmentTools_WaterShed("C:\\Users\Public\\Pictures\\Sample Pictures\\repairTest.bmp","lena.jpg");
+ 	//ImageSegmentTools tools;
 	//tools.ImgSegmentTools_WaterShed("C:\\Users\\Public\\Pictures\\Sample Pictures\\repairTest.bmp", "D:\\watershed.bmp");
 	//tools.ImgSegmentTools_Canny("C:\\Users\\Public\\Pictures\\Sample Pictures\\badimg.bmp", "D:\\cannyedge.bmp");
 
@@ -61,15 +66,17 @@ int main()
 	//set_mask_region("D:\\lena", "D:\\lenaMask.tif", pnt1, pnt2);
 	//set_mask_region("D:\\msk.bmp", "D:\\msk.tif", pnt1, pnt2);
 
-	//char* path1 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateAll";
-	//char* path2 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateAllDCT1D.tif";
+	//char* path1 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateLess";
+	//char* path2 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateLessDCT1D.tif";
+	//char* path3 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateMore";
+	//char* path4 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateMoreDCT1D.tif";
 	//char* path3 = "D:\\my_doc\\2015.10.20数据\\hyper\\hypertestSimulateAllIDCT1D.tif";
 	//char* pathm = "D:\\my_doc\\2015.10.20数据\\hyper\\msk.bmp";
 	//char* pathRepair= "D:\\my_doc\\2015.10.20数据\\hyper\\AllRepair.tif";
 	//ExemplarBased m_eb;
 	//m_eb.ExemplarBased_Inpaint(path2, pathm, pathRepair);
-	//IDCT1D(pathRepair, path3);
-
+	//DCT1D(path1, path2);
+	//DCT1D(path3, path4);
 	//set_mask_region("D:\\my_doc\\2016-05-11测试数据\\TestData1", "D:\\test.tif", pnt1, pnt2);
 	//vector<Edge_Pixels> edgeinter;
 	//get_segment_edge("D:\\ImgCutSimulate1", edgeinter);
@@ -170,6 +177,38 @@ int main()
 
 	//VideoTrack m_track;
 	//m_track.AnalysisVideo("D:\\cache\\opencv\\sources\\samples\\data\\768x576.avi");
-	
+	//m_track.FrameToImage("D:\\cache\\opencv\\sources\\samples\\data\\768x576.avi", "D:\\cache\\opencv\\sources\\samples\\data\\frame");
+
+	//vector<string> paths;
+	//vector<Point2f> matches1,matches2;
+	//ifstream ifs("D:\\cache\\opencv\\sources\\samples\\data\\frame\\list.txt",ios_base::in);
+	//do
+	//{
+	//	string path;
+	//	getline(ifs, path);
+	//	if (path != "")
+	//		paths.push_back(path);
+	//} while (!ifs.eof());
+	//ifs.close();
+	//int num = paths.size();
+	//ImgFeaturesTools m_ImgFeatures;
+	//char matchpath[256];
+	//for (size_t i = 0; i < num-1; i++)
+	//{
+	//	printf("%d\n",i);
+	//	m_ImgFeatures.ImgFeaturesTools_ExtractMatch(paths[i].c_str(), matches1, paths[i+1].c_str(),matches2, "SIFTGPU", "");
+	//	sprintf(matchpath, "D:\\cache\\opencv\\sources\\samples\\data\\frame\\%d-%d.pts", i, i + 1);
+	//	m_ImgFeatures.ImgFeaturesTools_SaveENVIMatches(matchpath, paths[i].c_str(), paths[i + 1].c_str(), matches1, matches2);
+	//	matches1.clear();
+	//	matches2.clear();
+	//}
+
+	//VideoTrack m_track;
+	//SetFileList("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\negative", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\negative\\neg_list.txt");
+	//m_track.ImageNormalize("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\positive\\list.txt","D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\positiveNormalize" , 50, 50);
+	CVMachineLearningTrain train_set;
+	//train_set.CV_HaarSampleDescriptor("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\positiveNormalize\\pos_list.txt", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\vec.vec", 50, 50, 2315);
+	train_set.CV_AdaBoostTrain("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\vec.vec", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\negative\\neg_list.txt", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\xml", 10, 30);
+
 	return 0;
 }

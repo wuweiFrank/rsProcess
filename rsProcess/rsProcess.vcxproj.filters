@@ -258,6 +258,39 @@
     <ClInclude Include="MailModel\CSendMail.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="machineLearning\AdaBoostUtility.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\boost.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\CascadeClassifier.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\haarfeatures.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\HOGfeatures.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\imagestorage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\lbpfeatures.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\traincascade_features.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\cvPublic.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\old_ml.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="machineLearning\old_ml_precomp.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -447,6 +480,42 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MailModel\CSendMail.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\AdaBoostUtility.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\cascadeclassifier.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\features.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\haarfeatures.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\HOGfeatures.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\imagestorage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\lbpfeatures.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\old_ml_boost.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\old_ml_data.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\old_ml_inner_functions.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\old_ml_tree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="machineLearning\boost.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
