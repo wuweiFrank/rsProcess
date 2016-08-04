@@ -2,18 +2,16 @@
 //
 
 #include "stdafx.h"
-#include"FrequencyFunc\DCTTrans.h"
-#include"AuxiliaryFunction.h"
-//#include"experiment\ExemplarBased.h"
-//#include"MailModel\CSendMail.h"
-#include"machineLearning\CVMachineLearning.h"
-#include"OPENCVTools.h"
+#include"experiment\HyperSpectralRepair.h"
 #include<iostream>
 #include<fstream>
 #include<string>
 using namespace std;
 int main()
 {
+	HyperRepairFuncTest();
+	//HyperRepairFunc hyperSpectral;
+	//hyperSpectral.RepairFunc_TextureElement("D:\\speclib.txt", 12, 80, "D:\\spec.tif");
 	//UAVMosaicFast m_mosaic_fast;
 	//ImgFeaturesTools m_img_tools;
 	//vector<vector<Point2f>> m_pnts;
@@ -206,9 +204,9 @@ int main()
 	//VideoTrack m_track;
 	//SetFileList("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\negative", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\negative\\neg_list.txt");
 	//m_track.ImageNormalize("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\positive\\list.txt","D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\positiveNormalize" , 50, 50);
-	CVMachineLearningTrain train_set;
+	//CVMachineLearningTrain train_set;
 	//train_set.CV_HaarSampleDescriptor("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\positiveNormalize\\pos_list.txt", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\vec.vec", 50, 50, 2315);
-	train_set.CV_AdaBoostTrain("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\vec.vec", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\negative\\neg_list.txt", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\xml", 10, 30);
+	//train_set.CV_AdaBoostTrain("D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\vec.vec", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\negative\\neg_list.txt", "D:\\my_doc\\2016.06.27科技支撑\\车辆样本\\xml", 10, 30);
 
 	return 0;
 }

@@ -290,7 +290,7 @@ void ExemplarBased::ExemplarBased_PriorityInpaint(CPOINT pos, int regionSize, fl
 	}
 	if (RegionPos == 3)
 	{
-		tmpPos.x = pos.x + regionSize; tmpPos.y = pos.y +regionSize;
+		tmpPos.x = pos.x + regionSize; tmpPos.y = pos.y -regionSize;
 	}
 	if (RegionPos == 4)
 	{

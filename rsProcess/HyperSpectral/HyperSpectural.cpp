@@ -1756,15 +1756,16 @@ long InvPCA(double *imgBufferIn,int bandSum,int *bandNo,
 void PCATrans(char* pathSrc,char* pathDst,int* bandNo,int num,char* pathMartix)
  {
  	GDALAllRegister();
+	CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");			//中文路径
  	GDALDatasetH m_datasetsrc,m_datasetdst;
  	m_datasetsrc=GDALOpen(pathSrc,GA_ReadOnly);
  	if(!m_datasetsrc)
  		return ;
 
  	//获取数据和影像信息
- 	int width=GDALGetRasterBandXSize(m_datasetsrc);
- 	int heigh=GDALGetRasterBandYSize(m_datasetsrc);
- 	int bands=GDALGetRasterCount(m_datasetsrc);
+	int width = GDALGetRasterXSize(m_datasetsrc);
+	int heigh = GDALGetRasterYSize(m_datasetsrc);
+	int bands = GDALGetRasterCount(m_datasetsrc);
 
 	//获取实际处理波段数
 	int realBand=0;

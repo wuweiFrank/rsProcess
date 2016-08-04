@@ -33,7 +33,8 @@ void CVMachineLearningTrain::CV_SVM_Train(const char* pathDataset,double C ,cons
 	cv::Mat labelsMat;
 	if(datasetType== DATASET_MNIST)
 		CV_GetMnistTrainData(pathDataset, pathLabelSet, trainData, labelsMat);
-
+	//if(datasetType== IMAGE_LIST)
+	//	CV_GetVehicleTrainData()
 	float* labelf =(float*)labelsMat.data;
 	cv::Mat labelsMatAdapter= cv::Mat::zeros(labelsMat.rows, 1, CV_32SC1);
 	for (int i = 0; i < labelsMat.rows; ++i)
@@ -491,7 +492,7 @@ void CVMachineLearningPredict::CV_SVM_PredictVehicle(const char* pathPredictImg,
 	cv::Ptr<SVM> svm = cv::Algorithm::load<SVM>(pathSVM);
 	cv::Mat supportVector = svm->getSupportVectors();//
 
-												 //获取alpha和rho
+				  //获取alpha和rho
 	cv::Mat alpha;//每个支持向量对应的参数α(拉格朗日乘子)，默认alpha是float64的
 	cv::Mat svIndex;//支持向量所在的索引
 	float rho = svm->getDecisionFunction(0, alpha, svIndex);

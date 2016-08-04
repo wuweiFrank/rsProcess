@@ -148,6 +148,7 @@ double BSCB::RepairChange(float* img, int x, int y, int xsize, int ysize)
 	double Iyhm = min(img[x + y*xsize] - img[x + (y-1)*xsize], 0);
 	double Ixqm = min(img[x+1 + y*xsize] - img[x + y*xsize], 0);
 	double Iyqm = min(img[x + (y+1)*xsize] - img[x + y*xsize], 0);
+
 	double IxhM = max(img[x + y*xsize] - img[x-1 + y*xsize], 0);
 	double IyhM = max(img[x + y*xsize] - img[x + (y-1)*xsize], 0);
 	double IxqM = max(img[x+1 + y*xsize] - img[x + y*xsize], 0);

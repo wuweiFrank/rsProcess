@@ -27,6 +27,8 @@ void NormalizeData(double* pBuffer, int length, double* pNormalBuffer);
 //获取相关系数
 float GetCoefficient(float* data1, float* data2, int num);
 float GetSSD(float* data1, float* data2, int num);
+float GetHellingerDistance(float* distribution1, int num1, float* distribution2, int num2);
+
 //对数据进行采样
 /*
 	在几何校正后校正前数据和校正后数据并不是完全对应

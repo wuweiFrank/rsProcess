@@ -232,6 +232,43 @@ float GetSSD(float* data1, float* data2, int num)
 	}
 	return sqrt(tmp);
 }
+float GetHellingerDistance(float* distribution1, int num1, float* distribution2, int num2)
+{
+	//首先获取最大最小值
+	int max1 = -999999, min1 = 999999, max2 = -999999, min2 = 999999;
+	for (int i = 0; i < num1; ++i)
+	{
+		max1 = max(max1, int(distribution1[i]));
+		min1 = min(min1, int(distribution1[i]));
+	}
+	for (int i = 0; i < num2; ++i)
+	{
+		max2 = max(max2, int(distribution2[i]));
+		min2 = min(min2, int(distribution2[i]));
+	}
+
+	//获取概率直方图
+	float *hist1 = new float[max1 - min1 + 1];
+	float *hist2 = new float[max2 - min2 + 1];
+	memset(hist1, 0, sizeof(float)*(max1 - min1 + 1));
+	memset(hist2, 0, sizeof(float)*(max2 - min2 + 1));
+
+	for (int i = 0; i < num1; ++i)
+		hist1[int(distribution1[i]) - min1] += 1.0/float(num1);
+	for (int i = 0; i < num2; ++i)
+		hist2[int(distribution2[i]) - min2] += 1.0/float(num2);
+
+	int min = max(min1, min2);
+	int max = min(max1, max2);
+	float tmp = 0;
+	for (int i = min; i < max; ++i)
+		tmp += sqrt(hist1[i-min1] * hist2[i-min2]);
+	delete[]hist1; hist1 = NULL;
+	delete[]hist2; hist2 = NULL;
+	return sqrt(1.0 - tmp);
+
+}
+
 //对数据进行采样
 void GetImgSample(unsigned char *pImgBuffer, DPOINT &minPt, DPOINT &maxPt, THREEDPOINT *pGoundPt, float fGSDX, float fGSDY, int nSamples, int nLines, int nReSamples, int nReLines, unsigned char *pRegBuffer)
 {
